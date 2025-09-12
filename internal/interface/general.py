@@ -129,34 +129,3 @@ class ILLMClient(Protocol):
             voice: str = "alloy",
             tts_model: str = "tts-1-hd"
     ) -> bytes: pass
-
-class ITelegramClient(Protocol):
-    @abstractmethod
-    async def generate_qr_code(self) -> io.BytesIO: pass
-
-    @abstractmethod
-    async def qr_code_status(self) -> tuple[str, str]: pass
-
-    @abstractmethod
-    async def start(self): pass
-
-    @abstractmethod
-    async def send_message_to_telegram(
-            self,
-            tg_user_data: str,
-            text: str
-    ): pass
-
-class ITelegramHTTPController(Protocol):
-    @abstractmethod
-    async def generate_qr_code(self) -> StreamingResponse:
-        pass
-
-    @abstractmethod
-    async def check_qr_status(self) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def start_telegram_client(self) -> JSONResponse:
-        pass
-

@@ -1,38 +1,4 @@
-create_organizations_table = """
-CREATE TABLE IF NOT EXISTS organizations (
-    id SERIAL PRIMARY KEY,
-    
-    name TEXT NOT NULL,
-    autoposting_moderation BOOLEAN DEFAULT TRUE,
-    publication_text_end_sample TEXT,
-    video_cut_description_end_sample TEXT DEFAULT '',
 
-    
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-"""
-
-create_employees_table = """
-CREATE TABLE IF NOT EXISTS employees (
-    id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    
-    invited_from_employee_id INTEGER NOT NULL,
-    account_id INTEGER NOT NULL,
-    
-    required_moderation BOOLEAN DEFAULT FALSE,
-    autoposting_permission BOOLEAN DEFAULT FALSE,
-    add_employee_permission BOOLEAN DEFAULT FALSE,
-    edit_employee_perm_permission BOOLEAN DEFAULT FALSE,
-    top_up_balance_permission BOOLEAN DEFAULT FALSE,
-    sign_up_social_net_permission BOOLEAN DEFAULT FALSE,
-    
-    name TEXT NOT NULL,
-    role TEXT NOT NULL,
-    
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-"""
 
 create_categories_table = """
 CREATE TABLE IF NOT EXISTS categories (
@@ -110,14 +76,6 @@ CREATE TABLE IF NOT EXISTS autopostings (
 );
 """
 
-drop_organizations_table = """
-DROP TABLE IF EXISTS organizations CASCADE;
-"""
-
-drop_employees_table = """
-DROP TABLE IF EXISTS employees CASCADE;
-"""
-
 drop_categories_table = """
 DROP TABLE IF EXISTS categories CASCADE;
 """
@@ -135,8 +93,6 @@ DROP TABLE IF EXISTS autopostings CASCADE;
 """
 
 create_organization_tables_queries = [
-    create_organizations_table,
-    create_employees_table,
     create_categories_table,
     create_video_cuts_table,
     create_publications_table,
@@ -148,6 +104,4 @@ drop_organization_tables_queries = [
     drop_publications_table,
     drop_video_cuts_table,
     drop_categories_table,
-    drop_employees_table,
-    drop_organizations_table,
 ]
