@@ -1,29 +1,24 @@
+import logging
+
 import requests
 from typing import Optional, Dict, Any, List, Union
 from urllib.parse import urlencode
 from io import BytesIO
 import mimetypes
 
+from pkg.client.client import AsyncHTTPClient
 from internal import interface
 
 
-class YouTubeClient:
+class YouTubeClient(interface.IYouTubeClient):
     def __init__(
             self,
-            tel: interface.ITelemetry,
             client_id: str,
             client_secret: str,
             redirect_uri: str
     ):
-        """
-        Инициализация клиента
+        self.logger = logging.getLogger(__name__)
 
-        Args:
-            client_id: Client ID из Google Cloud Console
-            client_secret: Client Secret из Google Cloud Console
-            redirect_uri: URI для перенаправления после авторизации
-        """
-        self.logger = tel.logger()
 
         self.client_id = client_id
         self.client_secret = client_secret
@@ -35,18 +30,40 @@ class YouTubeClient:
         self.api_base_url = "https://www.googleapis.com/youtube/v3"
         self.upload_url = "https://www.googleapis.com/upload/youtube/v3/videos"
 
+        self.auth_base_client = AsyncHTTPClient(
+            "accounts.google.com",
+            443,
+            prefix="/o/oauth2/v2/auth",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
+        self.token_client = AsyncHTTPClient(
+            "oauth2.googleapis.com",
+            443,
+            prefix="/token",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
+        self.api_base_client =  AsyncHTTPClient(
+            "www.googleapis.com",
+            443,
+            prefix="/youtube/v3",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
+        self.upload_client =   AsyncHTTPClient(
+            "www.googleapis.com",
+            443,
+            prefix="/upload/youtube/v3/videos",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
+
     def get_authorization_url(self, scopes: list[str] = None, state: str = None) -> str:
-
-        """
-        Генерирует URL для авторизации пользователя
-
-        Args:
-            scopes: Список разрешений. По умолчанию для загрузки видео
-            state: Параметр состояния для защиты от CSRF
-
-        Returns:
-            URL для авторизации
-        """
         if scopes is None:
             scopes = [
                 'https://www.googleapis.com/auth/youtube.upload',
@@ -68,16 +85,7 @@ class YouTubeClient:
 
         return f"{self.auth_base_url}?{urlencode(params)}"
 
-    def exchange_code_for_token(self, authorization_code: str) -> Dict[str, Any]:
-        """
-        Обменивает код авторизации на токены доступа
-
-        Args:
-            authorization_code: Код, полученный после авторизации
-
-        Returns:
-            Словарь с токенами доступа
-        """
+    async def exchange_code_for_token(self, authorization_code: str) -> dict:
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
@@ -87,7 +95,7 @@ class YouTubeClient:
         }
 
         try:
-            response = requests.post(self.token_url, data=data)
+            response = await self.token_client.post("", data=data)
             response.raise_for_status()
 
             return response.json()
@@ -95,16 +103,7 @@ class YouTubeClient:
         except requests.exceptions.RequestException as e:
             raise
 
-    def refresh_access_token(self, refresh_token: str) -> Dict[str, Any]:
-        """
-        Обновляет токен доступа используя refresh token
-
-        Args:
-            refresh_token: Refresh token
-
-        Returns:
-            Новые токены доступа
-        """
+    async def refresh_access_token(self, refresh_token: str) -> dict:
         data = {
             'client_id': self.client_id,
             'client_secret': self.client_secret,
@@ -113,7 +112,7 @@ class YouTubeClient:
         }
 
         try:
-            response = requests.post(self.token_url, data=data)
+            response = await self.token_client.post("", data=data)
             response.raise_for_status()
 
             return response.json()
@@ -121,18 +120,7 @@ class YouTubeClient:
         except requests.exceptions.RequestException as e:
             raise
 
-    def get_channel_info(self, access_token: str) -> Dict[str, Any]:
-        """
-        Получает информацию о канале пользователя
-
-        Args:
-            access_token: Токен доступа
-
-        Returns:
-            Информация о канале
-        """
-        url = f"{self.api_base_url}/channels"
-
+    async def get_channel_info(self, access_token: str) -> dict:
         params = {
             'part': 'snippet,statistics,status',
             'mine': 'true'
@@ -143,7 +131,7 @@ class YouTubeClient:
         }
 
         try:
-            response = requests.get(url, params=params, headers=headers)
+            response = await self.api_base_client.get("/channels", params=params, headers=headers)
             response.raise_for_status()
 
             data = response.json()
@@ -155,7 +143,7 @@ class YouTubeClient:
         except requests.exceptions.RequestException as e:
             raise
 
-    def upload_short(
+    async def upload_short(
             self,
             access_token: str,
             video_file: Union[str, bytes, BytesIO],
@@ -166,7 +154,7 @@ class YouTubeClient:
             privacy_status: str = "public",
             made_for_kids: bool = False,
             thumbnail_file: Optional[Union[str, bytes, BytesIO]] = None
-    ) -> Dict[str, Any]:
+    ) -> dict:
         """
         Загружает YouTube Short
 
@@ -184,8 +172,6 @@ class YouTubeClient:
         Returns:
             Информация о загруженном видео
         """
-
-        # Подготавливаем метаданные
         snippet: dict = {
             'title': title,
             'description': description,
@@ -209,16 +195,16 @@ class YouTubeClient:
         }
 
         # Загружаем видео
-        video_id = self._upload_video_file(access_token, video_file, video_metadata)
+        video_id = await self._upload_video_file(access_token, video_file, video_metadata)
 
         # Загружаем превью, если предоставлено
         if thumbnail_file and video_id:
-            self._upload_thumbnail(access_token, video_id, thumbnail_file)
+            await self._upload_thumbnail(access_token, video_id, thumbnail_file)
 
         # Получаем информацию о загруженном видео
-        return self.get_video_info(access_token, video_id)
+        return await self.get_video_info(access_token, video_id)
 
-    def _upload_video_file(
+    async def _upload_video_file(
             self,
             access_token: str,
             video_file: Union[str, bytes, BytesIO],
@@ -239,8 +225,8 @@ class YouTubeClient:
 
         # Инициируем загрузку
         try:
-            response = requests.post(
-                self.upload_url,
+            response = await self.upload_client.post(
+                "",
                 params=params,
                 headers=headers,
                 json=metadata
@@ -287,17 +273,12 @@ class YouTubeClient:
             self.logger.error(f"Ошибка при загрузке видео: {e}")
             raise
 
-    def _upload_thumbnail(
+    async def _upload_thumbnail(
             self,
             access_token: str,
             video_id: str,
             thumbnail_file: Union[str, bytes, BytesIO]
     ):
-        """
-        Загружает превью для видео
-        """
-        url = f"{self.api_base_url}/thumbnails/set"
-
         params = {
             'videoId': video_id
         }
@@ -323,28 +304,15 @@ class YouTubeClient:
 
             headers['Content-Type'] = content_type
 
-            response = requests.post(url, params=params, headers=headers, data=file_data)
+            response = await self.api_base_client.post("/thumbnails/set", params=params, headers=headers, data=file_data)
             response.raise_for_status()
 
             self.logger.info(f"Превью успешно загружено для видео {video_id}")
 
         except requests.exceptions.RequestException as e:
             self.logger.error(f"Ошибка при загрузке превью: {e}")
-            # Не прерываем процесс, если превью не загрузилось
 
-    def get_video_info(self, access_token: str, video_id: str) -> Dict[str, Any]:
-        """
-        Получает информацию о видео
-
-        Args:
-            access_token: Токен доступа
-            video_id: ID видео
-
-        Returns:
-            Информация о видео
-        """
-        url = f"{self.api_base_url}/videos"
-
+    async def get_video_info(self, access_token: str, video_id: str) -> dict:
         params = {
             'part': 'snippet,statistics,status,contentDetails',
             'id': video_id
@@ -355,7 +323,7 @@ class YouTubeClient:
         }
 
         try:
-            response = requests.get(url, params=params, headers=headers)
+            response = await self.api_base_client.get("/videos", params=params, headers=headers)
             response.raise_for_status()
 
             data = response.json()
@@ -368,15 +336,15 @@ class YouTubeClient:
             self.logger.error(f"Ошибка при получении информации о видео: {e}")
             raise
 
-    def update_video(
+    async def update_video(
             self,
             access_token: str,
             video_id: str,
-            title: Optional[str] = None,
-            description: Optional[str] = None,
-            tags: Optional[List[str]] = None,
-            privacy_status: Optional[str] = None
-    ) -> Dict[str, Any]:
+            title: str = None,
+            description: str = None,
+            tags: list[str] = None,
+            privacy_status: str = None
+    ) -> dict:
         """
         Обновляет информацию о видео
 
@@ -392,7 +360,7 @@ class YouTubeClient:
             Обновленная информация о видео
         """
         # Получаем текущую информацию о видео
-        current_video = self.get_video_info(access_token, video_id)
+        current_video = await self.get_video_info(access_token, video_id)
 
         url = f"{self.api_base_url}/videos"
 
@@ -435,88 +403,12 @@ class YouTubeClient:
             self.logger.error(f"Ошибка при обновлении видео: {e}")
             raise
 
-    def delete_video(self, access_token: str, video_id: str) -> bool:
-        """
-        Удаляет видео
-
-        Args:
-            access_token: Токен доступа
-            video_id: ID видео
-
-        Returns:
-            True если удаление прошло успешно
-        """
-        url = f"{self.api_base_url}/videos"
-
-        params = {
-            'id': video_id
-        }
-
-        headers = {
-            'Authorization': f'Bearer {access_token}'
-        }
-
-        try:
-            response = requests.delete(url, params=params, headers=headers)
-            response.raise_for_status()
-
-            self.logger.info(f"Видео {video_id} успешно удалено")
-            return True
-
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при удалении видео: {e}")
-            return False
-
-    def get_my_videos(self,
-                      access_token: str,
-                      max_results: int = 25,
-                      order: str = "date") -> List[Dict[str, Any]]:
-        """
-        Получает список видео канала
-
-        Args:
-            access_token: Токен доступа
-            max_results: Максимальное количество результатов
-            order: Порядок сортировки (date, rating, relevance, title, viewCount)
-
-        Returns:
-            Список видео
-        """
-        # Сначала получаем ID канала
-        channel_info = self.get_channel_info(access_token)
-        channel_id = channel_info['id']
-
-        url = f"{self.api_base_url}/search"
-
-        params = {
-            'part': 'snippet',
-            'channelId': channel_id,
-            'maxResults': max_results,
-            'order': order,
-            'type': 'video'
-        }
-
-        headers = {
-            'Authorization': f'Bearer {access_token}'
-        }
-
-        try:
-            response = requests.get(url, params=params, headers=headers)
-            response.raise_for_status()
-
-            data = response.json()
-            return data.get('items', [])
-
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при получении списка видео: {e}")
-            raise
-
 
 # Пример использования
 if __name__ == "__main__":
     # Конфигурация
-    CLIENT_ID = "your_client_id.googleusercontent.com"
-    CLIENT_SECRET = "your_client_secret"
+    CLIENT_ID = "1098153452849-qqk2jtb4e6094gik2poaopavr5ognvgm.apps.googleusercontent.com"
+    CLIENT_SECRET = "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"
     REDIRECT_URI = "http://localhost:8080/auth/callback"
 
     # Создаем клиент

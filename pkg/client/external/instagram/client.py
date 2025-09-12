@@ -1,49 +1,59 @@
-import requests
-import json
+import asyncio
+
 import time
-from typing import Optional, Dict, Any, List
 from urllib.parse import urlencode
-import logging
+
+from pkg.client.client import AsyncHTTPClient
+from internal import interface
 
 
-class InstagramClient:
-    """
-    Клиент для работы с Instagram Basic Display API и Instagram Graph API
-    для авторизации пользователей и публикации Reels (шортов)
-    """
+class InstagramClient(interface.IInstagramClient):
+    def __init__(
+            self,
+            tel: interface.ITelemetry,
+            app_id: str,
+            app_secret: str,
+            redirect_uri: str
+    ):
+        self.logger = tel.logger()
 
-    def __init__(self, app_id: str, app_secret: str, redirect_uri: str):
-        """
-        Инициализация клиента
-
-        Args:
-            app_id: ID приложения Facebook/Instagram
-            app_secret: Секретный ключ приложения
-            redirect_uri: URI для перенаправления после авторизации
-        """
         self.app_id = app_id
         self.app_secret = app_secret
         self.redirect_uri = redirect_uri
 
         # API endpoints
-        self.base_url = "https://graph.instagram.com"
-        self.facebook_base_url = "https://graph.facebook.com/v18.0"
-        self.auth_base_url = "https://api.instagram.com/oauth/authorize"
+        self.base_url = "graph.instagram.com"
+        self.facebook_base_url = "graph.facebook.com/v18.0"
+        self.auth_base_url = "api.instagram.com/oauth/authorize"
 
-        # Настройка логирования
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        self.base_client = AsyncHTTPClient(
+            self.base_url,
+            443,
+            prefix="",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
 
-    def get_authorization_url(self, scopes: List[str] = None) -> str:
-        """
-        Генерирует URL для авторизации пользователя
+        self.facebook_base_client = AsyncHTTPClient(
+            self.facebook_base_url,
+            443,
+            prefix="/v18.0",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
 
-        Args:
-            scopes: Список разрешений. По умолчанию для публикации контента
+        self.auth_base_url = AsyncHTTPClient(
+            self.auth_base_url,
+            443,
+            prefix="/oauth/authorize",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
 
-        Returns:
-            URL для авторизации
-        """
+    def get_authorization_url(self, scopes: list[str] = None) -> str:
         if scopes is None:
             scopes = [
                 'instagram_basic',
@@ -61,18 +71,7 @@ class InstagramClient:
 
         return f"{self.auth_base_url}?{urlencode(params)}"
 
-    def exchange_code_for_token(self, authorization_code: str) -> Dict[str, Any]:
-        """
-        Обменивает код авторизации на токен доступа
-
-        Args:
-            authorization_code: Код, полученный после авторизации
-
-        Returns:
-            Словарь с токеном доступа и информацией о пользователе
-        """
-        url = f"{self.facebook_base_url}/oauth/access_token"
-
+    async def exchange_code_for_token(self, authorization_code: str) -> dict:
         data = {
             'client_id': self.app_id,
             'client_secret': self.app_secret,
@@ -82,35 +81,43 @@ class InstagramClient:
         }
 
         try:
-            response = requests.post(url, data=data)
-            response.raise_for_status()
-
+            response = await self.facebook_base_client.post("/oauth/access_token", data=data)
             token_data = response.json()
 
             # Получаем долгосрочный токен
-            long_lived_token = self._get_long_lived_token(token_data['access_token'])
+            long_lived_token = await self._get_long_lived_token(token_data['access_token'])
 
             return {
                 'access_token': long_lived_token,
                 'token_type': token_data.get('token_type', 'bearer')
             }
 
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при обмене кода на токен: {e}")
-            raise
+        except Exception as e:
+            raise e
 
-    def _get_long_lived_token(self, short_token: str) -> str:
-        """
-        Получает долгосрочный токен доступа
+    async def get_instagram_account_id(self, access_token: str) -> str:
+        params = {
+            'access_token': access_token
+        }
 
-        Args:
-            short_token: Краткосрочный токен
+        try:
+            response = await self.facebook_base_client.get("/me/accounts", params=params)
+            response.raise_for_status()
 
-        Returns:
-            Долгосрочный токен доступа
-        """
-        url = f"{self.facebook_base_url}/oauth/access_token"
+            pages = response.json()['data']
 
+            # Ищем Instagram аккаунт среди страниц
+            for page in pages:
+                instagram_id = await self._get_instagram_id_for_page(page['id'], page['access_token'])
+                if instagram_id:
+                    return instagram_id
+
+            raise Exception("Instagram аккаунт не найден")
+
+        except Exception as e:
+            raise e
+
+    async def _get_long_lived_token(self, short_token: str) -> str:
         params = {
             'grant_type': 'fb_exchange_token',
             'client_id': self.app_id,
@@ -119,56 +126,16 @@ class InstagramClient:
         }
 
         try:
-            response = requests.get(url, params=params)
+            response = await self.facebook_base_client.get("/oauth/access_token", params=params)
             response.raise_for_status()
 
             data = response.json()
             return data['access_token']
 
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при получении долгосрочного токена: {e}")
-            return short_token
+        except Exception as e:
+            raise e
 
-    def get_instagram_account_id(self, access_token: str) -> str:
-        """
-        Получает ID Instagram аккаунта пользователя
-
-        Args:
-            access_token: Токен доступа
-
-        Returns:
-            ID Instagram аккаунта
-        """
-        # Сначала получаем Facebook страницы
-        url = f"{self.facebook_base_url}/me/accounts"
-
-        params = {
-            'access_token': access_token
-        }
-
-        try:
-            response = requests.get(url, params=params)
-            response.raise_for_status()
-
-            pages = response.json()['data']
-
-            # Ищем Instagram аккаунт среди страниц
-            for page in pages:
-                instagram_id = self._get_instagram_id_for_page(page['id'], page['access_token'])
-                if instagram_id:
-                    return instagram_id
-
-            raise Exception("Instagram аккаунт не найден")
-
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при получении ID аккаунта: {e}")
-            raise
-
-    def _get_instagram_id_for_page(self, page_id: str, page_token: str) -> Optional[str]:
-        """
-        Получает Instagram ID для Facebook страницы
-        """
-        url = f"{self.facebook_base_url}/{page_id}"
+    async def _get_instagram_id_for_page(self, page_id: str, page_token: str) -> str | None:
 
         params = {
             'fields': 'instagram_business_account',
@@ -176,67 +143,53 @@ class InstagramClient:
         }
 
         try:
-            response = requests.get(url, params=params)
+            response = await self.facebook_base_client.get(f"/{page_id}", params=params)
             response.raise_for_status()
 
             data = response.json()
             return data.get('instagram_business_account', {}).get('id')
 
-        except:
+        except Exception as e:
             return None
 
-    def upload_reel(self,
-                    access_token: str,
-                    instagram_account_id: str,
-                    video_url: str,
-                    caption: str = "",
-                    cover_url: Optional[str] = None,
-                    share_to_feed: bool = True) -> Dict[str, Any]:
-        """
-        Загружает и публикует Reel (шорт)
+    async def upload_reel(
+            self,
+            access_token: str,
+            instagram_account_id: str,
+            video_url: str,
+            caption: str = "",
+            cover_url: str = None,
+            share_to_feed: bool = True
+    ) -> dict:
+        try:
+            # Шаг 1: Создаем контейнер для медиа
+            container_id = await self._create_media_container(
+                access_token,
+                instagram_account_id,
+                video_url,
+                caption,
+                cover_url,
+                share_to_feed
+            )
 
-        Args:
-            access_token: Токен доступа
-            instagram_account_id: ID Instagram аккаунта
-            video_url: URL видеофайла (должен быть доступен публично)
-            caption: Описание к видео
-            cover_url: URL обложки видео (опционально)
-            share_to_feed: Поделиться ли в основной ленте
+            # Шаг 2: Ждем обработки видео
+            await self._wait_for_media_processing(access_token, container_id)
 
-        Returns:
-            Результат публикации
-        """
+            # Шаг 3: Публикуем медиа
+            return await self._publish_media(access_token, instagram_account_id, container_id)
 
-        # Шаг 1: Создаем контейнер для медиа
-        container_id = self._create_media_container(
-            access_token,
-            instagram_account_id,
-            video_url,
-            caption,
-            cover_url,
-            share_to_feed
-        )
+        except Exception as e:
+            raise e
 
-        # Шаг 2: Ждем обработки видео
-        self._wait_for_media_processing(access_token, container_id)
-
-        # Шаг 3: Публикуем медиа
-        return self._publish_media(access_token, instagram_account_id, container_id)
-
-    def _create_media_container(
+    async def _create_media_container(
             self,
             access_token: str,
             instagram_account_id: str,
             video_url: str,
             caption: str,
-            cover_url: Optional[str],
+            cover_url: str | None,
             share_to_feed: bool
     ) -> str:
-        """
-        Создает контейнер для медиа
-        """
-        url = f"{self.base_url}/{instagram_account_id}/media"
-
         data: dict = {
             'media_type': 'REELS',
             'video_url': video_url,
@@ -249,26 +202,16 @@ class InstagramClient:
             data['thumb_offset'] = 0  # Можно указать время для кадра обложки
 
         try:
-            response = requests.post(url, data=data)
+            response = await self.base_client.post(f"/{instagram_account_id}/media", data=data)
             response.raise_for_status()
 
             result = response.json()
             return result['id']
 
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при создании контейнера медиа: {e}")
-            raise
+        except Exception as e:
+            raise e
 
-    def _wait_for_media_processing(self, access_token: str, container_id: str, max_wait: int = 300):
-        """
-        Ожидает завершения обработки медиа
-
-        Args:
-            access_token: Токен доступа
-            container_id: ID контейнера медиа
-            max_wait: Максимальное время ожидания в секундах
-        """
-        url = f"{self.base_url}/{container_id}"
+    async def _wait_for_media_processing(self, access_token: str, container_id: str, max_wait: int = 300):
 
         params = {
             'fields': 'status_code',
@@ -279,7 +222,7 @@ class InstagramClient:
 
         while time.time() - start_time < max_wait:
             try:
-                response = requests.get(url, params=params)
+                response = await self.base_client.get(f"/{container_id}", params=params)
                 response.raise_for_status()
 
                 data = response.json()
@@ -292,92 +235,49 @@ class InstagramClient:
                     raise Exception("Ошибка при обработке медиа")
 
                 self.logger.info(f"Статус обработки: {status}")
-                time.sleep(10)
+                await asyncio.sleep(10)
 
-            except requests.exceptions.RequestException as e:
-                self.logger.error(f"Ошибка при проверке статуса: {e}")
-                time.sleep(10)
+            except Exception as e:
+                await asyncio.sleep(10)
+                raise e
 
         raise Exception("Превышено время ожидания обработки медиа")
 
-    def _publish_media(self, access_token: str, instagram_account_id: str, container_id: str) -> Dict[str, Any]:
-        """
-        Публикует медиа
-        """
-        url = f"{self.base_url}/{instagram_account_id}/media_publish"
-
+    async def _publish_media(
+            self,
+            access_token: str,
+            instagram_account_id: str,
+            container_id: str
+    ) -> dict:
         data = {
             'creation_id': container_id,
             'access_token': access_token
         }
 
         try:
-            response = requests.post(url, data=data)
+            response = await self.base_client.post(f"/{instagram_account_id}/media_publish", data=data)
             response.raise_for_status()
 
             result = response.json()
-            self.logger.info(f"Медиа опубликовано с ID: {result['id']}")
             return result
 
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при публикации медиа: {e}")
-            raise
+        except Exception as e:
+            raise e
 
-    def get_media_info(self, access_token: str, media_id: str) -> Dict[str, Any]:
-        """
-        Получает информацию о опубликованном медиа
-
-        Args:
-            access_token: Токен доступа
-            media_id: ID медиа
-
-        Returns:
-            Информация о медиа
-        """
-        url = f"{self.base_url}/{media_id}"
-
+    async def get_media_info(self, access_token: str, media_id: str) -> dict:
         params = {
             'fields': 'id,media_type,media_url,permalink,caption,timestamp,like_count,comments_count',
             'access_token': access_token
         }
 
         try:
-            response = requests.get(url, params=params)
+            response = await self.base_client.get(f"/{media_id}", params=params)
             response.raise_for_status()
 
             return response.json()
 
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при получении информации о медиа: {e}")
-            raise
-
-    def delete_media(self, access_token: str, media_id: str) -> bool:
-        """
-        Удаляет медиа (работает только для некоторых типов контента)
-
-        Args:
-            access_token: Токен доступа
-            media_id: ID медиа
-
-        Returns:
-            True если удаление прошло успешно
-        """
-        url = f"{self.base_url}/{media_id}"
-
-        params = {
-            'access_token': access_token
-        }
-
-        try:
-            response = requests.delete(url, params=params)
-            response.raise_for_status()
-
-            return response.json().get('success', False)
-
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ошибка при удалении медиа: {e}")
-            return False
-
+        except Exception as e:
+            raise e
 
 # Пример использования
 if __name__ == "__main__":

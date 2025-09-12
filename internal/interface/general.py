@@ -94,26 +94,26 @@ class IDB(Protocol):
     async def multi_query(self, queries: list[str]) -> None: pass
 
 
-class ILLMClient(Protocol):
-    @abstractmethod
-    async def generate_str(
-            self,
-            history: list[model.Message],
-            system_prompt: str,
-            temperature: float,
-            llm_model: str,
-            pdf_file: bytes = None,
-    ) -> str: pass
-
-    @abstractmethod
-    async def generate_json(
-            self,
-            history: list[model.Message],
-            system_prompt: str,
-            temperature: float,
-            llm_model: str,
-            pdf_file: bytes = None,
-    ) -> dict: pass
+# class ILLMClient(Protocol):
+#     @abstractmethod
+#     async def generate_str(
+#             self,
+#             history: list[model.Message],
+#             system_prompt: str,
+#             temperature: float,
+#             llm_model: str,
+#             pdf_file: bytes = None,
+#     ) -> str: pass
+#
+#     @abstractmethod
+#     async def generate_json(
+#             self,
+#             history: list[model.Message],
+#             system_prompt: str,
+#             temperature: float,
+#             llm_model: str,
+#             pdf_file: bytes = None,
+#     ) -> dict: pass
 
     @abstractmethod
     async def transcribe_audio(

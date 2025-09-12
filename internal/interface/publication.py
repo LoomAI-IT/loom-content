@@ -12,7 +12,7 @@ from internal import model
 
 class IPublicationController(Protocol):
     @abstractmethod
-    async def create_publication(
+    async def generate_publication(
             self,
             organization_id: int,
             category_id: int,
@@ -22,7 +22,7 @@ class IPublicationController(Protocol):
         pass
 
     @abstractmethod
-    async def create_video_cut(
+    async def generate_video_cut(
             self,
             organization_id: int,
             creator_id: int,
