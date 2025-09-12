@@ -46,6 +46,7 @@ class Category:
 @dataclass
 class VideoCut:
     id: int
+    project_id: int
     organization_id: int
     creator_id: int
     moderator_id: int
@@ -56,9 +57,10 @@ class VideoCut:
     youtube_video_reference: str
     name: str
     description: str
-
     tags: list[str]
     video_fid: str
+    video_name: str
+
     vizard_id: int
     moderation_status: ModerationStatus
     moderation_comment: str
@@ -72,6 +74,7 @@ class VideoCut:
         return [
             cls(
                 id=row.id,
+                project_id=row.project_id,
                 organization_id=row.organization_id,
                 creator_id=row.creator_id,
                 moderator_id=row.moderator_id,
@@ -82,6 +85,7 @@ class VideoCut:
                 description=row.description,
                 tags=row.tags,
                 video_fid=row.video_fid,
+                video_name=row.video_name,
                 vizard_id=row.vizard_id,
                 moderation_status=ModerationStatus(row.moderation_status),
                 moderation_comment=row.moderation_comment,
@@ -95,6 +99,7 @@ class VideoCut:
     def to_dict(self) -> dict:
         return {
             "id": self.id,
+            "project_id": self.project_id,
             "organization_id": self.organization_id,
             "creator_id": self.creator_id,
             "moderator_id": self.moderator_id,
@@ -105,6 +110,7 @@ class VideoCut:
             "description": self.description,
             "tags": self.tags,
             "video_fid": self.video_fid,
+            "video_name": self.video_name,
             "vizard_id": self.vizard_id,
             "moderation_status": self.moderation_status.value,
             "moderation_comment": self.moderation_comment,
@@ -129,6 +135,8 @@ class Publication:
     name: str
     text: str
     image_fid: str
+    image_name: str
+
     moderation_status: ModerationStatus
     moderation_comment: str
 
@@ -151,6 +159,7 @@ class Publication:
                 name=row.name,
                 text=row.text,
                 image_fid=row.image_fid,
+                image_name=row.image_name,
                 moderation_status=ModerationStatus(row.moderation_status),
                 moderation_comment=row.moderation_comment,
                 time_for_publication=row.time_for_publication,
@@ -173,6 +182,7 @@ class Publication:
             "name": self.name,
             "text": self.text,
             "image_fid": self.image_fid,
+            "image_name": self.image_name,
             "moderation_status": self.moderation_status.value,
             "moderation_comment": self.moderation_comment,
             "time_for_publication": self.time_for_publication.isoformat() if self.time_for_publication else None,

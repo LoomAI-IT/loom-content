@@ -409,7 +409,7 @@ if __name__ == "__main__":
     # Конфигурация
     CLIENT_ID = "1098153452849-qqk2jtb4e6094gik2poaopavr5ognvgm.apps.googleusercontent.com"
     CLIENT_SECRET = "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"
-    REDIRECT_URI = "http://localhost:8080/auth/callback"
+    REDIRECT_URI = "https://google.com"
 
     # Создаем клиент
     client = YouTubeClient(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI)

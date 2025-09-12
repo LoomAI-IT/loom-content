@@ -73,7 +73,12 @@ class IVkClient(Protocol):
     async def get_user_info(self, access_token: str, user_ids: str | list[str] = None) -> list[dict]: pass
 
     @abstractmethod
-    async def get_user_groups(self, access_token: str, extended: bool = True) -> dict: pass
+    def get_auth_url_for_groups(
+            self,
+            redirect_uri: str,
+            group_ids: list[str],
+            scope: str = "wall,photos,manage"
+    ) -> str: pass
 
     @abstractmethod
     async def upload_photo(self, access_token: str, photo_path: str, group_id: str = None) -> str: pass

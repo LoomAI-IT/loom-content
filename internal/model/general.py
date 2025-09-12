@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
+from pydantic import BaseModel
 
 
 @dataclass
@@ -11,3 +12,14 @@ class AsyncWeedOperationResponse:
     fid: Optional[str] = None
     url: Optional[str] = None
     size: Optional[int] = None
+
+
+class AuthorizationData(BaseModel):
+    account_id: int
+    message: str
+    code: int
+
+
+class JWTTokens(BaseModel):
+    access_token: str
+    refresh_token: str

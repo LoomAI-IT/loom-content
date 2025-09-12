@@ -1,5 +1,3 @@
-
-
 create_categories_table = """
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
@@ -15,6 +13,7 @@ CREATE TABLE IF NOT EXISTS categories (
 create_video_cuts_table = """
 CREATE TABLE IF NOT EXISTS video_cuts (
     id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
     organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     
     creator_id INTEGER NOT NULL,
@@ -27,6 +26,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     description TEXT NOT NULL,
     tags TEXT[] DEFAULT '{}',
     video_fid TEXT DEFAULT '',
+    video_name TEXT DEFAULT '',
     
     vizard_tokens INTEGER DEFAULT 0,
     moderation_status TEXT DEFAULT 'на модерации',
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS publications (
     name TEXT NOT NULL,
     text TEXT NOT NULL,
     image_fid TEXT,
+    image_name TEXT,
     
     moderation_status TEXT DEFAULT 'на модерации',
     moderation_comment TEXT DEFAULT '',
