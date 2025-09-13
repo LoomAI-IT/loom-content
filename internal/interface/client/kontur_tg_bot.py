@@ -12,5 +12,4 @@ class IKonturTgBotClient(Protocol):
             name: str,
             description: str,
             tags: str,
-
     ) -> None: pass

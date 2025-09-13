@@ -27,7 +27,7 @@ class GPTClient(interface.ILLMClient):
 
         self.client = openai.AsyncOpenAI(
             api_key=api_key,
-            http_client=httpx.AsyncClient()
+            http_client=httpx.AsyncClient(proxy="")
         )
 
     async def generate_str(
