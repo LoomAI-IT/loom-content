@@ -129,3 +129,46 @@ class ILLMClient(Protocol):
             voice: str = "alloy",
             tts_model: str = "tts-1-hd"
     ) -> tuple[bytes, model.OpenAITTSCostInfo]: pass
+
+    @abstractmethod
+    async def generate_image(
+            self,
+            prompt: str,
+            llm_model: str = "dall-e-3",
+            size: str = "1024x1024",
+            quality: str = "standard",
+            style: str = "vivid",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+
+    @abstractmethod
+    async def edit_image(
+            self,
+            image: bytes,
+            prompt: str,
+            mask: bytes = None,
+            llm_model: str = "dall-e-2",
+            size: str = "1024x1024",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+
+    @abstractmethod
+    async def create_image_variation(
+            self,
+            image: bytes,
+            llm_model: str = "dall-e-2",
+            size: str = "1024x1024",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+
+    @abstractmethod
+    async def download_image_from_url(
+            self,
+            image_url: str
+    ) -> bytes: pass

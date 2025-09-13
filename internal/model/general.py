@@ -31,6 +31,17 @@ class OpenAITTSCostInfo:
 
 
 @dataclass
+class OpenAIImageGenerationInfo:
+    model: str
+    size: str
+    quality: str
+    style: str
+    cost_per_image: float
+    total_cost: float
+    image_count: int
+
+
+@dataclass
 class AsyncWeedOperationResponse:
     status_code: int
     content: bytes

@@ -60,6 +60,24 @@ class GPTClient(interface.ILLMClient):
             "whisper-1": {"per_minute": 0.006},  # $0.006 за минуту
             "tts-1": {"per_1k_chars": 0.015},  # $0.015 за 1000 символов
             "tts-1-hd": {"per_1k_chars": 0.030},  # $0.030 за 1000 символов
+            "dall-e-3": {
+                "standard": {
+                    "1024x1024": 0.040,
+                    "1024x1792": 0.080,
+                    "1792x1024": 0.080,
+                },
+                "hd": {
+                    "1024x1024": 0.080,
+                    "1024x1792": 0.120,
+                    "1792x1024": 0.120,
+                }
+            },
+            # DALL-E 2 pricing (per image)
+            "dall-e-2": {
+                "1024x1024": 0.020,
+                "512x512": 0.018,
+                "256x256": 0.016,
+            }
         }
 
     async def generate_str(
@@ -491,6 +509,323 @@ class GPTClient(interface.ILLMClient):
 
                 span.set_status(Status(StatusCode.OK))
                 return audio_content, cost_info
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise
+
+    async def generate_image(
+            self,
+            prompt: str,
+            llm_model: str = "dall-e-3",
+            size: str = "1024x1024",
+            quality: str = "standard",
+            style: str= "vivid",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]:
+        with self.tracer.start_as_current_span(
+                "GPTClient.generate_image",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                # Валидация параметров
+                if llm_model == "dall-e-3":
+                    if n != 1:
+                        self.logger.warning(
+                            "DALL-E 3 поддерживает только n=1. Устанавливаем n=1"
+                        )
+                        n = 1
+                    if size not in ["1024x1024", "1024x1792", "1792x1024"]:
+                        raise ValueError(
+                            f"Размер {size} не поддерживается для DALL-E 3. "
+                            "Используйте: 1024x1024, 1024x1792, 1792x1024"
+                        )
+                elif llm_model == "dall-e-2":
+                    if size not in ["256x256", "512x512", "1024x1024"]:
+                        raise ValueError(
+                            f"Размер {size} не поддерживается для DALL-E 2. "
+                            "Используйте: 256x256, 512x512, 1024x1024"
+                        )
+                    if n > 10:
+                        raise ValueError("DALL-E 2 поддерживает максимум 10 изображений за раз")
+                    # DALL-E 2 не поддерживает quality и style
+                    quality = None
+                    style = None
+
+                # Подготовка параметров запроса
+                params = {
+                    "model": llm_model,
+                    "prompt": prompt,
+                    "size": size,
+                    "n": n,
+                    "response_format": response_format
+                }
+
+                if model == "dall-e-3":
+                    params["quality"] = quality
+                    params["style"] = style
+
+                if user:
+                    params["user"] = user
+
+                # Выполнение запроса
+                response = await self.client.images.generate(**params)
+
+                # Извлечение результатов
+                if response_format == "url":
+                    images = [img.url for img in response.data]
+                else:  # b64_json
+                    images = [img.b64_json for img in response.data]
+
+                # Расчет стоимости
+                cost_info = self._calculate_image_generation_cost(
+                    llm_model=llm_model,
+                    size=size,
+                    quality=quality,
+                    style=style,
+                    image_count=n
+                )
+
+                # Логирование метрик
+                span.set_attributes({
+                    "dalle.model": llm_model,
+                    "dalle.size": size,
+                    "dalle.quality": quality or "N/A",
+                    "dalle.style": style or "N/A",
+                    "dalle.image_count": n,
+                    "dalle.cost_per_image": cost_info.cost_per_image,
+                    "dalle.total_cost": cost_info.total_cost,
+                    "dalle.response_format": response_format
+                })
+
+                span.set_status(Status(StatusCode.OK))
+
+                self.logger.info(
+                    f"Сгенерировано {n} изображение(й) с помощью {llm_model}",
+                    {
+                        "model": llm_model,
+                        "size": size,
+                        "quality": quality,
+                        "total_cost": cost_info.total_cost
+                    }
+                )
+
+                return images, cost_info
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                self.logger.error(f"Ошибка при генерации изображения: {err}")
+                raise
+
+    async def edit_image(
+            self,
+            image: bytes,
+            prompt: str,
+            mask: bytes = None,
+            llm_model: str = "dall-e-2",
+            size: str = "1024x1024",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]:
+        with self.tracer.start_as_current_span(
+                "GPTClient.edit_image",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                if llm_model != "dall-e-2":
+                    raise ValueError("Только DALL-E 2 поддерживает редактирование изображений")
+
+                if n > 10:
+                    raise ValueError("Максимум 10 изображений за раз")
+
+                # Подготовка файлов
+                image_file = io.BytesIO(image)
+                image_file.name = "image.png"
+
+                params = {
+                    "image": image_file,
+                    "prompt": prompt,
+                    "size": size,
+                    "n": n,
+                    "response_format": response_format
+                }
+
+                if mask:
+                    mask_file = io.BytesIO(mask)
+                    mask_file.name = "mask.png"
+                    params["mask"] = mask_file
+
+                if user:
+                    params["user"] = user
+
+                # Выполнение запроса
+                response = await self.client.images.edit(**params)
+
+                # Извлечение результатов
+                if response_format == "url":
+                    images = [img.url for img in response.data]
+                else:
+                    images = [img.b64_json for img in response.data]
+
+                # Расчет стоимости
+                cost_info = self._calculate_image_generation_cost(
+                    llm_model=llm_model,
+                    size=size,
+                    quality=None,
+                    style=None,
+                    image_count=n
+                )
+
+                span.set_attributes({
+                    "dalle.operation": "edit",
+                    "dalle.model": llm_model,
+                    "dalle.size": size,
+                    "dalle.image_count": n,
+                    "dalle.total_cost": cost_info.total_cost,
+                    "dalle.has_mask": mask is not None
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return images, cost_info
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise
+
+    async def create_image_variation(
+            self,
+            image: bytes,
+            llm_model: str = "dall-e-2",
+            size: str = "1024x1024",
+            n: int = 1,
+            response_format: str = "url",
+            user: str = None
+    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]:
+        with self.tracer.start_as_current_span(
+                "GPTClient.create_image_variation",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                if llm_model != "dall-e-2":
+                    raise ValueError("Только DALL-E 2 поддерживает создание вариаций")
+
+                if n > 10:
+                    raise ValueError("Максимум 10 изображений за раз")
+
+                # Подготовка файла
+                image_file = io.BytesIO(image)
+                image_file.name = "image.png"
+
+                params = {
+                    "image": image_file,
+                    "size": size,
+                    "n": n,
+                    "response_format": response_format
+                }
+
+                if user:
+                    params["user"] = user
+
+                # Выполнение запроса
+                response = await self.client.images.create_variation(**params)
+
+                # Извлечение результатов
+                if response_format == "url":
+                    images = [img.url for img in response.data]
+                else:
+                    images = [img.b64_json for img in response.data]
+
+                # Расчет стоимости
+                cost_info = self._calculate_image_generation_cost(
+                    llm_model=llm_model,
+                    size=size,
+                    quality=None,
+                    style=None,
+                    image_count=n
+                )
+
+                span.set_attributes({
+                    "dalle.operation": "variation",
+                    "dalle.model": llm_model,
+                    "dalle.size": size,
+                    "dalle.image_count": n,
+                    "dalle.total_cost": cost_info.total_cost
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return images, cost_info
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise
+
+    def _calculate_image_generation_cost(
+            self,
+            llm_model: str,
+            size: str,
+            quality: str ,
+            style: str,
+            image_count: int
+    ) -> model.OpenAIImageGenerationInfo:
+        if llm_model == "dall-e-3":
+            # Для DALL-E 3 используем quality для определения цены
+            pricing_key = quality or "standard"
+            if pricing_key in self.PRICING["dall-e-3"] and size in self.PRICING["dall-e-3"][pricing_key]:
+                cost_per_image = self.PRICING["dall-e-3"][pricing_key][size]
+            else:
+                # Fallback на стандартную цену если не найдено
+                self.logger.warning(
+                    f"Цена не найдена для {llm_model} {quality} {size}, используем стандартную"
+                )
+                cost_per_image = 0.040
+        elif model == "dall-e-2":
+            # Для DALL-E 2 цена зависит только от размера
+            if size in self.PRICING["dall-e-2"]:
+                cost_per_image = self.PRICING["dall-e-2"][size]
+            else:
+                # Fallback
+                self.logger.warning(
+                    f"Цена не найдена для {model} {size}, используем стандартную"
+                )
+                cost_per_image = 0.020
+        else:
+            self.logger.warning(f"Неизвестная модель {model}")
+            cost_per_image = 0.040
+
+        total_cost = cost_per_image * image_count
+
+        return model.OpenAIImageGenerationInfo(
+            model=llm_model,
+            size=size,
+            quality=quality or "N/A",
+            style=style or "N/A",
+            cost_per_image=cost_per_image,
+            total_cost=total_cost,
+            image_count=image_count
+        )
+
+    async def download_image_from_url(
+            self,
+            image_url: str
+    ) -> bytes:
+        with self.tracer.start_as_current_span(
+                "GPTClient.download_image_from_url",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(image_url)
+                    response.raise_for_status()
+
+                span.set_status(Status(StatusCode.OK))
+                return response.content
 
             except Exception as err:
                 span.record_exception(err)
