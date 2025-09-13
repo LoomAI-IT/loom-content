@@ -6,8 +6,10 @@ import pypdf
 import base64
 import openai
 import tiktoken
-from datetime import datetime
+import subprocess
 from pdf2image import convert_from_bytes
+from typing import Any
+from pathlib import Path
 
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
@@ -31,17 +33,33 @@ class GPTClient(interface.ILLMClient):
         )
 
         self.PRICING = {
-            "gpt-4o": {"input": 2.50, "output": 10.00},
-            "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+            # GPT-4o серия
+            "gpt-4o": {"input": 2.50, "output": 10.00, "cached_input": 1.25},
+            "gpt-4o-mini": {"input": 0.15, "output": 0.60, "cached_input": 0.075},
+
+            # GPT-4 классические
             "gpt-4": {"input": 30.00, "output": 60.00},
             "gpt-4-32k": {"input": 60.00, "output": 120.00},
+            "gpt-4-turbo": {"input": 10.00, "output": 30.00},
+            "gpt-4-turbo-preview": {"input": 10.00, "output": 30.00},
+
+            # GPT-3.5
             "gpt-3.5-turbo": {"input": 0.50, "output": 1.50},
             "gpt-3.5-turbo-16k": {"input": 3.00, "output": 4.00},
-            # Whisper
-            "whisper-1": {"audio_per_minute": 0.006},
-            # TTS
-            "tts-1": {"per_1k_chars": 0.015},
-            "tts-1-hd": {"per_1k_chars": 0.030},
+
+            # O1 reasoning models
+            "o1": {"input": 15.00, "output": 60.00, "cached_input": 7.50},
+            "o1-preview": {"input": 15.00, "output": 60.00, "cached_input": 7.50},
+            "o1-mini": {"input": 3.00, "output": 12.00, "cached_input": 1.50},
+
+            # O3 серия
+            "o3": {"input": 20.00, "output": 80.00, "cached_input": 10.00},
+            "o3-mini": {"input": 5.00, "output": 20.00, "cached_input": 2.50},
+
+            # Audio models - цены в долларах
+            "whisper-1": {"per_minute": 0.006},  # $0.006 за минуту
+            "tts-1": {"per_1k_chars": 0.015},  # $0.015 за 1000 символов
+            "tts-1-hd": {"per_1k_chars": 0.030},  # $0.030 за 1000 символов
         }
 
     async def generate_str(
@@ -57,77 +75,24 @@ class GPTClient(interface.ILLMClient):
                 kind=SpanKind.CLIENT,
         ) as span:
             try:
-                if system_prompt != "":
-                    system_prompt = [{"role": "system", "content": system_prompt}]
-
-                history = [
-                    *system_prompt,
-                    *[
-                        {"role": message.role, "content": message.text}
-                        for message in history
-                    ]
-                ]
-
-                if pdf_file is not None:
-                    if llm_model in ["gpt-5", "gpt-4o", "gpt-4o-mini"]:
-                        # Подход 1: Конвертируем PDF в изображения (для vision моделей)
-                        images = self._pdf_to_images(pdf_file)
-
-                        content = [
-                            {"type": "text", "text": history[-1]["content"]}
-                        ]
-
-                        # Добавляем каждую страницу как изображение
-                        for i, img_base64 in enumerate(images):
-                            content.append({
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{img_base64}",
-                                    "detail": "high"
-                                }
-                            })
-
-                        history[-1]["content"] = content
-                    else:
-                        # Подход 2: Извлекаем текст из PDF
-                        pdf_text = self._extract_text_from_pdf(pdf_file)
-                        original_text = history[-1]["content"]
-                        history[-1]["content"] = f"{original_text}\n\nСодержимое PDF:\n{pdf_text}"
-
-                input_tokens = self._count_tokens(history, llm_model)
+                messages = self._prepare_messages(history, system_prompt, pdf_file, llm_model)
 
                 response = await self.client.chat.completions.create(
                     model=llm_model,
-                    messages=history,
+                    messages=messages,
                     temperature=temperature,
                 )
+
                 llm_response = response.choices[0].message.content
+                usage_info = response.usage
 
-                usage = response.usage
-                if usage:
-                    actual_input_tokens = usage.prompt_tokens
-                    output_tokens = usage.completion_tokens
-                else:
-                    # Fallback на наши подсчеты
-                    actual_input_tokens = input_tokens
-                    output_tokens = len(self._get_encoder(llm_model).encode(llm_response))
-
-                # Рассчитываем стоимость
-                cost_info = self._calculate_cost(actual_input_tokens, output_tokens, llm_model)
-
-                # Логируем информацию о стоимости
-                self.logger.info("Стоимость запроса", {
-                    "model": llm_model,
-                    "input_tokens": cost_info.input_tokens,
-                    "output_tokens": cost_info.output_tokens,
-                    "total_cost_usd": round(cost_info.total_cost, 6),
-                    "input_cost_usd": round(cost_info.input_cost, 6),
-                    "output_cost_usd": round(cost_info.output_cost, 6)
-                })
+                cost_info = self._calculate_cost_from_usage(usage_info, llm_model)
 
                 span.set_attributes({
                     "llm.input_tokens": cost_info.input_tokens,
                     "llm.output_tokens": cost_info.output_tokens,
+                    "llm.cached_tokens": getattr(cost_info, 'cached_tokens', 0),
+                    "llm.reasoning_tokens": getattr(cost_info, 'reasoning_tokens', 0),
                     "llm.cost_usd": cost_info.total_cost,
                     "llm.model": llm_model
                 })
@@ -139,6 +104,160 @@ class GPTClient(interface.ILLMClient):
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise
+
+    def _prepare_messages(self, history: list, system_prompt: str, pdf_file: bytes, llm_model: str) -> list:
+        messages = []
+
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+
+        messages.extend([
+            {"role": message.role, "content": message.text}
+            for message in history
+        ])
+
+        if pdf_file:
+            if llm_model in ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-preview"]:
+                # Vision модели - конвертируем в изображения
+                images = self._pdf_to_images(pdf_file)
+                content = [{"type": "text", "text": messages[-1]["content"]}]
+
+                for img_base64 in images:
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{img_base64}",
+                            "detail": "high"
+                        }
+                    })
+
+                messages[-1]["content"] = content
+            else:
+                # Текстовые модели - извлекаем текст
+                pdf_text = self._extract_text_from_pdf(pdf_file)
+                messages[-1]["content"] += f"\n\nСодержимое PDF:\n{pdf_text}"
+
+        return messages
+
+    def _calculate_cost_from_usage(
+            self,
+            usage: Any,
+            llm_model: str
+    ) -> model.OpenAICostInfo:
+        """
+        Расчет стоимости на основе данных usage из API
+        Учитывает обычные, кэшированные и reasoning токены
+        """
+        if not usage:
+            return model.OpenAICostInfo(0, 0, 0, 0, 0, llm_model)
+
+        # Извлекаем все типы токенов из response.usage
+        input_tokens = getattr(usage, 'prompt_tokens', 0) or getattr(usage, 'input_tokens', 0)
+        output_tokens = getattr(usage, 'completion_tokens', 0) or getattr(usage, 'output_tokens', 0)
+
+        # Новые поля для продвинутых моделей
+        cached_tokens = 0
+        reasoning_tokens = 0
+
+        # Проверяем наличие детальной информации о токенах
+        if hasattr(usage, 'input_tokens_details'):
+            details = usage.input_tokens_details
+            cached_tokens = getattr(details, 'cached_tokens', 0)
+
+        if hasattr(usage, 'output_tokens_details'):
+            details = usage.output_tokens_details
+            reasoning_tokens = getattr(details, 'reasoning_tokens', 0)
+
+        # Альтернативные названия полей (для совместимости)
+        cached_tokens = cached_tokens or getattr(usage, 'input_cached_tokens', 0)
+
+        # Получаем цены для модели
+        if llm_model not in self.PRICING:
+            self.logger.warning(f"Неизвестная модель для расчета стоимости: {llm_model}")
+            return model.OpenAICostInfo(input_tokens, output_tokens, 0, 0, 0, llm_model)
+
+        pricing = self.PRICING[llm_model]
+
+        # Расчет стоимости с учетом кэшированных токенов
+        regular_input_tokens = input_tokens - cached_tokens
+
+        input_cost = 0
+        if regular_input_tokens > 0:
+            input_cost += (regular_input_tokens / 1_000_000) * pricing["input"]
+
+        if cached_tokens > 0 and "cached_input" in pricing:
+            # Кэшированные токены со скидкой (обычно 50% для GPT-4o и больше для O1)
+            input_cost += (cached_tokens / 1_000_000) * pricing["cached_input"]
+        elif cached_tokens > 0:
+            # Если нет специальной цены для кэша, используем обычную
+            input_cost += (cached_tokens / 1_000_000) * pricing["input"]
+
+        # Output включает reasoning токены (они оплачиваются по той же ставке)
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
+
+        total_cost = input_cost + output_cost
+
+        # Создаем расширенный объект с информацией о всех типах токенов
+        cost_info = model.OpenAICostInfo(
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            input_cost=input_cost,
+            output_cost=output_cost,
+            total_cost=total_cost,
+            model=llm_model
+        )
+
+        return cost_info
+
+    def _extract_text_from_pdf(self, pdf_bytes: bytes) -> str:
+        with self.tracer.start_as_current_span(
+                "GPTClient._extract_text_from_pdf",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
+                text = ""
+                for page in reader.pages:
+                    text += page.extract_text()
+                return text
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise
+
+    def _pdf_to_images(self, pdf_bytes: bytes) -> list[str]:
+        with self.tracer.start_as_current_span(
+                "GPTClient._pdf_to_images",
+                kind=SpanKind.CLIENT,
+        ) as span:
+            try:
+                images = convert_from_bytes(pdf_bytes, dpi=200)
+                base64_images = []
+
+                for img in images:
+                    buffer = io.BytesIO()
+                    img.save(buffer, format='PNG')
+                    img_data = buffer.getvalue()
+                    base64_image = base64.b64encode(img_data).decode('utf-8')
+                    base64_images.append(base64_image)
+
+                return base64_images
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise
+
+    def _get_encoder(self, llm_model: str):
+        if llm_model not in self._encoders:
+            try:
+                # Используем cl100k_base для всех современных моделей
+                encoding_name = "cl100k_base"
+                self._encoders[llm_model] = tiktoken.get_encoding(encoding_name)
+            except Exception as e:
+                self.logger.warning(f"Не удалось загрузить энкодер для {llm_model}: {e}")
+                self._encoders[llm_model] = tiktoken.get_encoding("cl100k_base")
+
+        return self._encoders[llm_model]
 
     async def generate_json(
             self,
@@ -153,7 +272,6 @@ class GPTClient(interface.ILLMClient):
                 kind=SpanKind.CLIENT,
         ) as span:
             try:
-                # Сначала получаем строковый ответ с информацией о стоимости
                 llm_response_str, initial_cost = await self.generate_str(
                     history, system_prompt, temperature, llm_model, pdf_file
                 )
@@ -162,12 +280,9 @@ class GPTClient(interface.ILLMClient):
 
                 try:
                     llm_response_json = self.__extract_and_parse_json(llm_response_str)
-                except Exception as err:
+                except Exception:
                     llm_response_json, retry_cost = await self.__retry_llm_generate(
-                        history,
-                        llm_model,
-                        temperature,
-                        llm_response_str,
+                        history, llm_model, temperature, llm_response_str
                     )
 
                     total_cost = model.OpenAICostInfo(
@@ -187,38 +302,53 @@ class GPTClient(interface.ILLMClient):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise
 
+    def __extract_and_parse_json(self, text: str) -> dict:
+        match = re.search(r"\{.*\}", text, re.DOTALL)
+        json_str = match.group(0)
+        data = json.loads(json_str)
+        return data
+
     async def __retry_llm_generate(
             self,
             history: list,
             llm_model: str,
             temperature: float,
             llm_response_str: str,
-    ) -> dict:
+    ) -> tuple[dict, model.OpenAICostInfo]:
         self.logger.warning("LLM потребовался retry", {"llm_response": llm_response_str})
-        history = [
-            *history,
+
+        retry_messages = [
+            *[{"role": msg.role, "content": msg.text} for msg in history],
             {"role": "assistant", "content": llm_response_str},
-            {"role": "user", "content": "Я же просил JSON формат, как в системно промпте, дай ответ в JSON формате"},
+            {"role": "user", "content": "Я же просил JSON формат, как в системном промпте, дай ответ в JSON формате"},
         ]
+
         response = await self.client.chat.completions.create(
             model=llm_model,
-            messages=history,
+            messages=retry_messages,
             temperature=temperature,
         )
+
         llm_response_str = response.choices[0].message.content
         llm_response_json = self.__extract_and_parse_json(llm_response_str)
-        return llm_response_json
+
+        retry_cost = self._calculate_cost_from_usage(response.usage, llm_model)
+
+        return llm_response_json, retry_cost
 
     async def transcribe_audio(
             self,
             audio_file: bytes,
             filename: str = "audio.wav"
-    ) -> str:
+    ) -> tuple[str, model.OpenAITranscriptionCostInfo]:
         with self.tracer.start_as_current_span(
                 "GPTClient.transcribe_audio",
-                kind=SpanKind.CLIENT,
+                kind=SpanKind.CLIENT
         ) as span:
             try:
+                # Определяем длительность аудио для расчета стоимости
+                duration_minutes = self._get_audio_duration(audio_file, filename)
+
                 audio_buffer = io.BytesIO(audio_file)
                 audio_buffer.name = filename
 
@@ -228,23 +358,106 @@ class GPTClient(interface.ILLMClient):
                     response_format="text"
                 )
 
+                cost_per_minute = self.PRICING["whisper-1"]["per_minute"]
+                total_cost = duration_minutes * cost_per_minute
+
+                cost_info = model.OpenAITranscriptionCostInfo(
+                    duration_minutes=duration_minutes,
+                    cost_per_minute=cost_per_minute,
+                    total_cost=total_cost,
+                    model="whisper-1"
+                )
+
+                span.set_attributes({
+                    "audio.duration_minutes": duration_minutes,
+                    "audio.cost_per_minute": cost_per_minute,
+                    "audio.total_cost": total_cost,
+                    "audio.model": "whisper-1"
+                })
+
                 span.set_status(Status(StatusCode.OK))
-                return transcript
+                return transcript, cost_info
 
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise
 
+    def _get_audio_duration(self, audio_file: bytes, filename: str) -> float:
+        try:
+            # Вариант 1: Использование ffmpeg через subprocess (если установлен)
+
+            import tempfile
+
+            with tempfile.NamedTemporaryFile(suffix=Path(filename).suffix, delete=False) as tmp_file:
+                tmp_file.write(audio_file)
+                tmp_file_path = tmp_file.name
+
+            try:
+                result = subprocess.run(
+                    [
+                        'ffprobe',
+                        '-v', 'error',
+                        '-show_entries', 'format=duration',
+                        '-of', 'default=noprint_wrappers=1:nokey=1',
+                        tmp_file_path
+                    ],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                duration_seconds = float(result.stdout.strip())
+                return duration_seconds / 60.0
+
+            finally:
+                # Удаляем временный файл
+                import os
+                os.unlink(tmp_file_path)
+
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            # Вариант 2: Использование pydub (если ffmpeg недоступен)
+            try:
+                from pydub import AudioSegment
+                audio_segment = AudioSegment.from_file(io.BytesIO(audio_file))
+                duration_seconds = len(audio_segment) / 1000.0
+                return duration_seconds / 60.0
+
+            except ImportError:
+                # Вариант 3: Приблизительная оценка на основе размера файла
+                # Предполагаем средний битрейт 128 kbps для MP3
+                self.logger.warning(
+                    "Не удалось точно определить длительность аудио. "
+                    "Используется приблизительная оценка на основе размера файла."
+                )
+
+                # Размер файла в килобайтах
+                file_size_kb = len(audio_file) / 1024
+
+                # Приблизительная оценка для разных форматов
+                if filename.lower().endswith('.mp3'):
+                    # MP3: ~128 kbps = 16 KB/s = 0.96 MB/min
+                    estimated_minutes = file_size_kb / (16 * 60)
+                elif filename.lower().endswith('.wav'):
+                    # WAV: ~1411 kbps = 176 KB/s = 10.6 MB/min
+                    estimated_minutes = file_size_kb / (176 * 60)
+                elif filename.lower().endswith('.m4a'):
+                    # M4A: ~256 kbps = 32 KB/s = 1.92 MB/min
+                    estimated_minutes = file_size_kb / (32 * 60)
+                else:
+                    # По умолчанию используем оценку для MP3
+                    estimated_minutes = file_size_kb / (16 * 60)
+
+                return estimated_minutes
+
     async def text_to_speech(
             self,
             text: str,
             voice: str = "alloy",
             tts_model: str = "tts-1-hd"
-    ) -> bytes:
+    ) -> tuple[bytes, model.OpenAITTSCostInfo]:
         with self.tracer.start_as_current_span(
                 "GPTClient.text_to_speech",
-                kind=SpanKind.CLIENT,
+                kind=SpanKind.CLIENT
         ) as span:
             try:
                 response = await self.client.audio.speech.create(
@@ -254,132 +467,32 @@ class GPTClient(interface.ILLMClient):
                     response_format="mp3",
                     speed=0.85,
                 )
-
                 audio_content = response.content
 
+                char_count = len(text)
+                cost_per_1k_chars = self.PRICING[tts_model]["per_1k_chars"]
+                total_cost = (char_count / 1000) * cost_per_1k_chars
+
+                cost_info = model.OpenAITTSCostInfo(
+                    character_count=char_count,
+                    cost_per_1k_chars=cost_per_1k_chars,
+                    total_cost=total_cost,
+                    model=tts_model,
+                    voice=voice
+                )
+
+                span.set_attributes({
+                    "tts.character_count": char_count,
+                    "tts.cost_per_1k_chars": cost_per_1k_chars,
+                    "tts.total_cost": total_cost,
+                    "tts.model": tts_model,
+                    "tts.voice": voice
+                })
+
                 span.set_status(Status(StatusCode.OK))
-                return audio_content
+                return audio_content, cost_info
 
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise
-
-    def _extract_text_from_pdf(self, pdf_bytes: bytes) -> str:
-        with self.tracer.start_as_current_span(
-                "GPTClient._extract_text_from_pdf",
-                kind=SpanKind.CLIENT,
-        ) as span:
-            try:
-                """Извлекает текст из PDF файла"""
-                reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
-                text = ""
-                for page in reader.pages:
-                    text += page.extract_text()
-                return text
-            except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
-                raise
-
-    def _pdf_to_images(self, pdf_bytes: bytes) -> list[str]:
-        with self.tracer.start_as_current_span(
-                "GPTClient._pdf_to_images",
-                kind=SpanKind.CLIENT,
-        ) as span:
-            try:
-                images = convert_from_bytes(pdf_bytes, dpi=200)
-
-                base64_images = []
-                for img in images:
-                    # Конвертируем PIL Image в base64
-                    buffer = io.BytesIO()
-                    img.save(buffer, format='PNG')
-                    img_data = buffer.getvalue()
-                    base64_image = base64.b64encode(img_data).decode('utf-8')
-                    base64_images.append(base64_image)
-
-                return base64_images
-            except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
-                raise err
-
-    def __extract_and_parse_json(self, text: str) -> dict:
-        match = re.search(r"\{.*\}", text, re.DOTALL)
-
-        json_str = match.group(0)
-        data = json.loads(json_str)
-        return data
-
-    def _get_encoder(self, llm_model: str):
-        if llm_model not in self._encoders:
-            try:
-
-                if "gpt-4" in llm_model or "gpt-3.5" in llm_model:
-                    encoding_name = "cl100k_base"
-                else:
-                    encoding_name = "cl100k_base"
-
-                self._encoders[llm_model] = tiktoken.get_encoding(encoding_name)
-            except Exception as e:
-                self.logger.warning(f"Не удалось загрузить энкодер для {llm_model}: {e}")
-                self._encoders[llm_model] = tiktoken.get_encoding("cl100k_base")
-
-        return self._encoders[llm_model]
-
-    def _count_tokens(self, messages: list, llm_model: str) -> int:
-        try:
-            encoder = self._get_encoder(llm_model)
-
-            # Базовый подсчет токенов для сообщений
-            total_tokens = 0
-
-            for message in messages:
-                # Каждое сообщение имеет служебные токены
-                total_tokens += 4  # для role, content и служебных разделителей
-
-                if isinstance(message.get("content"), str):
-                    total_tokens += len(encoder.encode(message["content"]))
-                elif isinstance(message.get("content"), list):
-                    # Для мультимодальных сообщений (текст + изображения)
-                    for content_item in message["content"]:
-                        if content_item.get("type") == "text":
-                            total_tokens += len(encoder.encode(content_item["text"]))
-                        elif content_item.get("type") == "image_url":
-                            # Приблизительная оценка токенов для изображения
-                            # Это зависит от размера и детализации
-                            if content_item.get("image_url", {}).get("detail") == "high":
-                                total_tokens += 765  # примерная стоимость high detail изображения
-                            else:
-                                total_tokens += 85  # примерная стоимость low detail изображения
-
-                total_tokens += len(encoder.encode(message.get("role", "")))
-
-            # Добавляем токены для ответа
-            total_tokens += 2
-
-            return total_tokens
-        except Exception as e:
-            self.logger.warning(f"Ошибка подсчета токенов: {e}")
-            return 0
-
-    def _calculate_cost(self, input_tokens: int, output_tokens: int, llm_model: str) -> model.OpenAICostInfo:
-        if llm_model not in self.PRICING:
-            self.logger.warning(f"Неизвестная модель для расчета стоимости: {llm_model}")
-            return model.OpenAICostInfo(input_tokens, output_tokens, 0, 0, 0, llm_model)
-
-        pricing = self.PRICING[llm_model]
-
-        input_cost = (input_tokens / 1_000_000) * pricing["input"]
-        output_cost = (output_tokens / 1_000_000) * pricing["output"]
-        total_cost = input_cost + output_cost
-
-        return model.OpenAICostInfo(
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            input_cost=input_cost,
-            output_cost=output_cost,
-            total_cost=total_cost,
-            model=llm_model
-        )

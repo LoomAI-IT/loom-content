@@ -120,7 +120,7 @@ class ILLMClient(Protocol):
             self,
             audio_file: bytes,
             filename: str = "audio.wav"
-    ) -> str: pass
+    ) -> tuple[str, model.OpenAITranscriptionCostInfo]: pass
 
     @abstractmethod
     async def text_to_speech(
@@ -128,4 +128,4 @@ class ILLMClient(Protocol):
             text: str,
             voice: str = "alloy",
             tts_model: str = "tts-1-hd"
-    ) -> bytes: pass
+    ) -> tuple[bytes, model.OpenAITTSCostInfo]: pass

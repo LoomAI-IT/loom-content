@@ -14,6 +14,23 @@ class OpenAICostInfo:
 
 
 @dataclass
+class OpenAITranscriptionCostInfo:
+    duration_minutes: float
+    cost_per_minute: float
+    total_cost: float
+    model: str
+
+
+@dataclass
+class OpenAITTSCostInfo:
+    character_count: int
+    cost_per_1k_chars: float
+    total_cost: float
+    model: str
+    voice: str
+
+
+@dataclass
 class AsyncWeedOperationResponse:
     status_code: int
     content: bytes
