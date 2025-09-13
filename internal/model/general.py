@@ -4,6 +4,16 @@ from pydantic import BaseModel
 
 
 @dataclass
+class OpenAICostInfo:
+    input_tokens: int
+    output_tokens: int
+    input_cost: float
+    output_cost: float
+    total_cost: float
+    model: str
+
+
+@dataclass
 class AsyncWeedOperationResponse:
     status_code: int
     content: bytes

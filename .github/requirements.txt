@@ -9,9 +9,7 @@ python-multipart
 pypdf
 pdf2image
 pillow
-telethon
-segno
-
+tiktoken
 
 hiredis==3.2.1
 redis==6.2.0
