@@ -437,6 +437,13 @@ class IPublicationRepo(Protocol):
     ) -> None: pass
 
     @abstractmethod
+    async def add_openai_rub_cost_to_publication(
+            self,
+            publication_id: int,
+            amount_rub: int
+    ) -> None: pass
+
+    @abstractmethod
     async def get_publication_by_id(self, publication_id: int) -> list[model.Publication]:
         pass
 
@@ -531,6 +538,13 @@ class IPublicationRepo(Protocol):
             moderation_status: model.ModerationStatus = None,
             moderation_comment: str = None,
             time_for_publication: datetime = None
+    ) -> None: pass
+
+    @abstractmethod
+    async def add_vizard_rub_cost_to_video_cut(
+            self,
+            video_cut_id: int,
+            amount_rub: int
     ) -> None: pass
 
     @abstractmethod

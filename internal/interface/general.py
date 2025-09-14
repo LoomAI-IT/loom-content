@@ -94,6 +94,31 @@ class IDB(Protocol):
     async def multi_query(self, queries: list[str]) -> None: pass
 
 
+class IVizardClient(Protocol):
+    @abstractmethod
+    async def get_project_status(self, project_id: str) -> dict: pass
+
+    @abstractmethod
+    async def create_project(
+            self,
+            video_url: str,
+            video_type: str,
+            lang: str = "en",
+            prefer_length: list[int] = None,
+            ratio_of_clip: int = None,
+            template_id: int = None,
+            remove_silence: bool = False,
+            max_clip_number: int = None,
+            keywords: str = None,
+            subtitle_switch: bool = True,
+            emoji_switch: bool = False,
+            highlight_switch: bool = False,
+            headline_switch: bool = False,
+            project_name: str = None,
+            webhook_url: str = None
+    ) -> dict: pass
+
+
 class ILLMClient(Protocol):
     @abstractmethod
     async def generate_str(

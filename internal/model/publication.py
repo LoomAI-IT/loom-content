@@ -61,7 +61,7 @@ class VideoCut:
     video_fid: str
     video_name: str
 
-    vizard_id: int
+    vizard_rub_cost: int
     moderation_status: ModerationStatus
     moderation_comment: str
 
@@ -86,7 +86,7 @@ class VideoCut:
                 tags=row.tags,
                 video_fid=row.video_fid,
                 video_name=row.video_name,
-                vizard_id=row.vizard_id,
+                vizard_rub_cost=row.vizard_rub_cost,
                 moderation_status=ModerationStatus(row.moderation_status),
                 moderation_comment=row.moderation_comment,
                 time_for_publication=row.time_for_publication,
@@ -111,7 +111,7 @@ class VideoCut:
             "tags": self.tags,
             "video_fid": self.video_fid,
             "video_name": self.video_name,
-            "vizard_id": self.vizard_id,
+            "vizard_rub_cost": self.vizard_rub_cost,
             "moderation_status": self.moderation_status.value,
             "moderation_comment": self.moderation_comment,
             "time_for_publication": self.time_for_publication.isoformat() if self.time_for_publication else None,
@@ -137,6 +137,8 @@ class Publication:
     image_fid: str
     image_name: str
 
+    openai_rub_cost: int
+
     moderation_status: ModerationStatus
     moderation_comment: str
 
@@ -160,6 +162,7 @@ class Publication:
                 text=row.text,
                 image_fid=row.image_fid,
                 image_name=row.image_name,
+                openai_rub_cost=row.openai_rub_cost,
                 moderation_status=ModerationStatus(row.moderation_status),
                 moderation_comment=row.moderation_comment,
                 time_for_publication=row.time_for_publication,
@@ -183,6 +186,7 @@ class Publication:
             "text": self.text,
             "image_fid": self.image_fid,
             "image_name": self.image_name,
+            "openai_rub_cost": self.openai_rub_cost,
             "moderation_status": self.moderation_status.value,
             "moderation_comment": self.moderation_comment,
             "time_for_publication": self.time_for_publication.isoformat() if self.time_for_publication else None,

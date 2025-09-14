@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     video_fid TEXT DEFAULT '',
     video_name TEXT DEFAULT '',
     
-    vizard_tokens INTEGER DEFAULT 0,
+    vizard_rub_cost INTEGER DEFAULT 0,
     moderation_status TEXT DEFAULT 'на модерации',
     moderation_comment TEXT DEFAULT '',
     
@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS publications (
     text TEXT NOT NULL,
     image_fid TEXT,
     image_name TEXT,
+    
+    openai_rub_cost INTEGER DEFAULT 0,
     
     moderation_status TEXT DEFAULT 'на модерации',
     moderation_comment TEXT DEFAULT '',

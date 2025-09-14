@@ -1,226 +1,267 @@
-import requests
-import json
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
-import logging
+from enum import Enum
+
+from pkg.client.client import AsyncHTTPClient
+from internal import interface
 
 
-@dataclass
-class VizardConfig:
-    """Конфигурация для VizardClient"""
-    base_url: str
-    api_key: str
-    timeout: int = 30
-    max_retries: int = 3
-    verify_ssl: bool = True
+class VideoType(Enum):
+    """Типы источников видео"""
+    REMOTE_FILE = 1  # Прямая ссылка на видеофайл (.mp4, .mov)
+    YOUTUBE = 2  # YouTube видео
+    GOOGLE_DRIVE = 3  # Google Drive видео
+    VIMEO = 4  # Vimeo видео
+    STREAMYARD = 5  # StreamYard видео
 
 
-class VizardError(Exception):
-    """Базовое исключение для VizardClient"""
-    pass
+class AspectRatio(Enum):
+    """Соотношения сторон для клипов"""
+    VERTICAL = 1  # 9:16 - для TikTok, YouTube Shorts
+    SQUARE = 2  # 1:1 - для Instagram, Facebook
+    HORIZONTAL = 4  # 16:9 - для YouTube, Twitter
 
 
-class VizardAuthError(VizardError):
-    """Ошибка аутентификации"""
-    pass
+class ClipLength(Enum):
+    """Длительность клипов в секундах"""
+    AUTO = 0  # Автоматический выбор
+    SEC_15 = 15  # 15 секунд
+    SEC_30 = 30  # 30 секунд
+    SEC_60 = 60  # 60 секунд
+    SEC_90 = 90  # 90 секунд
 
 
-class VizardAPIError(VizardError):
-    """Ошибка API"""
-
-    def __init__(self, message: str, status_code: int = None, response_data: Dict = None):
-        super().__init__(message)
-        self.status_code = status_code
-        self.response_data = response_data
+class PricingPlan(Enum):
+    """Тарифные планы Vizard"""
+    FREE = "free"
+    CREATOR = "creator"
+    BUSINESS = "business"
 
 
-class VizardClient:
-    """
-    Клиент для работы с Vizard API
+class VizardClient(interface.IVizardClient):
+    BASE_URL = "https://elb-api.vizard.ai/hvizard-server-front/open-api/v1"
 
-    Пример использования:
-        config = VizardConfig(
-            base_url="https://api.vizard.ai",
-            api_key="your-api-key"
-        )
-        client = VizardClient(config)
-
-        # Создать проект
-        project = client.create_project("My Project", "Description")
-
-        # Загрузить видео
-        video = client.upload_video(project["id"], "/path/to/video.mp4")
-
-        # Получить результаты анализа
-        results = client.get_analysis_results(video["id"])
-    """
-
-    def __init__(self, config: VizardConfig):
-        self.config = config
-        self.session = requests.Session()
-        self.session.headers.update({
-            'Authorization': f'Bearer {config.api_key}',
-            'Content-Type': 'application/json',
-            'User-Agent': 'VizardClient/1.0'
-        })
-        self.session.verify = config.verify_ssl
-
-        self.logger = logging.getLogger(__name__)
-
-    def _make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
-        """Выполняет HTTP запрос с обработкой ошибок и повторными попытками"""
-        url = f"{self.config.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
-
-        for attempt in range(self.config.max_retries):
-            try:
-                self.logger.debug(f"Выполняется {method} запрос к {url}, попытка {attempt + 1}")
-
-                response = self.session.request(
-                    method=method,
-                    url=url,
-                    timeout=self.config.timeout,
-                    **kwargs
-                )
-
-                if response.status_code == 401:
-                    raise VizardAuthError("Неверный API ключ или токен истёк")
-
-                if response.status_code == 429:
-                    self.logger.warning("Превышен лимит запросов, повторная попытка...")
-                    continue
-
-                response.raise_for_status()
-
-                try:
-                    return response.json()
-                except json.JSONDecodeError:
-                    return {"success": True, "data": response.text}
-
-            except requests.exceptions.Timeout:
-                if attempt == self.config.max_retries - 1:
-                    raise VizardError(f"Превышено время ожидания после {self.config.max_retries} попыток")
-                continue
-
-            except requests.exceptions.RequestException as e:
-                if attempt == self.config.max_retries - 1:
-                    raise VizardAPIError(
-                        f"Ошибка API: {str(e)}",
-                        getattr(response, 'status_code', None),
-                        getattr(response, 'json', lambda: {})()
-                    )
-                continue
-
-        raise VizardError("Не удалось выполнить запрос после всех попыток")
-
-    def get_projects(self, limit: int = 10, offset: int = 0) -> List[Dict[str, Any]]:
-        """Получить список проектов"""
-        params = {"limit": limit, "offset": offset}
-        response = self._make_request("GET", "/projects", params=params)
-        return response.get("data", [])
-
-    def create_project(self, name: str, description: str = "") -> Dict[str, Any]:
-        """Создать новый проект"""
-        data = {
-            "name": name,
-            "description": description
+    # Цены и лимиты планов (в минутах)
+    PRICING = {
+        PricingPlan.FREE: {
+            "monthly_minutes": 60,
+            "price_per_month": 0,
+            "max_upload_length": 60,  # минут
+            "max_upload_size": 1,  # GB
+            "max_upload_quality": "1080p",
+            "max_export_quality": "720p",
+            "watermark": True,
+            "api_access": False
+        },
+        PricingPlan.CREATOR: {
+            "monthly_minutes": 600,
+            "price_per_month": 16,  # USD при годовой оплате
+            "max_upload_length": 600,
+            "max_upload_size": 10,
+            "max_upload_quality": "4K",
+            "max_export_quality": "4K",
+            "watermark": False,
+            "api_access": True
+        },
+        PricingPlan.BUSINESS: {
+            "monthly_minutes": 600,  # базовый пакет
+            "price_per_month": 60,  # USD при годовой оплате, базовый пакет
+            "max_upload_length": 600,
+            "max_upload_size": 10,
+            "max_upload_quality": "4K",
+            "max_export_quality": "4K",
+            "watermark": False,
+            "api_access": True
         }
-        response = self._make_request("POST", "/projects", json=data)
-        return response.get("data", {})
+    }
 
-    def get_project(self, project_id: str) -> Dict[str, Any]:
-        """Получить информацию о проекте"""
-        response = self._make_request("GET", f"/projects/{project_id}")
-        return response.get("data", {})
+    def __init__(
+            self,
+            tel: interface.ITelemetry,
+            api_key: str,
+            plan: PricingPlan = PricingPlan.CREATOR
+    ):
+        self.logger = tel.logger()
 
-    def update_project(self, project_id: str, name: str = None, description: str = None) -> Dict[str, Any]:
-        """Обновить проект"""
-        data = {}
-        if name is not None:
-            data["name"] = name
-        if description is not None:
-            data["description"] = description
+        self.api_key = api_key
+        self.plan = plan
+        self.headers = {
+            "Content-Type": "application/json",
+            "VIZARDAI_API_KEY": self.api_key
+        }
+        self.used_minutes = 0
+        self.api_client = AsyncHTTPClient(
+            "elb-api.vizard.ai",
+            443,
+            prefix="/hvizard-server-front/open-api/v1",
+            use_tracing=True,
+            logger=self.logger,
+            use_https=True
+        )
 
-        response = self._make_request("PUT", f"/projects/{project_id}", json=data)
-        return response.get("data", {})
+    async def create_project(
+            self,
+            video_url: str,
+            video_type: str,
+            lang: str = "en",
+            prefer_length: list[int] = None,
+            ratio_of_clip: int = None,
+            template_id: int = None,
+            remove_silence: bool = False,
+            max_clip_number: int = None,
+            keywords: str = None,
+            subtitle_switch: bool = True,
+            emoji_switch: bool = False,
+            highlight_switch: bool = False,
+            headline_switch: bool = False,
+            project_name: str = None,
+            webhook_url: str = None
+    ) -> dict:
+        """
+        Создание проекта и отправка видео на обработку
 
-    def delete_project(self, project_id: str) -> bool:
-        """Удалить проект"""
-        self._make_request("DELETE", f"/projects/{project_id}")
-        return True
+        Args:
+            video_url: URL видео
+            video_type: Тип источника видео
+            lang: Язык видео (en, es, fr, de, it, pt, ru, zh, ja, ko и др.)
+            prefer_length: Предпочтительная длительность клипов
+            ratio_of_clip: Соотношение сторон клипов
+            template_id: ID кастомного шаблона
+            remove_silence: Удалять паузы и слова-паразиты
+            max_clip_number: Максимальное количество клипов (1-100)
+            keywords: Ключевые слова через запятую
+            subtitle_switch: Включить субтитры
+            emoji_switch: Включить автоэмодзи в субтитрах
+            highlight_switch: Выделять ключевые слова в субтитрах
+            headline_switch: Добавить заголовок в начале клипа
+            project_name: Название проекта
+            webhook_url: URL для webhook уведомлений
 
-    def upload_video(self, project_id: str, video_path: str,
-                     metadata: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Загрузить видео в проект"""
+        Returns:
+            Ответ API с project_id
+        """
+        # Подготовка данных запроса
+        data: dict = {
+            "lang": lang,
+            "videoUrl": video_url,
+            "videoType": video_type,
+            "preferLength": [l.value for l in (prefer_length or [ClipLength.AUTO])]
+        }
+
+        # Опциональные параметры
+        if ratio_of_clip:
+            data["ratioOfClip"] = ratio_of_clip
+        if template_id:
+            data["templateId"] = template_id
+        if remove_silence:
+            data["removeSilenceSwitch"] = 1
+        else:
+            data["removeSilenceSwitch"] = 0
+        if max_clip_number:
+            data["maxClipNumber"] = min(max(1, max_clip_number), 100)
+        if keywords:
+            data["keyword"] = keywords
+        data["subtitleSwitch"] = 1 if subtitle_switch else 0
+        data["emojiSwitch"] = 1 if emoji_switch else 0
+        data["highlightSwitch"] = 1 if highlight_switch else 0
+        data["headlineSwitch"] = 1 if headline_switch else 0
+        if project_name:
+            data["projectName"] = project_name
+        if webhook_url:
+            data["webhookUrl"] = webhook_url
+
+        # Отправка запроса
         try:
-            with open(video_path, 'rb') as video_file:
-                files = {'video': video_file}
-                data = {'project_id': project_id}
+            response = await self.api_client.post(
+                f"/project/create",
+                headers=self.headers,
+                json=data
+            )
+            response.raise_for_status()
 
-                if metadata:
-                    data.update(metadata)
+            response_json = response.json()
 
-                # Временно убираем Content-Type для multipart/form-data
-                headers = self.session.headers.copy()
-                headers.pop('Content-Type', None)
+            return response_json
 
-                response = self.session.post(
-                    f"{self.config.base_url}/videos/upload",
-                    files=files,
-                    data=data,
-                    headers=headers,
-                    timeout=self.config.timeout * 3  # Увеличиваем таймаут для загрузки
-                )
-
-                response.raise_for_status()
-                return response.json().get("data", {})
-
-        except FileNotFoundError:
-            raise VizardError(f"Файл не найден: {video_path}")
         except Exception as e:
-            raise VizardError(f"Ошибка загрузки видео: {str(e)}")
+            raise e
 
-    def get_videos(self, project_id: str = None) -> List[Dict[str, Any]]:
-        """Получить список видео"""
-        params = {}
-        if project_id:
-            params["project_id"] = project_id
+    async def get_project_status(self, project_id: str) -> dict:
+        try:
+            response = await self.api_client.get(
+                f"/project/query/{project_id}",
+                headers={"VIZARDAI_API_KEY": self.api_key}
+            )
+            response.raise_for_status()
 
-        response = self._make_request("GET", "/videos", params=params)
-        return response.get("data", [])
+            response_json = response.json()
 
-    def get_video(self, video_id: str) -> Dict[str, Any]:
-        """Получить информацию о видео"""
-        response = self._make_request("GET", f"/videos/{video_id}")
-        return response.get("data", {})
+            # Обновление счетчика использованных минут
+            if response_json.get("status") == "completed":
+                video_duration = response_json.get("videoDuration", 0) / 60  # в минутах
+                self.used_minutes += video_duration
 
-    def start_analysis(self, video_id: str, analysis_type: str = "full") -> Dict[str, Any]:
-        """Запустить анализ видео"""
-        data = {"analysis_type": analysis_type}
-        response = self._make_request("POST", f"/videos/{video_id}/analyze", json=data)
-        return response.get("data", {})
+            return response_json
 
-    def get_analysis_status(self, video_id: str) -> Dict[str, Any]:
-        """Получить статус анализа"""
-        response = self._make_request("GET", f"/videos/{video_id}/analysis/status")
-        return response.get("data", {})
+        except Exception as e:
+            raise e
 
-    def get_analysis_results(self, video_id: str) -> Dict[str, Any]:
-        """Получить результаты анализа"""
-        response = self._make_request("GET", f"/videos/{video_id}/analysis/results")
-        return response.get("data", {})
+    def calculate_price(
+            self,
+            video_duration_minutes: float,
+            clips_count: int = None
+    ) -> dict:
+        plan_info = self.PRICING[self.plan]
 
-    def export_results(self, video_id: str, format: str = "json") -> Dict[str, Any]:
-        """Экспортировать результаты анализа"""
-        params = {"format": format}
-        response = self._make_request("GET", f"/videos/{video_id}/export", params=params)
-        return response.get("data", {})
+        # Проверка лимитов
+        if video_duration_minutes > plan_info["max_upload_length"]:
+            return {
+                "error": f"Видео превышает максимальную длительность для плана {self.plan.value}: "
+                         f"{plan_info['max_upload_length']} минут"
+            }
 
-    def get_user_info(self) -> Dict[str, Any]:
-        """Получить информацию о текущем пользователе"""
-        response = self._make_request("GET", "/user/profile")
-        return response.get("data", {})
+        # Расчет стоимости
+        monthly_minutes = plan_info["monthly_minutes"]
+        monthly_price = plan_info["price_per_month"]
 
-    def get_usage_stats(self) -> Dict[str, Any]:
-        """Получить статистику использования"""
-        response = self._make_request("GET", "/user/usage")
-        return response.get("data", {})
+        # Стоимость за минуту
+        if monthly_price > 0:
+            price_per_minute = monthly_price / monthly_minutes
+        else:
+            price_per_minute = 0
+
+        video_cost = video_duration_minutes * price_per_minute
+
+        # Проверка доступных минут
+        remaining_minutes = monthly_minutes - self.used_minutes
+        minutes_needed = video_duration_minutes
+        additional_minutes_needed = max(0, int(minutes_needed - remaining_minutes))
+
+        price_info = {
+            "plan": self.plan.value,
+            "video_duration_minutes": video_duration_minutes,
+            "monthly_minutes_limit": monthly_minutes,
+            "used_minutes": self.used_minutes,
+            "remaining_minutes": remaining_minutes,
+            "minutes_needed": minutes_needed,
+            "additional_minutes_needed": additional_minutes_needed,
+            "price_per_minute": round(price_per_minute, 4),
+            "estimated_cost": round(video_cost, 2),
+            "currency": "USD",
+            "notes": []
+        }
+
+        # Добавление заметок
+        if additional_minutes_needed > 0:
+            price_info["notes"].append(
+                f"Недостаточно минут! Нужно еще {additional_minutes_needed:.1f} минут. "
+                "Необходимо обновить план или докупить минуты."
+            )
+
+        if self.plan == PricingPlan.FREE:
+            price_info["notes"].append("API недоступен на бесплатном плане!")
+
+        if clips_count:
+            price_info["clips_count"] = clips_count
+            if clips_count > 100:
+                price_info["notes"].append("Максимум 100 клипов за один запрос")
+
+        return price_info
