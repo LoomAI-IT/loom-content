@@ -5,11 +5,11 @@ class Config:
     def __init__(self):
         # Service configuration
         self.environment = os.getenv("ENVIRONMENT", "dev")
-        self.service_name = os.getenv("KONTUR_PUBLICATION_CONTAINER_NAME", "kontur-employee")
+        self.service_name = os.getenv("KONTUR_PUBLICATION_CONTAINER_NAME", "kontur-publication")
         self.http_port = os.getenv("KONTUR_PUBLICATION_PORT", "8000")
         self.service_version = os.getenv("SERVICE_VERSION", "1.0.0")
         self.root_path = os.getenv("ROOT_PATH", "/")
-        self.prefix = os.getenv("KONTUR_PUBLICATION_PREFIX", "/api/employee")
+        self.prefix = os.getenv("KONTUR_PUBLICATION_PREFIX", "/api/publication")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
         self.interserver_secret_key = os.getenv("INTERSERVER_SECRET_KEY")
