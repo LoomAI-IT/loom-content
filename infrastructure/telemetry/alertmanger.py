@@ -36,7 +36,7 @@ class AlertManager:
         if openai_api_key:
             self.openai_client = openai.AsyncOpenAI(
                 api_key=openai_api_key,
-                http_client=httpx.AsyncClient()
+                http_client=httpx.AsyncClient(proxy="http://32uLYMeQ:jLaDv4WK@193.160.72.227:62940")
             )
         else:
             self.openai_client = None
