@@ -29,7 +29,7 @@ class GPTClient(interface.ILLMClient):
 
         self.client = openai.AsyncOpenAI(
             api_key=api_key,
-            http_client=httpx.AsyncClient(proxy="")
+            http_client=httpx.AsyncClient(proxy="http://32uLYMeQ:jLaDv4WK@193.160.72.227:62940")
         )
 
         self.PRICING = {
