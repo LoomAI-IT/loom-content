@@ -565,6 +565,15 @@ class IPublicationPromptGenerator(Protocol):
         pass
 
     @abstractmethod
+    async def get_regenerate_publication_text_system_prompt(
+            self,
+            prompt_for_text_style: str,
+            publication_text: str,
+            changes: str
+    ) -> str:
+        pass
+
+    @abstractmethod
     async def get_generate_publication_image_system_prompt(
             self,
             prompt_for_image_style: str,
