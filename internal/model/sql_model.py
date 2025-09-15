@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     
+    enabled bool DEFAULT FALSE,
     filter_prompt TEXT NOT NULL,
     rewrite_prompt TEXT NOT NULL,
     tg_channels TEXT[] DEFAULT '{}',

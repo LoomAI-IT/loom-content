@@ -140,6 +140,7 @@ class IPublicationController(Protocol):
             autoposting_id: int,
             filter_prompt: str = None,
             rewrite_prompt: str = None,
+            enabled: bool = None,
             tg_channels: list[str] = None
     ) -> JSONResponse:
         pass
@@ -164,7 +165,7 @@ class IPublicationController(Protocol):
             self,
             video_cut_id: int,
             name: str = None,
-            text: str = None,
+            description: str = None,
             tags: list[str] = None,
             time_for_publication: datetime = None
     ): pass
@@ -339,6 +340,7 @@ class IPublicationService(Protocol):
             autoposting_id: int,
             filter_prompt: str = None,
             rewrite_prompt: str = None,
+            enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
         pass
@@ -363,7 +365,7 @@ class IPublicationService(Protocol):
             self,
             video_cut_id: int,
             name: str = None,
-            text: str = None,
+            description: str = None,
             tags: list[str] = None,
             time_for_publication: datetime = None
     ) -> None: pass
@@ -498,6 +500,7 @@ class IPublicationRepo(Protocol):
             autoposting_id: int,
             filter_prompt: str = None,
             rewrite_prompt: str = None,
+            enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
         pass

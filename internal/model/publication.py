@@ -200,6 +200,7 @@ class Autoposting:
     id: int
     organization_id: int
 
+    enabled: bool
     filter_prompt: str
     rewrite_prompt: str
     tg_channels: list[str]
@@ -212,6 +213,7 @@ class Autoposting:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                enabled=row.enabled,
                 filter_prompt=row.filter_prompt,
                 rewrite_prompt=row.rewrite_prompt,
                 tg_channels=row.tg_channels,
@@ -224,6 +226,7 @@ class Autoposting:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "enabled": self.enabled,
             "filter_prompt": self.filter_prompt,
             "rewrite_prompt": self.rewrite_prompt,
             "tg_channels": self.tg_channels,
