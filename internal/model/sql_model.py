@@ -1,7 +1,7 @@
 create_categories_table = """
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    organization_id INTEGER NOT NULL,
     
     prompt_for_image_style TEXT NOT NULL,
     prompt_for_text_style TEXT NOT NULL,
@@ -14,7 +14,7 @@ create_video_cuts_table = """
 CREATE TABLE IF NOT EXISTS video_cuts (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
-    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    organization_id INTEGER NOT NULL,
     
     creator_id INTEGER NOT NULL,
     moderator_id INTEGER DEFAULT NULL,
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS video_cuts (
 create_publications_table = """
 CREATE TABLE IF NOT EXISTS publications (
     id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-    category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+    organization_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
     
     creator_id INTEGER NOT NULL,
     moderator_id INTEGER DEFAULT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS publications (
 create_autopostings_table = """
 CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
-    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    organization_id INTEGER NOT NULL,
     
     enabled bool DEFAULT FALSE,
     filter_prompt TEXT NOT NULL,
