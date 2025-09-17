@@ -37,10 +37,7 @@ SET
     time_for_publication = COALESCE(:time_for_publication, time_for_publication),
     publication_at = COALESCE(:publication_at, publication_at),
     image_fid = COALESCE(:image_fid, image_fid),
-    image_name = CASE 
-        WHEN :image_fid IS NOT NULL THEN 'generated_image.png'
-        ELSE image_name
-    END
+    image_name = COALESCE(:image_name, image_name)
 WHERE id = :publication_id;
 """
 

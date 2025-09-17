@@ -213,7 +213,7 @@ class IPublicationService(Protocol):
             need_images: bool,
             text_reference: str,
             time_for_publication: datetime = None
-    ) -> None:
+    ) -> int:
         pass
 
     @abstractmethod
@@ -229,7 +229,7 @@ class IPublicationService(Protocol):
             self,
             publication_id: int,
             prompt: str = None,
-    ) -> str:
+    ) -> dict:
         pass
 
     @abstractmethod
@@ -278,7 +278,7 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
-    async def get_publications_by_organization(self, organization_id: int) -> model.Publication:
+    async def get_publications_by_organization(self, organization_id: int) -> list[model.Publication]:
         pass
 
     @abstractmethod
@@ -303,7 +303,7 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
-    async def get_categories_by_organization(self, organization_id: int) -> model.Category:
+    async def get_categories_by_organization(self, organization_id: int) -> list[model.Category]:
         pass
 
     @abstractmethod
@@ -331,7 +331,7 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
-    async def get_autoposting_by_organization(self, organization_id: int) -> model.Autoposting:
+    async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
         pass
 
     @abstractmethod
@@ -357,7 +357,7 @@ class IPublicationService(Protocol):
             creator_id: int,
             youtube_video_reference: str,
             time_for_publication: datetime = None
-    ) -> None:
+    ) -> int:
         pass
 
     @abstractmethod
@@ -387,7 +387,7 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
-    async def get_video_cuts_by_organization(self, organization_id: int) -> model.VideoCut:
+    async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]:
         pass
 
     @abstractmethod
@@ -427,7 +427,7 @@ class IPublicationRepo(Protocol):
     async def change_publication(
             self,
             publication_id: int,
-            moderator_id: int,
+            moderator_id: int = None,
             name: str = None,
             text: str = None,
             tags: list[str] = None,
@@ -436,6 +436,7 @@ class IPublicationRepo(Protocol):
             time_for_publication: datetime = None,
             publication_at: datetime = None,
             image_fid: str = None,
+            image_name: str = None,
     ) -> None: pass
 
     @abstractmethod

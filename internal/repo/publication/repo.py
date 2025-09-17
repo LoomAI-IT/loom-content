@@ -58,7 +58,7 @@ class PublicationRepo(interface.IPublicationRepo):
 
     async def change_publication(
             self,
-            publication_id: int,
+            publication_id: int = None,
             moderator_id: int = None,
             name: str = None,
             text: str = None,
@@ -68,6 +68,7 @@ class PublicationRepo(interface.IPublicationRepo):
             time_for_publication: datetime = None,
             publication_at: datetime = None,
             image_fid: str = None,
+            image_name: str = None,
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.change_publication",
@@ -88,6 +89,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'time_for_publication': time_for_publication,
                     'publication_at': publication_at,
                     'image_fid': image_fid,
+                    'image_name': image_name,
                 }
 
                 await self.db.update(change_publication, args)

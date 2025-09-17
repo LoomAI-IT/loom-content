@@ -96,6 +96,13 @@ class IDB(Protocol):
 
 class IVizardClient(Protocol):
     @abstractmethod
+    def calculate_price(
+            self,
+            video_duration_minutes: float,
+            clips_count: int = None
+    ) -> dict: pass
+
+    @abstractmethod
     async def get_project_status(self, project_id: str) -> dict: pass
 
     @abstractmethod
