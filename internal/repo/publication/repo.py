@@ -24,7 +24,6 @@ class PublicationRepo(interface.IPublicationRepo):
             name: str,
             text: str,
             tags: list[str],
-            time_for_publication: datetime = None
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_publication",
@@ -44,7 +43,6 @@ class PublicationRepo(interface.IPublicationRepo):
                     'name': name,
                     'text': text,
                     'tags': tags,
-                    'time_for_publication': time_for_publication,
                 }
 
                 publication_id = await self.db.insert(create_publication, args)

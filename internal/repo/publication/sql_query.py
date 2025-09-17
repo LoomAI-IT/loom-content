@@ -8,7 +8,6 @@ INSERT INTO publications (
     name,
     text,
     tags,
-    time_for_publication,
     moderation_status
 )
 VALUES (
@@ -19,7 +18,6 @@ VALUES (
     :name,
     :text,
     :tags,
-    :time_for_publication,
     'draft'
 )
 RETURNING id;

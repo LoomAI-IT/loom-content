@@ -37,7 +37,6 @@ class PublicationService(interface.IPublicationService):
             creator_id: int,
             need_images: bool,
             text_reference: str,
-            time_for_publication: str = None
     ) -> model.Publication:
         with self.tracer.start_as_current_span(
                 "PublicationService.generate_publication",
@@ -69,7 +68,6 @@ class PublicationService(interface.IPublicationService):
                     temperature=1,
                     llm_model="gpt-5"
                 )
-                time_for_publication = datetime.fromisoformat(time_for_publication.replace("Z", ""))
                 # Создаем публикацию в БД
                 publication_id = await self.repo.create_publication(
                     organization_id=organization_id,
@@ -79,7 +77,6 @@ class PublicationService(interface.IPublicationService):
                     name=publication_data["name"].strip(),
                     text=publication_data["text"],
                     tags=publication_data["tags"],
-                    time_for_publication=time_for_publication
                 )
 
                 # Считаем общую стоимость текста

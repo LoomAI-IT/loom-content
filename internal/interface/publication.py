@@ -178,7 +178,6 @@ class IPublicationService(Protocol):
             creator_id: int,
             need_images: bool,
             text_reference: str,
-            time_for_publication: str = None
     ) -> model.Publication:
         pass
 
@@ -387,7 +386,6 @@ class IPublicationRepo(Protocol):
             name: str,
             text: str,
             tags: list[str],
-            time_for_publication: datetime = None
     ) -> int:
         pass
 

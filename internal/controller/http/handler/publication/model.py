@@ -19,7 +19,6 @@ class GeneratePublicationBody(BaseModel):
     creator_id: int
     need_images: bool
     text_reference: str
-    time_for_publication: Optional[str] = None
 
     class Config:
         json_schema_extra = {
@@ -29,7 +28,6 @@ class GeneratePublicationBody(BaseModel):
                 "creator_id": 1,
                 "need_images": True,
                 "text_reference": "Новая статья о технологиях искусственного интеллекта",
-                "time_for_publication": "2024-12-31T10:00:00Z"
             }
         }
 

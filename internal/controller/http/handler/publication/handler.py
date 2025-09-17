@@ -52,7 +52,6 @@ class PublicationController(interface.IPublicationController):
                     creator_id=body.creator_id,
                     need_images=body.need_images,
                     text_reference=body.text_reference,
-                    time_for_publication=body.time_for_publication
                 )
 
                 self.logger.info("Publication generated successfully", {
