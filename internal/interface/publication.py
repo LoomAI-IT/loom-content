@@ -525,7 +525,7 @@ class IPublicationRepo(Protocol):
             description: str,
             tags: list[str],
             time_for_publication: datetime = None
-    ) -> None:
+    ) -> int:
         pass
 
     @abstractmethod
