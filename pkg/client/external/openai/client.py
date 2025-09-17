@@ -130,7 +130,7 @@ class GPTClient(interface.ILLMClient):
             messages.append({"role": "system", "content": system_prompt})
 
         messages.extend([
-            {"role": message.role, "content": message.text}
+            {"role": message["role"], "content": message["text"]}
             for message in history
         ])
 
