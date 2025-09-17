@@ -157,7 +157,7 @@ def include_publication_handlers(
         publication_controller.get_categories_by_organization,
         methods=["GET"],
         tags=["Category"],
-        response_model=ListDataResponse,
+        response_model=list[model.Category],
     )
 
     # Обновление рубрики
