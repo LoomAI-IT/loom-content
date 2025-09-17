@@ -66,7 +66,7 @@ class PublicationService(interface.IPublicationService):
                 publication_data, publication_data_cost = await self.llm_client.generate_json(
                     history=[{"role": "user", "content": "Создай пост для социальной сети"}],
                     system_prompt=text_system_prompt,
-                    temperature=0.7,
+                    temperature=1,
                     llm_model="gpt-5"
                 )
 
