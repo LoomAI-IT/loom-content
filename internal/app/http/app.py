@@ -119,7 +119,7 @@ def include_publication_handlers(
         publication_controller.get_publications_by_organization,
         methods=["GET"],
         tags=["Publication"],
-        response_model=ListDataResponse,
+        response_model=list[model.Publication],
     )
 
     # Скачивание изображения публикации
