@@ -67,12 +67,8 @@ class PublicationService(interface.IPublicationService):
                     history=[{"role": "user", "content": "Создай пост для социальной сети"}],
                     system_prompt=text_system_prompt,
                     temperature=0.7,
-                    llm_model="gpt-4o"
+                    llm_model="gpt-5"
                 )
-
-                # Парсим теги
-                tags = [tag.strip().replace('#', '') for tag in publication_data["tags"].split(',')]
-                tags = [f"#{tag}" for tag in tags if tag]
 
                 # Создаем публикацию в БД
                 publication_id = await self.repo.create_publication(
@@ -82,7 +78,7 @@ class PublicationService(interface.IPublicationService):
                     text_reference=text_reference,
                     name=publication_data["name"].strip(),
                     text=publication_data["text"],
-                    tags=tags,
+                    tags=publication_data["tags"],
                     time_for_publication=time_for_publication
                 )
 
