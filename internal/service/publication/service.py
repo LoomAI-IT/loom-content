@@ -37,7 +37,7 @@ class PublicationService(interface.IPublicationService):
             creator_id: int,
             need_images: bool,
             text_reference: str,
-            time_for_publication: datetime = None
+            time_for_publication: str = None
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.generate_publication",
@@ -69,7 +69,7 @@ class PublicationService(interface.IPublicationService):
                     temperature=1,
                     llm_model="gpt-5"
                 )
-
+                time_for_publication = datetime.fromisoformat(time_for_publication.replace("Z", "+00:00"))
                 # Создаем публикацию в БД
                 publication_id = await self.repo.create_publication(
                     organization_id=organization_id,

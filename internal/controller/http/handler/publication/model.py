@@ -19,7 +19,7 @@ class GeneratePublicationBody(BaseModel):
     creator_id: int
     need_images: bool
     text_reference: str
-    time_for_publication: Optional[datetime] = None
+    time_for_publication: Optional[str] = None
 
     class Config:
         json_schema_extra = {
