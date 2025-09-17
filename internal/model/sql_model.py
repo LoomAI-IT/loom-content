@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
     
+    name TEXT NOT NULL,
     prompt_for_image_style TEXT NOT NULL,
     prompt_for_text_style TEXT NOT NULL,
     

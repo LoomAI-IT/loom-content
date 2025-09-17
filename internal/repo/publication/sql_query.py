@@ -62,11 +62,13 @@ ORDER BY created_at DESC;
 create_category = """
 INSERT INTO categories (
     organization_id,
+    name,
     prompt_for_image_style,
     prompt_for_text_style
 )
 VALUES (
     :organization_id,
+    :name,
     :prompt_for_image_style,
     :prompt_for_text_style
 )
@@ -76,6 +78,7 @@ RETURNING id;
 update_category = """
 UPDATE categories
 SET 
+    name = COALESCE(:name, name),
     prompt_for_image_style = COALESCE(:prompt_for_image_style, prompt_for_image_style),
     prompt_for_text_style = COALESCE(:prompt_for_text_style, prompt_for_text_style)
 WHERE id = :category_id;

@@ -92,6 +92,7 @@ class ModeratePublicationBody(BaseModel):
 # РУБРИКИ
 class CreateCategoryBody(BaseModel):
     organization_id: int
+    name: str
     prompt_for_image_style: str
     prompt_for_text_style: str
 
@@ -99,6 +100,7 @@ class CreateCategoryBody(BaseModel):
         json_schema_extra = {
             "example": {
                 "organization_id": 1,
+                "name": "тами",
                 "prompt_for_image_style": "Минималистичный стиль с корпоративными цветами",
                 "prompt_for_text_style": "Профессиональный тон, дружелюбный подход"
             }
@@ -106,12 +108,14 @@ class CreateCategoryBody(BaseModel):
 
 
 class UpdateCategoryBody(BaseModel):
+    name: Optional[str] = None
     prompt_for_image_style: Optional[str] = None
     prompt_for_text_style: Optional[str] = None
 
     class Config:
         json_schema_extra = {
             "example": {
+                "name": "Обновленный стиль изображений",
                 "prompt_for_image_style": "Обновленный стиль изображений",
                 "prompt_for_text_style": "Обновленный стиль текста"
             }

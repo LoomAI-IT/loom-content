@@ -17,6 +17,7 @@ class Category:
     id: int
     organization_id: int
 
+    name: str
     prompt_for_image_style: str
     prompt_for_text_style: str
 
@@ -28,6 +29,7 @@ class Category:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                name=row.name,
                 prompt_for_image_style=row.prompt_for_image_style,
                 prompt_for_text_style=row.prompt_for_text_style,
                 created_at=row.created_at
@@ -39,6 +41,7 @@ class Category:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "name": self.name,
             "prompt_for_image_style": self.prompt_for_image_style,
             "prompt_for_text_style": self.prompt_for_text_style,
             "created_at": self.created_at.isoformat()

@@ -446,6 +446,7 @@ class PublicationController(interface.IPublicationController):
 
                 category_id = await self.publication_service.create_category(
                     organization_id=body.organization_id,
+                    name=body.name,
                     prompt_for_image_style=body.prompt_for_image_style,
                     prompt_for_text_style=body.prompt_for_text_style
                 )
@@ -553,6 +554,7 @@ class PublicationController(interface.IPublicationController):
 
                 await self.publication_service.update_category(
                     category_id=body.category_id,
+                    name=body.name,
                     prompt_for_image_style=body.prompt_for_image_style,
                     prompt_for_text_style=body.prompt_for_text_style
                 )

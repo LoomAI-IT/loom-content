@@ -171,6 +171,7 @@ class PublicationRepo(interface.IPublicationRepo):
     async def create_category(
             self,
             organization_id: int,
+            name: str,
             prompt_for_image_style: str,
             prompt_for_text_style: str
     ) -> int:
@@ -184,6 +185,7 @@ class PublicationRepo(interface.IPublicationRepo):
             try:
                 args = {
                     'organization_id': organization_id,
+                    'name': name,
                     'prompt_for_image_style': prompt_for_image_style,
                     'prompt_for_text_style': prompt_for_text_style,
                 }
@@ -200,6 +202,7 @@ class PublicationRepo(interface.IPublicationRepo):
     async def update_category(
             self,
             category_id: int,
+            name: str = None,
             prompt_for_image_style: str = None,
             prompt_for_text_style: str = None
     ) -> None:
@@ -213,6 +216,7 @@ class PublicationRepo(interface.IPublicationRepo):
             try:
                 args = {
                     'category_id': category_id,
+                    'name': name,
                     'prompt_for_image_style': prompt_for_image_style,
                     'prompt_for_text_style': prompt_for_text_style,
                 }

@@ -259,6 +259,7 @@ class IPublicationService(Protocol):
     async def create_category(
             self,
             organization_id: int,
+            name: str,
             prompt_for_image_style: str,
             prompt_for_text_style: str
     ) -> int:
@@ -276,6 +277,7 @@ class IPublicationService(Protocol):
     async def update_category(
             self,
             category_id: int,
+            name: str = None,
             prompt_for_image_style: str = None,
             prompt_for_text_style: str = None
     ) -> None:
@@ -425,6 +427,7 @@ class IPublicationRepo(Protocol):
     async def create_category(
             self,
             organization_id: int,
+            name: str,
             prompt_for_image_style: str,
             prompt_for_text_style: str
     ) -> int:
@@ -434,6 +437,7 @@ class IPublicationRepo(Protocol):
     async def update_category(
             self,
             category_id: int,
+            name: str = None,
             prompt_for_image_style: str = None,
             prompt_for_text_style: str = None
     ) -> None:

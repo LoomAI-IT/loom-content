@@ -560,6 +560,7 @@ class PublicationService(interface.IPublicationService):
     async def create_category(
             self,
             organization_id: int,
+            name: str,
             prompt_for_image_style: str,
             prompt_for_text_style: str
     ) -> int:
@@ -571,6 +572,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 category_id = await self.repo.create_category(
                     organization_id=organization_id,
+                    name=name,
                     prompt_for_image_style=prompt_for_image_style,
                     prompt_for_text_style=prompt_for_text_style
                 )
@@ -623,6 +625,7 @@ class PublicationService(interface.IPublicationService):
             self,
             category_id: int,
             prompt_for_image_style: str = None,
+            name: str = None,
             prompt_for_text_style: str = None
     ) -> None:
         with self.tracer.start_as_current_span(
@@ -633,6 +636,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 await self.repo.update_category(
                     category_id=category_id,
+                    name=name,
                     prompt_for_image_style=prompt_for_image_style,
                     prompt_for_text_style=prompt_for_text_style
                 )
