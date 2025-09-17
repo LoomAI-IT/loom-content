@@ -17,8 +17,8 @@ class PublicationService(interface.IPublicationService):
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.IKonturOrganizationClient,
-            tg_bot_client: interface.IKonturTgBotClient,
             vizard_client: interface.IVizardClient,
+
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
@@ -27,7 +27,6 @@ class PublicationService(interface.IPublicationService):
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
-        self.tg_bot_client = tg_bot_client
         self.vizard_client = vizard_client
 
     # ПУБЛИКАЦИИ
@@ -873,7 +872,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 await self.repo.change_video_cut(
                     video_cut_id=video_cut_id,
-                    moderation_status=model.ModerationStatus.MODERATION
+                    moderation_status=model.ModerationStatus.MODERATION.value
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -914,7 +913,7 @@ class PublicationService(interface.IPublicationService):
                 # Обновляем статус
                 await self.repo.change_video_cut(
                     video_cut_id=video_cut_id,
-                    moderation_status=model.ModerationStatus.PUBLISHED
+                    moderation_status=model.ModerationStatus.PUBLISHED.value
                 )
 
                 span.set_status(Status(StatusCode.OK))

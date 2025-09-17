@@ -12,7 +12,7 @@ class Config:
         self.prefix = os.getenv("KONTUR_PUBLICATION_PREFIX", "/api/publication")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
-        self.interserver_secret_key = os.getenv("INTERSERVER_SECRET_KEY")
+        self.interserver_secret_key = os.getenv("KONTUR_INTERSERVER_SECRET_KEY")
 
         # PostgreSQL configuration
         self.db_host = os.getenv("KONTUR_EMPLOYEE_POSTGRES_CONTAINER_NAME", "localhost")
@@ -20,6 +20,9 @@ class Config:
         self.db_name = os.getenv("KONTUR_EMPLOYEE_POSTGRES_DB_NAME", "hr_interview")
         self.db_user = os.getenv("KONTUR_EMPLOYEE_POSTGRES_USER", "postgres")
         self.db_pass = os.getenv("KONTUR_EMPLOYEE_POSTGRES_PASSWORD", "password")
+
+        self.weed_master_host = os.getenv("KONTUR_WEED_MASTER_CONTAINER_NAME", "localhost")
+        self.weed_master_port = int(os.getenv("KONTUR_WEED_MASTER_PORT", "9333"))
 
         # Настройки телеметрии
         self.alert_tg_bot_token = os.getenv("KONTUR_ALERT_TG_BOT_TOKEN", "")
@@ -38,3 +41,26 @@ class Config:
 
         # OpenAI configuration
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+
+        # Kontur Authorization service
+        self.kontur_authorization_host = os.getenv("KONTUR_AUTHORIZATION_CONTAINER_NAME", "localhost")
+        self.kontur_authorization_port = os.getenv("KONTUR_AUTHORIZATION_PORT", "8001")
+
+        # Kontur Organization service
+        self.kontur_organization_host = os.getenv("KONTUR_ORGANIZATION_CONTAINER_NAME", "localhost")
+        self.kontur_organization_port = os.getenv("KONTUR_ORGANIZATION_PORT", "8002")
+
+        # Kontur TG Bot service
+        self.kontur_tg_bot_host = os.getenv("KONTUR_TG_BOT_CONTAINER_NAME", "localhost")
+        self.kontur_tg_bot_port = os.getenv("KONTUR_TG_BOT_PORT", "8003")
+
+        # Vizard configuration
+        self.vizard_api_key = os.getenv("VIZARD_API_KEY", "")
+        self.vizard_base_url = os.getenv("VIZARD_BASE_URL", "https://api.vizard.ai")
+
+        # Storage configuration
+        self.storage_host = os.getenv("STORAGE_CONTAINER_NAME", "localhost")
+        self.storage_port = int(os.getenv("STORAGE_PORT", "9333"))
+
+        # Password secret key
+        self.password_secret_key = os.getenv("PASSWORD_SECRET_KEY", "default_secret_key")
