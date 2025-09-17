@@ -35,7 +35,6 @@ alert_manager = AlertManager(
     cfg.monitoring_redis_port,
     cfg.monitoring_redis_db,
     cfg.monitoring_redis_password,
-    cfg.openai_api_key
 )
 
 tel = Telemetry(
