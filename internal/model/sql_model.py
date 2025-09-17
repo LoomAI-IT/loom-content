@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS publications (
     text_reference TEXT NOT NULL,
     name TEXT NOT NULL,
     text TEXT NOT NULL,
+    tags TEXT[] DEFAULT '{}',
     image_fid TEXT,
     image_name TEXT,
     
