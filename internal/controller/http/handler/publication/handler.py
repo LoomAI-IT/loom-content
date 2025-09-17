@@ -952,10 +952,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Video cuts retrieved successfully",
-                        "data": [video_cut.to_dict() for video_cut in video_cuts]
-                    }
+                    content=[video_cut.to_dict() for video_cut in video_cuts]
                 )
 
             except Exception as err:
