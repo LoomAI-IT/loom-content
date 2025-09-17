@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     moderation_status TEXT DEFAULT 'на модерации',
     moderation_comment TEXT DEFAULT '',
     
-    time_for_publication TIMESTAMP,
+    time_for_publication TIMESTAMP DEFAULT NULL,
     publication_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS publications (
     moderation_status TEXT DEFAULT 'на модерации',
     moderation_comment TEXT DEFAULT '',
     
-    time_for_publication TIMESTAMP,
+    time_for_publication TIMESTAMP DEFAULT NULL,
     publication_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
