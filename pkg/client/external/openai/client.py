@@ -319,6 +319,7 @@ class GPTClient(interface.ILLMClient):
                     )
 
                 span.set_status(Status(StatusCode.OK))
+                self.logger.info("Ответ от LLM", {"llm_response_str": llm_response_str})
                 return llm_response_json, total_cost
 
             except Exception as err:
