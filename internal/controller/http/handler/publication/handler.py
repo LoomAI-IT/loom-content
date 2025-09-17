@@ -490,10 +490,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Category retrieved successfully",
-                        "data": category.to_dict()
-                    }
+                    content=category.to_dict()
                 )
 
             except Exception as err:
