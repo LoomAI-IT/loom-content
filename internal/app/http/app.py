@@ -43,20 +43,32 @@ def include_publication_handlers(
 
     # Генерация публикации
     app.add_api_route(
-        prefix + "/generate",
-        publication_controller.generate_publication,
+        prefix + "/text/generate",
+        publication_controller.generate_publication_text,
         methods=["POST"],
         tags=["Publication"],
-        response_model=model.Publication,
     )
 
     # Регенерация изображения публикации
     app.add_api_route(
-        prefix + "/{publication_id}/image/regenerate",
-        publication_controller.regenerate_publication_image,
+        prefix + "/text/regenerate",
+        publication_controller.regenerate_publication_text,
         methods=["POST"],
         tags=["Publication"],
-        response_model=PublicationResponse,
+    )
+    app.add_api_route(
+        prefix + "/image/generate",
+        publication_controller.generate_publication_image,
+        methods=["POST"],
+        tags=["Publication"],
+    )
+
+    # Регенерация изображения публикации
+    app.add_api_route(
+        prefix + "/create",
+        publication_controller.create_publication,
+        methods=["POST"],
+        tags=["Publication"],
     )
 
     # Регенерация текста публикации
