@@ -341,7 +341,7 @@ class GPTClient(interface.ILLMClient):
         self.logger.warning("LLM потребовался retry", {"llm_response": llm_response_str})
 
         retry_messages = [
-            *[{"role": msg.role, "content": msg.text} for msg in history],
+            *[{"role": msg["role"], "content": msg["content"]} for msg in history],
             {"role": "assistant", "content": llm_response_str},
             {"role": "user", "content": "Я же просил JSON формат, как в системном промпте, дай ответ в JSON формате"},
         ]
