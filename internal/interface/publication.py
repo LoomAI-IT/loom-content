@@ -9,47 +9,37 @@ from starlette.responses import StreamingResponse
 
 from internal import model
 
+from internal.controller.http.handler.publication.model import *
+
 
 class IPublicationController(Protocol):
     # Публикация
     @abstractmethod
     async def generate_publication(
             self,
-            organization_id: int,
-            category_id: int,
-            creator_id: int,
-            need_images: bool,
-            text_reference: str,
-            time_for_publication: datetime = None
+            body: GeneratePublicationBody,
     ) -> JSONResponse:
         pass
 
     @abstractmethod
     async def regenerate_publication_image(
             self,
-            publication_id: int,
-            prompt: str = None,
+            body: RegeneratePublicationImageBody,
     ) -> JSONResponse:
         pass
 
     @abstractmethod
     async def regenerate_publication_text(
             self,
-            publication_id: int,
-            prompt: str = None,
+            body: RegeneratePublicationTextBody,
     ) -> JSONResponse:
         pass
 
     @abstractmethod
     async def change_publication(
             self,
-            publication_id: int,
-            name: str = None,
-            text: str = None,
-            tags: list[str] = None,
-            time_for_publication: datetime = None,
-            image: UploadFile = None
-    ): pass
+            body: ChangePublicationBody,
+    ) -> JSONResponse: pass
 
     @abstractmethod
     async def delete_publication_image(
@@ -66,10 +56,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def moderate_publication(
             self,
-            publication_id: int,
-            moderator_id: int,
-            moderation_status: model.ModerationStatus,
-            moderation_comment: str = ""
+            body: ModeratePublicationBody
     ) -> JSONResponse:
         pass
 
@@ -92,9 +79,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def create_category(
             self,
-            organization_id: int,
-            prompt_for_image_style: str,
-            prompt_for_text_style: str
+            body: CreateCategoryBody,
     ) -> JSONResponse:
         pass
 
@@ -109,9 +94,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def update_category(
             self,
-            category_id: int,
-            prompt_for_image_style: str = None,
-            prompt_for_text_style: str = None
+            body: UpdateCategoryBody
     ) -> JSONResponse:
         pass
 
@@ -123,10 +106,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def create_autoposting(
             self,
-            organization_id: int,
-            filter_prompt: str,
-            rewrite_prompt: str,
-            tg_channels: list[str] = None
+            body: CreateAutopostingBody
     ) -> JSONResponse:
         pass
 
@@ -137,11 +117,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def update_autoposting(
             self,
-            autoposting_id: int,
-            filter_prompt: str = None,
-            rewrite_prompt: str = None,
-            enabled: bool = None,
-            tg_channels: list[str] = None
+            body: UpdateAutopostingBody
     ) -> JSONResponse:
         pass
 
@@ -153,22 +129,15 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def generate_video_cut(
             self,
-            organization_id: int,
-            creator_id: int,
-            youtube_video_reference: str,
-            time_for_publication: datetime = None
+            body: GenerateVideoCutBody
     ) -> JSONResponse:
         pass
 
     @abstractmethod
     async def change_video_cut(
             self,
-            video_cut_id: int,
-            name: str = None,
-            description: str = None,
-            tags: list[str] = None,
-            time_for_publication: datetime = None
-    ): pass
+            body: ChangeVideoCutBody
+    ) -> JSONResponse: pass
 
     @abstractmethod
     async def send_video_cut_to_moderation(
@@ -187,10 +156,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def moderate_video_cut(
             self,
-            video_cut_id: int,
-            moderator_id: int,
-            moderation_status: model.ModerationStatus,
-            moderation_comment: str = ""
+            body: ModerateVideoCutBody
     ) -> JSONResponse:
         pass
 
@@ -268,7 +234,7 @@ class IPublicationService(Protocol):
             self,
             publication_id: int,
             moderator_id: int,
-            moderation_status: model.ModerationStatus,
+            moderation_status: str,
             moderation_comment: str = ""
     ) -> None:
         pass
@@ -395,7 +361,7 @@ class IPublicationService(Protocol):
             self,
             video_cut_id: int,
             moderator_id: int,
-            moderation_status: model.ModerationStatus,
+            moderation_status: str,
             moderation_comment: str = ""
     ) -> None:
         pass
@@ -431,7 +397,7 @@ class IPublicationRepo(Protocol):
             name: str = None,
             text: str = None,
             tags: list[str] = None,
-            moderation_status: model.ModerationStatus = None,
+            moderation_status: str = None,
             moderation_comment: str = None,
             time_for_publication: datetime = None,
             publication_at: datetime = None,
@@ -539,7 +505,7 @@ class IPublicationRepo(Protocol):
             name: str = None,
             description: str = None,
             tags: list[str] = None,
-            moderation_status: model.ModerationStatus = None,
+            moderation_status: str = None,
             moderation_comment: str = None,
             time_for_publication: datetime = None
     ) -> None: pass

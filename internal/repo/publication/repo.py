@@ -63,7 +63,7 @@ class PublicationRepo(interface.IPublicationRepo):
             name: str = None,
             text: str = None,
             tags: list[str] = None,
-            moderation_status: model.ModerationStatus = None,
+            moderation_status: str = None,
             moderation_comment: str = None,
             time_for_publication: datetime = None,
             publication_at: datetime = None,
@@ -84,7 +84,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'name': name,
                     'text': text,
                     'tags': tags,
-                    'moderation_status': moderation_status.value if moderation_status else None,
+                    'moderation_status': moderation_status if moderation_status else None,
                     'moderation_comment': moderation_comment,
                     'time_for_publication': time_for_publication,
                     'publication_at': publication_at,
@@ -436,7 +436,7 @@ class PublicationRepo(interface.IPublicationRepo):
             name: str = None,
             description: str = None,
             tags: list[str] = None,
-            moderation_status: model.ModerationStatus = None,
+            moderation_status: str = None,
             moderation_comment: str = None,
             time_for_publication: datetime = None
     ) -> None:
@@ -456,7 +456,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'name': name,
                     'description': description,
                     'tags': tags,
-                    'moderation_status': moderation_status.value if moderation_status else None,
+                    'moderation_status': moderation_status if moderation_status else None,
                     'moderation_comment': moderation_comment,
                     'time_for_publication': time_for_publication,
                 }

@@ -385,7 +385,7 @@ class PublicationService(interface.IPublicationService):
                 # Обновляем статус и время публикации
                 await self.repo.change_publication(
                     publication_id=publication_id,
-                    moderation_status=model.ModerationStatus.PUBLISHED,
+                    moderation_status=model.ModerationStatus.PUBLISHED.value,
                     publication_at=datetime.utcnow()
                 )
 
@@ -448,7 +448,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 await self.repo.change_publication(
                     publication_id=publication_id,
-                    moderation_status=model.ModerationStatus.MODERATION
+                    moderation_status=model.ModerationStatus.MODERATION.value
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -462,7 +462,7 @@ class PublicationService(interface.IPublicationService):
             self,
             publication_id: int,
             moderator_id: int,
-            moderation_status: model.ModerationStatus,
+            moderation_status: str,
             moderation_comment: str = ""
     ) -> None:
         with self.tracer.start_as_current_span(
@@ -471,7 +471,7 @@ class PublicationService(interface.IPublicationService):
                 attributes={
                     "publication_id": publication_id,
                     "moderator_id": moderator_id,
-                    "moderation_status": moderation_status.value
+                    "moderation_status": moderation_status
                 }
         ) as span:
             try:
@@ -964,7 +964,7 @@ class PublicationService(interface.IPublicationService):
             self,
             video_cut_id: int,
             moderator_id: int,
-            moderation_status: model.ModerationStatus,
+            moderation_status: str,
             moderation_comment: str = ""
     ) -> None:
         with self.tracer.start_as_current_span(
@@ -973,7 +973,7 @@ class PublicationService(interface.IPublicationService):
                 attributes={
                     "video_cut_id": video_cut_id,
                     "moderator_id": moderator_id,
-                    "moderation_status": moderation_status.value
+                    "moderation_status": moderation_status
                 }
         ) as span:
             try:
