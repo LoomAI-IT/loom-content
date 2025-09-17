@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Protocol
 from datetime import datetime
 
-from fastapi import UploadFile
+from fastapi import UploadFile, File
 from fastapi.responses import JSONResponse
 from starlette.responses import StreamingResponse
 
@@ -15,16 +15,9 @@ from internal.controller.http.handler.publication.model import *
 class IPublicationController(Protocol):
     # Публикация
     @abstractmethod
-    async def generate_publication(
+    async def generate_publication_text(
             self,
-            body: GeneratePublicationBody,
-    ) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def regenerate_publication_image(
-            self,
-            body: RegeneratePublicationImageBody,
+            body: GeneratePublicationTextBody,
     ) -> JSONResponse:
         pass
 
@@ -34,6 +27,20 @@ class IPublicationController(Protocol):
             body: RegeneratePublicationTextBody,
     ) -> JSONResponse:
         pass
+
+    @abstractmethod
+    async def generate_publication_image(
+            self,
+            body: GeneratePublicationImageBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def create_publication(
+            self,
+            body: CreatePublicationBody,
+            image_file: UploadFile = File(...),
+    ) -> JSONResponse: pass
 
     @abstractmethod
     async def change_publication(

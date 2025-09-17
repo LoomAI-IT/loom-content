@@ -18,7 +18,7 @@ VALUES (
     :name,
     :text,
     :tags,
-    'draft'
+    :moderation_status
 )
 RETURNING id;
 """

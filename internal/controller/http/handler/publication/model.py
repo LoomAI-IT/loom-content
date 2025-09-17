@@ -13,62 +13,38 @@ class ModerationStatusEnum(str, Enum):
 
 
 # ПУБЛИКАЦИИ
-class GeneratePublicationBody(BaseModel):
-    organization_id: int
+class GeneratePublicationTextBody(BaseModel):
     category_id: int
-    creator_id: int
-    need_images: bool
     text_reference: str
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "organization_id": 1,
-                "category_id": 1,
-                "creator_id": 1,
-                "need_images": True,
-                "text_reference": "Новая статья о технологиях искусственного интеллекта",
-            }
-        }
-
-
-class RegeneratePublicationImageBody(BaseModel):
-    prompt: Optional[str] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "prompt": "Сделай изображение более ярким и добавь больше синих оттенков"
-            }
-        }
 
 
 class RegeneratePublicationTextBody(BaseModel):
-    prompt: Optional[str] = None
+    category_id: int
+    publication_text: str
+    prompt: str = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "prompt": "Сделай текст более дружелюбным и добавь призыв к действию"
-            }
-        }
+
+class GeneratePublicationImageBody(BaseModel):
+    category_id: int
+    publication_text: str
+    text_reference: str
+    prompt: str = None
+
+class CreatePublicationBody(BaseModel):
+    organization_id: int
+    category_id: int
+    creator_id: int
+    text_reference: str
+    name: str
+    text: str
+    tags: list[str]
 
 
 class ChangePublicationBody(BaseModel):
-    name: Optional[str] = None
-    text: Optional[str] = None
-    tags: Optional[List[str]] = None
-    time_for_publication: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Обновленное название публикации",
-                "text": "Обновленный текст публикации",
-                "tags": ["#технологии", "#AI", "#инновации"],
-                "time_for_publication": "2024-12-31T10:00:00Z"
-            }
-        }
+    name: str = None
+    text: str = None
+    tags: str = None
+    time_for_publication: datetime = None
 
 
 class ModeratePublicationBody(BaseModel):
@@ -76,15 +52,6 @@ class ModeratePublicationBody(BaseModel):
     moderator_id: int
     moderation_status: ModerationStatusEnum
     moderation_comment: Optional[str] = ""
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "moderator_id": 1,
-                "moderation_status": "approved",
-                "moderation_comment": "Публикация одобрена"
-            }
-        }
 
 
 # РУБРИКИ
@@ -94,30 +61,11 @@ class CreateCategoryBody(BaseModel):
     prompt_for_image_style: str
     prompt_for_text_style: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "organization_id": 1,
-                "name": "тами",
-                "prompt_for_image_style": "Минималистичный стиль с корпоративными цветами",
-                "prompt_for_text_style": "Профессиональный тон, дружелюбный подход"
-            }
-        }
-
 
 class UpdateCategoryBody(BaseModel):
     name: Optional[str] = None
     prompt_for_image_style: Optional[str] = None
     prompt_for_text_style: Optional[str] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Обновленный стиль изображений",
-                "prompt_for_image_style": "Обновленный стиль изображений",
-                "prompt_for_text_style": "Обновленный стиль текста"
-            }
-        }
 
 
 # АВТОПОСТИНГ
@@ -127,32 +75,12 @@ class CreateAutopostingBody(BaseModel):
     rewrite_prompt: str
     tg_channels: Optional[List[str]] = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "organization_id": 1,
-                "filter_prompt": "Фильтровать контент по технологической тематике",
-                "rewrite_prompt": "Переписать в стиле компании",
-                "tg_channels": ["@channel1", "@channel2"]
-            }
-        }
-
 
 class UpdateAutopostingBody(BaseModel):
     filter_prompt: Optional[str] = None
     rewrite_prompt: Optional[str] = None
     enabled: Optional[bool] = None
     tg_channels: Optional[List[str]] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "filter_prompt": "Обновленный фильтр",
-                "rewrite_prompt": "Обновленный промпт переписывания",
-                "enabled": True,
-                "tg_channels": ["@channel1", "@channel2", "@channel3"]
-            }
-        }
 
 
 # НАРЕЗКА ВИДЕО
@@ -162,16 +90,6 @@ class GenerateVideoCutBody(BaseModel):
     youtube_video_reference: str
     time_for_publication: Optional[datetime] = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "organization_id": 1,
-                "creator_id": 1,
-                "youtube_video_reference": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                "time_for_publication": "2024-12-31T10:00:00Z"
-            }
-        }
-
 
 class ChangeVideoCutBody(BaseModel):
     name: Optional[str] = None
@@ -179,30 +97,11 @@ class ChangeVideoCutBody(BaseModel):
     tags: Optional[List[str]] = None
     time_for_publication: Optional[datetime] = None
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "name": "Обновленное название видео",
-                "description": "Обновленное описание видео",
-                "tags": ["#видео", "#контент", "#маркетинг"],
-                "time_for_publication": "2024-12-31T10:00:00Z"
-            }
-        }
-
 
 class ModerateVideoCutBody(BaseModel):
     moderator_id: int
     moderation_status: ModerationStatusEnum
     moderation_comment: Optional[str] = ""
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "moderator_id": 1,
-                "moderation_status": "approved",
-                "moderation_comment": "Видеонарезка одобрена"
-            }
-        }
 
 
 # RESPONSE MODELS

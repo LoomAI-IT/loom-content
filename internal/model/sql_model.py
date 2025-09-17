@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     video_name TEXT DEFAULT '',
     
     vizard_rub_cost INTEGER DEFAULT 0,
-    moderation_status TEXT DEFAULT 'на модерации',
+    moderation_status TEXT DEFAULT '',
     moderation_comment TEXT DEFAULT '',
     
     time_for_publication TIMESTAMP DEFAULT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS publications (
     
     openai_rub_cost INTEGER DEFAULT 0,
     
-    moderation_status TEXT DEFAULT 'на модерации',
+    moderation_status TEXT DEFAULT '',
     moderation_comment TEXT DEFAULT '',
     
     time_for_publication TIMESTAMP DEFAULT NULL,
