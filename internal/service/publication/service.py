@@ -96,9 +96,9 @@ class PublicationService(interface.IPublicationService):
 
                         image_urls, image_cost = await self.llm_client.generate_image(
                             prompt=image_system_prompt,
-                            llm_model="dall-e-3",
+                            llm_model="gpt-image-1",
                             size="1024x1024",
-                            quality="standard",
+                            quality="high",
                             style="vivid"
                         )
 

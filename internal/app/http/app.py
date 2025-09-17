@@ -43,7 +43,7 @@ def include_publication_handlers(
 
     # Генерация публикации
     app.add_api_route(
-        prefix + "/publication/generate",
+        prefix + "/generate",
         publication_controller.generate_publication,
         methods=["POST"],
         tags=["Publication"],
@@ -52,7 +52,7 @@ def include_publication_handlers(
 
     # Регенерация изображения публикации
     app.add_api_route(
-        prefix + "/publication/{publication_id}/image/regenerate",
+        prefix + "/{publication_id}/image/regenerate",
         publication_controller.regenerate_publication_image,
         methods=["POST"],
         tags=["Publication"],
@@ -61,7 +61,7 @@ def include_publication_handlers(
 
     # Регенерация текста публикации
     app.add_api_route(
-        prefix + "/publication/{publication_id}/text/regenerate",
+        prefix + "/{publication_id}/text/regenerate",
         publication_controller.regenerate_publication_text,
         methods=["POST"],
         tags=["Publication"],
@@ -70,7 +70,7 @@ def include_publication_handlers(
 
     # Изменение публикации
     app.add_api_route(
-        prefix + "/publication/{publication_id}",
+        prefix + "/{publication_id}",
         publication_controller.change_publication,
         methods=["PUT"],
         tags=["Publication"],
@@ -79,7 +79,7 @@ def include_publication_handlers(
 
     # Удаление изображения публикации
     app.add_api_route(
-        prefix + "/publication/{publication_id}/image",
+        prefix + "/{publication_id}/image",
         publication_controller.delete_publication_image,
         methods=["DELETE"],
         tags=["Publication"],
@@ -88,7 +88,7 @@ def include_publication_handlers(
 
     # Отправка публикации на модерацию
     app.add_api_route(
-        prefix + "/publication/{publication_id}/moderation",
+        prefix + "/{publication_id}/moderation/send",
         publication_controller.send_publication_to_moderation,
         methods=["POST"],
         tags=["Publication"],
@@ -97,7 +97,7 @@ def include_publication_handlers(
 
     # Модерация публикации
     app.add_api_route(
-        prefix + "/publication/moderate",
+        prefix + "/moderate",
         publication_controller.moderate_publication,
         methods=["POST"],
         tags=["Publication"],
@@ -106,7 +106,7 @@ def include_publication_handlers(
 
     # Получение публикации по ID
     app.add_api_route(
-        prefix + "/publication/{publication_id}",
+        prefix + "/{publication_id}",
         publication_controller.get_publication_by_id,
         methods=["GET"],
         tags=["Publication"],
@@ -124,7 +124,7 @@ def include_publication_handlers(
 
     # Скачивание изображения публикации
     app.add_api_route(
-        prefix + "/publication/{publication_id}/image/download",
+        prefix + "/{publication_id}/image/download",
         publication_controller.download_publication_image,
         methods=["GET"],
         tags=["Publication"],
@@ -238,7 +238,7 @@ def include_publication_handlers(
 
     # Отправка нарезки на модерацию
     app.add_api_route(
-        prefix + "/video-cut/{video_cut_id}/moderation",
+        prefix + "/video-cut/{video_cut_id}/moderation/send",
         publication_controller.send_video_cut_to_moderation,
         methods=["POST"],
         tags=["VideoCut"],

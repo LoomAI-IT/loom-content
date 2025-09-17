@@ -72,6 +72,11 @@ class GPTClient(interface.ILLMClient):
                     "1792x1024": 0.120,
                 }
             },
+            "gpt-image-1": {
+                "input": 5.00,
+                "image_input": 10.00,
+                "output": 40.00
+            },
             # DALL-E 2 pricing (per image)
             "dall-e-2": {
                 "1024x1024": 0.020,
@@ -520,7 +525,7 @@ class GPTClient(interface.ILLMClient):
             prompt: str,
             llm_model: str = "dall-e-3",
             size: str = "1024x1024",
-            quality: str = "standard",
+            quality: str = "high",
             style: str= "vivid",
             n: int = 1,
             response_format: str = "url",
@@ -567,7 +572,8 @@ class GPTClient(interface.ILLMClient):
                 if model == "dall-e-3":
                     params["quality"] = quality
                     params["style"] = style
-
+                if model == "gpt-image-1":
+                    params["quality"] = style
                 if user:
                     params["user"] = user
 

@@ -74,6 +74,7 @@ class ChangePublicationBody(BaseModel):
 
 
 class ModeratePublicationBody(BaseModel):
+    publication_id: int
     moderator_id: int
     moderation_status: ModerationStatusEnum
     moderation_comment: Optional[str] = ""
