@@ -38,12 +38,14 @@ class CreatePublicationBody(BaseModel):
     name: str
     text: str
     tags: list[str]
+    moderation_status: str
+    image_url: str = None
 
 
 class ChangePublicationBody(BaseModel):
     name: str = None
     text: str = None
-    tags: str = None
+    tags: list[str] = None
     time_for_publication: datetime = None
 
 

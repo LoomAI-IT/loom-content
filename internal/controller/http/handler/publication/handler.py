@@ -1,16 +1,9 @@
-from datetime import datetime
-from typing import Optional
 from opentelemetry.trace import Status, StatusCode, SpanKind
-from fastapi import Request, HTTPException, UploadFile, Query, Path
+
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from internal import interface, model
-from internal.controller.http.handler.publication.model import (
-    GeneratePublicationBody, RegeneratePublicationImageBody, RegeneratePublicationTextBody,
-    ChangePublicationBody, ModeratePublicationBody, CreateCategoryBody, UpdateCategoryBody,
-    CreateAutopostingBody, UpdateAutopostingBody, GenerateVideoCutBody, ChangeVideoCutBody,
-    ModerateVideoCutBody
-)
+from internal import interface
+from internal.controller.http.handler.publication.model import *
 
 
 class PublicationController(interface.IPublicationController):
@@ -24,80 +17,37 @@ class PublicationController(interface.IPublicationController):
         self.publication_service = publication_service
 
     # ПУБЛИКАЦИИ
-    async def generate_publication(
+    async def generate_publication_text(
             self,
-             body: GeneratePublicationBody,
+            body: GeneratePublicationTextBody,
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
-                "PublicationController.generate_publication",
+                "PublicationController.generate_publication_text",
                 kind=SpanKind.INTERNAL,
                 attributes={
-                    "organization_id": body.organization_id,
-                    "category_id": body.category_id,
-                    "creator_id": body.creator_id,
-                    "need_images": body.need_images
+                    "category_id": body.category_id
                 }
         ) as span:
             try:
-                self.logger.info("Generate publication request", {
-                    "organization_id": body.organization_id,
-                    "category_id": body.category_id,
-                    "creator_id": body.creator_id,
-                    "need_images": body.need_images
+                self.logger.info("Generate publication text request", {
+                    "category_id": body.category_id
                 })
 
-                publication = await self.publication_service.generate_publication(
-                    organization_id=body.organization_id,
+                text_data = await self.publication_service.generate_publication_text(
                     category_id=body.category_id,
-                    creator_id=body.creator_id,
-                    need_images=body.need_images,
-                    text_reference=body.text_reference,
+                    text_reference=body.text_reference
                 )
 
-                self.logger.info("Publication generated successfully", {
-                    "organization_id": body.organization_id
-                })
-
-                span.set_status(Status(StatusCode.OK))
-                return JSONResponse(
-                    status_code=201,
-                    content=publication.to_dict()
-                )
-
-            except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
-                raise err
-
-    async def regenerate_publication_image(
-            self,
-            body: RegeneratePublicationImageBody,
-    ) -> JSONResponse:
-        with self.tracer.start_as_current_span(
-                "PublicationController.regenerate_publication_image",
-                kind=SpanKind.INTERNAL,
-                attributes={"publication_id": body.publication_id}
-        ) as span:
-            try:
-                self.logger.info("Regenerate publication image request", {
-                    "publication_id": body.publication_id
-                })
-
-                image_io = await self.publication_service.regenerate_publication_image(
-                    publication_id=body.publication_id,
-                    prompt=body.prompt
-                )
-
-                self.logger.info("Publication image regenerated successfully", {
-                    "publication_id": body.publication_id
+                self.logger.info("Publication text generated successfully", {
+                    "category_id": body.category_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Publication image regenerated successfully",
-                        "publication_id": body.publication_id
+                        "message": "Publication text generated successfully",
+                        "data": text_data
                     }
                 )
 
@@ -113,20 +63,23 @@ class PublicationController(interface.IPublicationController):
         with self.tracer.start_as_current_span(
                 "PublicationController.regenerate_publication_text",
                 kind=SpanKind.INTERNAL,
-                attributes={"publication_id": body.publication_id}
+                attributes={
+                    "category_id": body.category_id
+                }
         ) as span:
             try:
                 self.logger.info("Regenerate publication text request", {
-                    "publication_id": body.publication_id
+                    "category_id": body.category_id
                 })
 
-                publication_data = await self.publication_service.regenerate_publication_text(
-                    publication_id=body.publication_id,
+                text_data = await self.publication_service.regenerate_publication_text(
+                    category_id=body.category_id,
+                    publication_text=body.publication_text,
                     prompt=body.prompt
                 )
 
                 self.logger.info("Publication text regenerated successfully", {
-                    "publication_id": body.publication_id
+                    "category_id": body.category_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
@@ -134,8 +87,99 @@ class PublicationController(interface.IPublicationController):
                     status_code=200,
                     content={
                         "message": "Publication text regenerated successfully",
-                        "publication_id": body.publication_id,
-                        "data": publication_data
+                        "data": text_data
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def generate_publication_image(
+            self,
+            body: GeneratePublicationImageBody,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.generate_publication_image",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "category_id": body.category_id
+                }
+        ) as span:
+            try:
+                self.logger.info("Generate publication image request", {
+                    "category_id": body.category_id
+                })
+
+                image_url = await self.publication_service.generate_publication_image(
+                    category_id=body.category_id,
+                    publication_text=body.publication_text,
+                    text_reference=body.text_reference,
+                    prompt=body.prompt
+                )
+
+                self.logger.info("Publication image generated successfully", {
+                    "category_id": body.category_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Publication image generated successfully",
+                        "image_url": image_url
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def create_publication(
+            self,
+            body: CreatePublicationBody,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.create_publication",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "organization_id": body.organization_id,
+                    "category_id": body.category_id,
+                    "creator_id": body.creator_id
+                }
+        ) as span:
+            try:
+                self.logger.info("Create publication request", {
+                    "organization_id": body.organization_id,
+                    "category_id": body.category_id,
+                    "creator_id": body.creator_id
+                })
+
+                publication_id = await self.publication_service.create_publication(
+                    organization_id=body.organization_id,
+                    category_id=body.category_id,
+                    creator_id=body.creator_id,
+                    text_reference=body.text_reference,
+                    name=body.name,
+                    text=body.text,
+                    tags=body.tags,
+                    moderation_status=body.moderation_status,
+                    image_url=body.image_url,
+                )
+
+                self.logger.info("Publication created successfully", {
+                    "publication_id": publication_id,
+                    "organization_id": body.organization_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=201,
+                    content={
+                        "message": "Publication created successfully",
+                        "publication_id": publication_id
                     }
                 )
 
@@ -760,7 +804,7 @@ class PublicationController(interface.IPublicationController):
     # НАРЕЗКА
     async def generate_video_cut(
             self,
-            body:  GenerateVideoCutBody
+            body: GenerateVideoCutBody
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.generate_video_cut",

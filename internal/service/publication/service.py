@@ -30,23 +30,15 @@ class PublicationService(interface.IPublicationService):
         self.vizard_client = vizard_client
 
     # ПУБЛИКАЦИИ
-    async def generate_publication(
+    async def generate_publication_text(
             self,
-            organization_id: int,
             category_id: int,
-            creator_id: int,
-            need_images: bool,
-            text_reference: str,
-    ) -> model.Publication:
+            text_reference: str
+    ) -> dict:
         with self.tracer.start_as_current_span(
-                "PublicationService.generate_publication",
+                "PublicationService.generate_publication_text",
                 kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id,
-                    "category_id": category_id,
-                    "creator_id": creator_id,
-                    "need_images": need_images
-                }
+                attributes={"category_id": category_id}
         ) as span:
             try:
                 # Получаем категорию для промптов
@@ -62,105 +54,86 @@ class PublicationService(interface.IPublicationService):
                     text_reference
                 )
 
-                publication_data, publication_data_cost = await self.llm_client.generate_json(
+                publication_data, cost_info = await self.llm_client.generate_json(
                     history=[{"role": "user", "content": "Создай пост для социальной сети"}],
                     system_prompt=text_system_prompt,
                     temperature=1,
                     llm_model="gpt-5"
                 )
-                # Создаем публикацию в БД
-                publication_id = await self.repo.create_publication(
-                    organization_id=organization_id,
-                    category_id=category_id,
-                    creator_id=creator_id,
-                    text_reference=text_reference,
-                    name=publication_data["name"].strip(),
-                    text=publication_data["text"],
-                    tags=publication_data["tags"],
-                )
-
-                # Считаем общую стоимость текста
-                total_text_cost_rub = int(publication_data_cost.total_cost * 100)
-                await self.repo.add_openai_rub_cost_to_publication(publication_id, total_text_cost_rub)
-
-                # Генерируем изображение если нужно
-                if need_images:
-                    try:
-                        image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
-                            category.prompt_for_image_style,
-                            publication_data["text"]
-                        )
-
-                        image_urls, image_cost = await self.llm_client.generate_image(
-                            prompt=image_system_prompt,
-                            llm_model="gpt-image-1",
-                            size="1024x1024",
-                            quality="high",
-                            style="vivid"
-                        )
-
-                        if image_urls:
-                            # Скачиваем изображение
-                            image_bytes = await self.llm_client.download_image_from_url(image_urls[0])
-                            image_io = io.BytesIO(image_bytes)
-
-                            # Загружаем в Storage
-                            image_name = f"{uuid.uuid4().hex}.png"
-                            upload_response = await self.storage.upload(image_io, image_name)
-
-                            # Обновляем публикацию с изображением
-                            await self.repo.change_publication(
-                                publication_id,
-                                image_fid=upload_response.fid,
-                                image_name=image_name,
-                            )
-
-                            # Добавляем стоимость изображения
-                            image_cost_rub = int(image_cost.total_cost * 100)
-                            await self.repo.add_openai_rub_cost_to_publication(publication_id, image_cost_rub)
-
-                    except Exception as image_error:
-                        self.logger.warning(
-                            f"Failed to generate image for publication {publication_id}: {str(image_error)}")
-
-                # # Списываем стоимость с организации
-                # try:
-                #     await self.organization_client.debit_balance(organization_id, total_text_cost_rub)
-                # except Exception as billing_error:
-                #     self.logger.error(
-                #         f"Failed to debit balance for organization {organization_id}: {str(billing_error)}")
 
                 span.set_status(Status(StatusCode.OK))
+                return publication_data
 
-                publication = (await self.repo.get_publication_by_id(publication_id))[0]
-                return publication
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
-    async def regenerate_publication_image(
+    async def regenerate_publication_text(
             self,
-            publication_id: int,
-            prompt: str = None,
-    ) -> io.BytesIO:
+            category_id: int,
+            publication_text: str,
+            prompt: str = None
+    ) -> dict:
         with self.tracer.start_as_current_span(
-                "PublicationService.regenerate_publication_image",
+                "PublicationService.regenerate_publication_text_standalone",
                 kind=SpanKind.INTERNAL,
-                attributes={"publication_id": publication_id}
+                attributes={"category_id": category_id}
         ) as span:
             try:
-                # Получаем публикацию
-                publications = await self.repo.get_publication_by_id(publication_id)
-                if not publications:
-                    raise ValueError(f"Publication {publication_id} not found")
-
-                publication = publications[0]
-
                 # Получаем категорию для стиля
-                categories = await self.repo.get_category_by_id(publication.category_id)
+                categories = await self.repo.get_category_by_id(category_id)
                 if not categories:
-                    raise ValueError(f"Category {publication.category_id} not found")
+                    raise ValueError(f"Category {category_id} not found")
+
+                category = categories[0]
+
+                # Генерируем промпт для текста
+                if prompt:
+                    text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
+                        category.prompt_for_text_style,
+                        publication_text,
+                        prompt
+                    )
+                else:
+                    text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
+                        category.prompt_for_text_style,
+                        publication_text
+                    )
+
+                # Генерируем новый текст
+                publication_data, text_cost = await self.llm_client.generate_json(
+                    history=[{"role": "user", "content": "Создай улучшенный пост для социальной сети"}],
+                    system_prompt=text_system_prompt,
+                    temperature=1,
+                    llm_model="gpt-5"
+                )
+
+                span.set_status(Status(StatusCode.OK))
+                return publication_data
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def generate_publication_image(
+            self,
+            category_id: int,
+            publication_text: str,
+            text_reference: str,
+            prompt: str = None
+    ) -> str:
+        with self.tracer.start_as_current_span(
+                "PublicationService.generate_publication_image_standalone",
+                kind=SpanKind.INTERNAL,
+                attributes={"category_id": category_id}
+        ) as span:
+            try:
+                # Получаем категорию для стиля
+                categories = await self.repo.get_category_by_id(category_id)
+                if not categories:
+                    raise ValueError(f"Category {category_id} not found")
 
                 category = categories[0]
 
@@ -168,16 +141,16 @@ class PublicationService(interface.IPublicationService):
                 if prompt:
                     image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
                         category.prompt_for_image_style,
-                        publication.text,
+                        publication_text,
                         prompt
                     )
                 else:
                     image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
                         category.prompt_for_image_style,
-                        publication.text
+                        publication_text
                     )
 
-                # Генерируем новое изображение
+                # Генерируем изображение
                 image_urls, image_cost = await self.llm_client.generate_image(
                     prompt=image_system_prompt,
                     llm_model="dall-e-3",
@@ -189,112 +162,67 @@ class PublicationService(interface.IPublicationService):
                 if not image_urls:
                     raise ValueError("Failed to generate image")
 
-                # Скачиваем изображение
-                image_bytes = await self.llm_client.download_image_from_url(image_urls[0])
-                image_io = io.BytesIO(image_bytes)
-
-                # Удаляем старое изображение если есть
-                if publication.image_fid:
-                    try:
-                        await self.storage.delete(publication.image_fid, publication.image_name)
-                    except Exception:
-                        pass  # Игнорируем ошибки удаления
-
-                # Загружаем новое изображение
-                upload_response = await self.storage.upload(image_io, "generated_image.png")
-
-                # Обновляем публикацию
-                await self.repo.change_publication(
-                    publication_id=publication_id,
-                    image_fid=upload_response.fid
-                )
-
-                # Добавляем стоимость
-                image_cost_rub = int(image_cost.total_cost * 100)
-                await self.repo.add_openai_rub_cost_to_publication(publication_id, image_cost_rub)
-
-                # # Списываем с организации
-                # try:
-                #     await self.organization_client.debit_balance(publication.organization_id, image_cost_rub)
-                # except Exception as billing_error:
-                #     self.logger.error(f"Failed to debit balance: {str(billing_error)}")
-
-                # Возвращаем новый BytesIO для скачивания
-                image_io.seek(0)
                 span.set_status(Status(StatusCode.OK))
-                return image_io
+                return image_urls[0]  # Возвращаем URL первого изображения
 
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
-    async def regenerate_publication_text(
+    async def create_publication(
             self,
-            publication_id: int,
-            prompt: str = None,
-    ) -> dict:
+            organization_id: int,
+            category_id: int,
+            creator_id: int,
+            text_reference: str,
+            name: str,
+            text: str,
+            tags: list[str],
+            moderation_status: str,
+            image_url: str = None
+    ) -> int:
         with self.tracer.start_as_current_span(
-                "PublicationService.regenerate_publication_text",
+                "PublicationService.create_publication",
                 kind=SpanKind.INTERNAL,
-                attributes={"publication_id": publication_id}
+                attributes={
+                    "organization_id": organization_id,
+                    "category_id": category_id,
+                    "creator_id": creator_id
+                }
         ) as span:
             try:
-                # Получаем публикацию
-                publications = await self.repo.get_publication_by_id(publication_id)
-                if not publications:
-                    raise ValueError(f"Publication {publication_id} not found")
-
-                publication = publications[0]
-
-                # Получаем категорию для стиля
-                categories = await self.repo.get_category_by_id(publication.category_id)
-                if not categories:
-                    raise ValueError(f"Category {publication.category_id} not found")
-
-                category = categories[0]
-
-                # Генерируем промпт для текста
-                if prompt:
-                    text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
-                        category.prompt_for_text_style,
-                        publication.text,
-                        prompt
-                    )
-                else:
-                    text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
-                        category.prompt_for_text_style,
-                        publication.text_reference
-                    )
-
-                # Генерируем новый текст
-                publication_data, text_cost = await self.llm_client.generate_json(
-                    history=[{"role": "user", "content": "Создай улучшенный пост для социальной сети"}],
-                    system_prompt=text_system_prompt,
-                    temperature=0.7,
-                    llm_model="gpt-4o"
+                # Создаем публикацию в БД
+                publication_id = await self.repo.create_publication(
+                    organization_id=organization_id,
+                    category_id=category_id,
+                    creator_id=creator_id,
+                    text_reference=text_reference,
+                    name=name,
+                    text=text,
+                    tags=tags,
+                    moderation_status=moderation_status
                 )
 
-                # Обновляем публикацию
-                await self.repo.change_publication(
-                    publication_id,
-                    name=publication_data["name"].strip(),
-                    text=publication_data["text"],
-                    tags=publication_data["tags"],
-                )
+                # Загружаем изображение если предоставлено
+                if image_url:
+                    # Читаем файл
+                    image_content = await self.llm_client.download_image_from_url(image_url)
+                    image_io = io.BytesIO(image_content)
+                    image_name = f"{uuid.uuid4().hex}.png"
 
-                # Добавляем стоимость
-                text_cost_rub = int(text_cost.total_cost * 100)
-                await self.repo.add_openai_rub_cost_to_publication(publication_id, text_cost_rub)
-                #
-                # # Списываем с организации
-                # try:
-                #     await self.organization_client.debit_balance(publication.organization_id, text_cost_rub)
-                # except Exception as billing_error:
-                #     self.logger.error(f"Failed to debit balance: {str(billing_error)}")
+                    # Загружаем в Storage
+                    upload_response = await self.storage.upload(image_io, image_name)
+
+                    # Обновляем публикацию с изображением
+                    await self.repo.change_publication(
+                        publication_id=publication_id,
+                        image_fid=upload_response.fid,
+                        image_name=image_name
+                    )
 
                 span.set_status(Status(StatusCode.OK))
-                return publication_data
+                return publication_id
 
             except Exception as err:
                 span.record_exception(err)
