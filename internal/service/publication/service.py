@@ -123,12 +123,12 @@ class PublicationService(interface.IPublicationService):
                         self.logger.warning(
                             f"Failed to generate image for publication {publication_id}: {str(image_error)}")
 
-                # Списываем стоимость с организации
-                try:
-                    await self.organization_client.debit_balance(organization_id, total_text_cost_rub)
-                except Exception as billing_error:
-                    self.logger.error(
-                        f"Failed to debit balance for organization {organization_id}: {str(billing_error)}")
+                # # Списываем стоимость с организации
+                # try:
+                #     await self.organization_client.debit_balance(organization_id, total_text_cost_rub)
+                # except Exception as billing_error:
+                #     self.logger.error(
+                #         f"Failed to debit balance for organization {organization_id}: {str(billing_error)}")
 
                 span.set_status(Status(StatusCode.OK))
 
@@ -213,11 +213,11 @@ class PublicationService(interface.IPublicationService):
                 image_cost_rub = int(image_cost.total_cost * 100)
                 await self.repo.add_openai_rub_cost_to_publication(publication_id, image_cost_rub)
 
-                # Списываем с организации
-                try:
-                    await self.organization_client.debit_balance(publication.organization_id, image_cost_rub)
-                except Exception as billing_error:
-                    self.logger.error(f"Failed to debit balance: {str(billing_error)}")
+                # # Списываем с организации
+                # try:
+                #     await self.organization_client.debit_balance(publication.organization_id, image_cost_rub)
+                # except Exception as billing_error:
+                #     self.logger.error(f"Failed to debit balance: {str(billing_error)}")
 
                 # Возвращаем новый BytesIO для скачивания
                 image_io.seek(0)
@@ -286,12 +286,12 @@ class PublicationService(interface.IPublicationService):
                 # Добавляем стоимость
                 text_cost_rub = int(text_cost.total_cost * 100)
                 await self.repo.add_openai_rub_cost_to_publication(publication_id, text_cost_rub)
-
-                # Списываем с организации
-                try:
-                    await self.organization_client.debit_balance(publication.organization_id, text_cost_rub)
-                except Exception as billing_error:
-                    self.logger.error(f"Failed to debit balance: {str(billing_error)}")
+                #
+                # # Списываем с организации
+                # try:
+                #     await self.organization_client.debit_balance(publication.organization_id, text_cost_rub)
+                # except Exception as billing_error:
+                #     self.logger.error(f"Failed to debit balance: {str(billing_error)}")
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
