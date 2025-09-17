@@ -55,6 +55,7 @@ class GPTClient(interface.ILLMClient):
             # O3 серия
             "o3": {"input": 20.00, "output": 80.00, "cached_input": 10.00},
             "o3-mini": {"input": 5.00, "output": 20.00, "cached_input": 2.50},
+            "gpt-5": {"input": 20.00, "output": 80.00, "cached_input": 10.00},
 
             # Audio models - цены в долларах
             "whisper-1": {"per_minute": 0.006},  # $0.006 за минуту

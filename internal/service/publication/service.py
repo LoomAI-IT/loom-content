@@ -66,7 +66,7 @@ class PublicationService(interface.IPublicationService):
                     history=[{"role": "user", "content": "Создай пост для социальной сети"}],
                     system_prompt=text_system_prompt,
                     temperature=1,
-                    llm_model="gpt-4o-mini"
+                    llm_model="gpt-5"
                 )
                 # Создаем публикацию в БД
                 publication_id = await self.repo.create_publication(
