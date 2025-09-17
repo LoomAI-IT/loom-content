@@ -45,10 +45,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Publication text generated successfully",
-                        "data": text_data
-                    }
+                    content=text_data
                 )
 
             except Exception as err:
@@ -85,10 +82,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Publication text regenerated successfully",
-                        "data": text_data
-                    }
+                    content=text_data
                 )
 
             except Exception as err:
