@@ -332,10 +332,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Publication retrieved successfully",
-                        "data": publication.to_dict()
-                    }
+                    content=publication.to_dict()
                 )
 
             except Exception as err:

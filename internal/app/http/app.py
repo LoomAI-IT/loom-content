@@ -110,7 +110,7 @@ def include_publication_handlers(
         publication_controller.get_publication_by_id,
         methods=["GET"],
         tags=["Publication"],
-        response_model=DataResponse,
+        response_model=model.Publication,
     )
 
     # Получение публикаций по организации
