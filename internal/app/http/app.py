@@ -47,7 +47,7 @@ def include_publication_handlers(
         publication_controller.generate_publication,
         methods=["POST"],
         tags=["Publication"],
-        response_model=PublicationResponse,
+        response_model=model.Publication,
     )
 
     # Регенерация изображения публикации

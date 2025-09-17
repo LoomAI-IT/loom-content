@@ -38,7 +38,7 @@ class PublicationService(interface.IPublicationService):
             need_images: bool,
             text_reference: str,
             time_for_publication: str = None
-    ) -> int:
+    ) -> model.Publication:
         with self.tracer.start_as_current_span(
                 "PublicationService.generate_publication",
                 kind=SpanKind.INTERNAL,
@@ -134,7 +134,9 @@ class PublicationService(interface.IPublicationService):
                         f"Failed to debit balance for organization {organization_id}: {str(billing_error)}")
 
                 span.set_status(Status(StatusCode.OK))
-                return publication_id
+
+                publication = (await self.repo.get_publication_by_id(publication_id))[0]
+                return publication
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))

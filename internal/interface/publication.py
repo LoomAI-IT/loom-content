@@ -179,7 +179,7 @@ class IPublicationService(Protocol):
             need_images: bool,
             text_reference: str,
             time_for_publication: str = None
-    ) -> int:
+    ) -> model.Publication:
         pass
 
     @abstractmethod

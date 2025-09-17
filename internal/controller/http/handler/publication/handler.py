@@ -46,7 +46,7 @@ class PublicationController(interface.IPublicationController):
                     "need_images": body.need_images
                 })
 
-                publication_id = await self.publication_service.generate_publication(
+                publication = await self.publication_service.generate_publication(
                     organization_id=body.organization_id,
                     category_id=body.category_id,
                     creator_id=body.creator_id,
@@ -56,17 +56,13 @@ class PublicationController(interface.IPublicationController):
                 )
 
                 self.logger.info("Publication generated successfully", {
-                    "publication_id": publication_id,
                     "organization_id": body.organization_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
-                    content={
-                        "message": "Publication generated successfully",
-                        "publication_id": publication_id
-                    }
+                    content=publication.to_dict()
                 )
 
             except Exception as err:
