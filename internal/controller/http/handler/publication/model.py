@@ -21,14 +21,15 @@ class GeneratePublicationTextBody(BaseModel):
 class RegeneratePublicationTextBody(BaseModel):
     category_id: int
     publication_text: str
-    prompt: str = None
+    prompt: str | None = None
 
 
 class GeneratePublicationImageBody(BaseModel):
     category_id: int
     publication_text: str
     text_reference: str
-    prompt: str = None
+    prompt: str | None = None
+
 
 class CreatePublicationBody(BaseModel):
     organization_id: int
@@ -39,13 +40,13 @@ class CreatePublicationBody(BaseModel):
     text: str
     tags: list[str]
     moderation_status: str
-    image_url: str = None
+    image_url: str | None = None
 
 
 class ChangePublicationBody(BaseModel):
-    name: str = None
-    text: str = None
-    tags: list[str] = None
+    name: str | None = None
+    text: str | None = None
+    tags: list[str] | None = None
     time_for_publication: datetime = None
 
 
@@ -65,9 +66,9 @@ class CreateCategoryBody(BaseModel):
 
 
 class UpdateCategoryBody(BaseModel):
-    name: Optional[str] = None
-    prompt_for_image_style: Optional[str] = None
-    prompt_for_text_style: Optional[str] = None
+    name: Optional[str] | None = None
+    prompt_for_image_style: Optional[str] | None = None
+    prompt_for_text_style: Optional[str] | None = None
 
 
 # АВТОПОСТИНГ
@@ -75,14 +76,14 @@ class CreateAutopostingBody(BaseModel):
     organization_id: int
     filter_prompt: str
     rewrite_prompt: str
-    tg_channels: Optional[List[str]] = None
+    tg_channels: Optional[List[str]] | None = None
 
 
 class UpdateAutopostingBody(BaseModel):
-    filter_prompt: Optional[str] = None
-    rewrite_prompt: Optional[str] = None
-    enabled: Optional[bool] = None
-    tg_channels: Optional[List[str]] = None
+    filter_prompt: Optional[str] | None = None
+    rewrite_prompt: Optional[str] | None = None
+    enabled: Optional[bool] | None = None
+    tg_channels: Optional[List[str]] | None = None
 
 
 # НАРЕЗКА ВИДЕО
