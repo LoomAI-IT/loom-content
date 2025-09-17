@@ -5,9 +5,11 @@ from enum import Enum
 
 
 class ModerationStatus(Enum):
-    PENDING = "на модерации"
-    REJECTED = "отклонен"
-    APPROVED = "принят"
+    DRAFT = "draft"
+    MODERATION = "moderation"
+    REJECTED = "rejected"
+    APPROVED = "approved"
+    PUBLISHED = "published"
 
 
 @dataclass
