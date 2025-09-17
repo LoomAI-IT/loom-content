@@ -69,7 +69,7 @@ class PublicationService(interface.IPublicationService):
                     temperature=1,
                     llm_model="gpt-5"
                 )
-                time_for_publication = datetime.fromisoformat(time_for_publication.replace("Z", "+00:00"))
+                time_for_publication = datetime.fromisoformat(time_for_publication.replace("Z", ""))
                 # Создаем публикацию в БД
                 publication_id = await self.repo.create_publication(
                     organization_id=organization_id,
