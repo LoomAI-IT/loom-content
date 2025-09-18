@@ -106,6 +106,7 @@ class GPTClient(interface.ILLMClient):
                     messages=messages,
                     temperature=temperature,
                 )
+                print(f"Generate text response: {response=}")
 
                 llm_response = response.choices[0].message.content
                 usage_info = response.usage
@@ -492,6 +493,7 @@ class GPTClient(interface.ILLMClient):
                     response_format="mp3",
                     speed=0.85,
                 )
+                print(f"Generate text fron audio response: {response=}")
                 audio_content = response.content
 
                 char_count = len(text)
@@ -581,6 +583,7 @@ class GPTClient(interface.ILLMClient):
 
                 # Выполнение запроса
                 response = await self.client.images.generate(**params)
+                print(f"Image generation response: {response=}")
 
                 # Извлечение результатов
                 if response_format == "url":
