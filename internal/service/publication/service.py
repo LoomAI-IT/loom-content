@@ -275,13 +275,7 @@ class PublicationService(interface.IPublicationService):
 
                     # Загружаем в Storage
                     upload_response = await self.storage.upload(image_io, image_name)
-
-                    # Обновляем публикацию с изображением
-                    await self.repo.change_publication(
-                        publication_id=publication_id,
-                        image_fid=upload_response.fid,
-                        image_name=image_name
-                    )
+                    image_fid = upload_response.fid
 
                 elif image_url:
                     # Загружаем изображение по URL (старая логика)
@@ -291,13 +285,8 @@ class PublicationService(interface.IPublicationService):
 
                     # Загружаем в Storage
                     upload_response = await self.storage.upload(image_io, image_name)
+                    image_fid = upload_response.fid
 
-                    # Обновляем публикацию с изображением
-                    await self.repo.change_publication(
-                        publication_id=publication_id,
-                        image_fid=upload_response.fid,
-                        image_name=image_name
-                    )
 
                 # Обновляем публикацию
                 await self.repo.change_publication(
