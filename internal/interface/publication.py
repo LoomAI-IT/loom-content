@@ -52,7 +52,15 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def change_publication(
             self,
-            body: ChangePublicationBody,
+            publication_id: int,
+            vk_source_id: int = Form(None),
+            tg_source_id: int = Form(None),
+            name: str = Form(None),
+            text: str = Form(None),
+            tags: list[str] = Form(None),
+            time_for_publication: datetime = Form(None),
+            image_url: str = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse: pass
 
     @abstractmethod
@@ -233,7 +241,8 @@ class IPublicationService(Protocol):
             text: str = None,
             tags: list[str] = None,
             time_for_publication: datetime = None,
-            image: UploadFile = None,
+            image_url: str = None,
+            image_file: UploadFile = None,
     ) -> None: pass
 
     @abstractmethod
@@ -421,6 +430,8 @@ class IPublicationRepo(Protocol):
             self,
             publication_id: int,
             moderator_id: int = None,
+            vk_source_id: int = None,
+            tg_source_id: int = None,
             name: str = None,
             text: str = None,
             tags: list[str] = None,

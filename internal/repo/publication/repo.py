@@ -58,8 +58,10 @@ class PublicationRepo(interface.IPublicationRepo):
 
     async def change_publication(
             self,
-            publication_id: int = None,
+            publication_id: int,
             moderator_id: int = None,
+            vk_source_id: int = None,
+            tg_source_id: int = None,
             name: str = None,
             text: str = None,
             tags: list[str] = None,
@@ -81,6 +83,8 @@ class PublicationRepo(interface.IPublicationRepo):
                 args = {
                     'publication_id': publication_id,
                     'moderator_id': moderator_id,
+                    'vk_source_id': vk_source_id,
+                    'tg_source_id': tg_source_id,
                     'name': name,
                     'text': text,
                     'tags': tags,

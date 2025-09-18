@@ -31,24 +31,6 @@ class GeneratePublicationImageBody(BaseModel):
     prompt: str | None = None
 
 
-class CreatePublicationBody(BaseModel):
-    organization_id: int
-    category_id: int
-    creator_id: int
-    text_reference: str
-    name: str
-    text: str
-    tags: list[str]
-    moderation_status: str
-    image_url: str | None = None
-
-
-class ChangePublicationBody(BaseModel):
-    name: str | None = None
-    text: str | None = None
-    tags: list[str] | None = None
-    time_for_publication: datetime = None
-
 
 class ModeratePublicationBody(BaseModel):
     publication_id: int

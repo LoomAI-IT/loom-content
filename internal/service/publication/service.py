@@ -255,7 +255,8 @@ class PublicationService(interface.IPublicationService):
             text: str = None,
             tags: list[str] = None,
             time_for_publication: datetime = None,
-            image: UploadFile = None,
+            image_url: str = None,
+            image_file: UploadFile = None,
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationService.change_publication",
@@ -263,34 +264,52 @@ class PublicationService(interface.IPublicationService):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                image_fid = None
+                image_fid = ""
+                image_name = ""
 
-                # Загружаем новое изображение если предоставлено
-                if image:
-                    # Читаем файл
-                    image_content = await image.read()
+                if image_file and image_file.filename:
+                    # Загружаем файл изображения
+                    image_content = await image_file.read()
                     image_io = io.BytesIO(image_content)
+                    image_name = image_file.filename
 
-                    # Получаем текущую публикацию для удаления старого изображения
-                    publications = await self.repo.get_publication_by_id(publication_id)
-                    if publications and publications[0].image_fid:
-                        try:
-                            await self.storage.delete(publications[0].image_fid, publications[0].image_name)
-                        except Exception:
-                            pass  # Игнорируем ошибки удаления
+                    # Загружаем в Storage
+                    upload_response = await self.storage.upload(image_io, image_name)
 
-                    # Загружаем новое изображение
-                    upload_response = await self.storage.upload(image_io, image.filename or "uploaded_image.png")
-                    image_fid = upload_response.fid
+                    # Обновляем публикацию с изображением
+                    await self.repo.change_publication(
+                        publication_id=publication_id,
+                        image_fid=upload_response.fid,
+                        image_name=image_name
+                    )
+
+                elif image_url:
+                    # Загружаем изображение по URL (старая логика)
+                    image_content = await self.llm_client.download_image_from_url(image_url)
+                    image_io = io.BytesIO(image_content)
+                    image_name = f"{uuid.uuid4().hex}.png"
+
+                    # Загружаем в Storage
+                    upload_response = await self.storage.upload(image_io, image_name)
+
+                    # Обновляем публикацию с изображением
+                    await self.repo.change_publication(
+                        publication_id=publication_id,
+                        image_fid=upload_response.fid,
+                        image_name=image_name
+                    )
 
                 # Обновляем публикацию
                 await self.repo.change_publication(
                     publication_id=publication_id,
+                    vk_source_id=vk_source_id,
+                    tg_source_id=tg_source_id,
                     name=name,
                     text=text,
                     tags=tags,
                     time_for_publication=time_for_publication,
-                    image_fid=image_fid
+                    image_fid=image_fid,
+                    image_name=image_name,
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -743,7 +762,6 @@ class PublicationService(interface.IPublicationService):
                 name = vizard_project.get("name")
                 description = vizard_project.get("description")
                 tags = vizard_project.get("tags")
-
 
                 # Парсим теги
                 tags = [tag.strip().replace('#', '') for tag in tags.split(',')]

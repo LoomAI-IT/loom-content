@@ -197,29 +197,40 @@ class PublicationController(interface.IPublicationController):
 
     async def change_publication(
             self,
-            body: ChangePublicationBody,
+            publication_id: int,
+            vk_source_id: int = Form(None),
+            tg_source_id: int = Form(None),
+            name: str = Form(None),
+            text: str = Form(None),
+            tags: list[str] = Form(None),
+            time_for_publication: datetime = Form(None),
+            image_url: str = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.change_publication",
                 kind=SpanKind.INTERNAL,
-                attributes={"publication_id": body.publication_id}
+                attributes={"publication_id": publication_id}
         ) as span:
             try:
                 self.logger.info("Change publication request", {
-                    "publication_id": body.publication_id
+                    "publication_id": publication_id
                 })
 
                 await self.publication_service.change_publication(
-                    publication_id=body.publication_id,
-                    name=body.name,
-                    text=body.text,
-                    tags=body.tags,
-                    time_for_publication=body.time_for_publication,
-                    image=body.image
+                    publication_id=publication_id,
+                    vk_source_id=vk_source_id,
+                    tg_source_id=tg_source_id,
+                    name=name,
+                    text=text,
+                    tags=tags,
+                    time_for_publication=time_for_publication,
+                    image_url=image_url,
+                    image_file=image_file,
                 )
 
                 self.logger.info("Publication changed successfully", {
-                    "publication_id": body.publication_id
+                    "publication_id": publication_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
@@ -227,7 +238,7 @@ class PublicationController(interface.IPublicationController):
                     status_code=200,
                     content={
                         "message": "Publication updated successfully",
-                        "publication_id": body.publication_id
+                        "publication_id": publication_id
                     }
                 )
 
@@ -331,7 +342,7 @@ class PublicationController(interface.IPublicationController):
         ) as span:
             try:
                 self.logger.info("Moderate publication request", {
-                    "publication_id": body.ublication_id,
+                    "publication_id": body.publication_id,
                     "moderator_id": body.moderator_id,
                     "moderation_status": body.moderation_status.value
                 })

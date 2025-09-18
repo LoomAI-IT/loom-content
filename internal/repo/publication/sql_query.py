@@ -27,6 +27,8 @@ change_publication = """
 UPDATE publications
 SET 
     moderator_id = COALESCE(:moderator_id, moderator_id),
+    vk_source_id = COALESCE(:vk_source_id, vk_source_id),
+    tg_source_id = COALESCE(:tg_source_id, tg_source_id),
     name = COALESCE(:name, name),
     text = COALESCE(:text, text),
     tags = COALESCE(:tags, tags),
