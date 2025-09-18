@@ -267,6 +267,24 @@ class PublicationService(interface.IPublicationService):
                 image_fid = None
                 image_name = None
 
+                # Если загружается новое изображение, сначала удаляем старое
+                if image_file or image_url:
+                    # Получаем текущую публикацию для проверки старого изображения
+                    publications = await self.repo.get_publication_by_id(publication_id)
+                    if publications and publications[0].image_fid:
+                        old_publication = publications[0]
+                        # Удаляем старый файл из Storage
+                        try:
+                            await self.storage.delete(
+                                old_publication.image_fid,
+                                old_publication.image_name
+                            )
+                            self.logger.info(f"Deleted old image: {old_publication.image_fid}")
+                        except Exception as delete_error:
+                            self.logger.warning(
+                                f"Failed to delete old image: {str(delete_error)}"
+                            )
+
                 if image_file and image_file.filename:
                     # Загружаем файл изображения
                     image_content = await image_file.read()
@@ -278,7 +296,7 @@ class PublicationService(interface.IPublicationService):
                     image_fid = upload_response.fid
 
                 elif image_url:
-                    # Загружаем изображение по URL (старая логика)
+                    # Загружаем изображение по URL
                     image_content = await self.llm_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
                     image_name = f"{uuid.uuid4().hex}.png"
@@ -286,7 +304,6 @@ class PublicationService(interface.IPublicationService):
                     # Загружаем в Storage
                     upload_response = await self.storage.upload(image_io, image_name)
                     image_fid = upload_response.fid
-
 
                 # Обновляем публикацию
                 await self.repo.change_publication(
