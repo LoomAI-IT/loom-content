@@ -2,7 +2,7 @@ import io
 from abc import abstractmethod
 from typing import Protocol
 
-from fastapi import UploadFile
+from fastapi import UploadFile, Form, File
 from fastapi.responses import JSONResponse
 from starlette.responses import StreamingResponse
 
@@ -37,7 +37,16 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def create_publication(
             self,
-            body: CreatePublicationBody,
+            organization_id: int = Form(...),
+            category_id: int = Form(...),
+            creator_id: int = Form(...),
+            text_reference: str = Form(...),
+            name: str = Form(...),
+            text: str = Form(...),
+            tags: str = Form(...),
+            moderation_status: str = Form(...),
+            image_url: str = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse: pass
 
     @abstractmethod
@@ -210,7 +219,8 @@ class IPublicationService(Protocol):
             text: str,
             tags: list[str],
             moderation_status: str,
-            image_url: str = None
+            image_url: str = None,
+            image_file: UploadFile = None,
     ) -> int: pass
 
     @abstractmethod

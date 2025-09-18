@@ -180,7 +180,8 @@ class PublicationService(interface.IPublicationService):
             text: str,
             tags: list[str],
             moderation_status: str,
-            image_url: str = None
+            image_url: str = None,
+            image_file: UploadFile = None,
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_publication",
@@ -204,9 +205,25 @@ class PublicationService(interface.IPublicationService):
                     moderation_status=moderation_status
                 )
 
-                # Загружаем изображение если предоставлено
-                if image_url:
-                    # Читаем файл
+                # Обрабатываем изображение
+                if image_file and image_file.filename:
+                    # Загружаем файл изображения
+                    image_content = await image_file.read()
+                    image_io = io.BytesIO(image_content)
+                    image_name = image_file.filename
+
+                    # Загружаем в Storage
+                    upload_response = await self.storage.upload(image_io, image_name)
+
+                    # Обновляем публикацию с изображением
+                    await self.repo.change_publication(
+                        publication_id=publication_id,
+                        image_fid=upload_response.fid,
+                        image_name=image_name
+                    )
+
+                elif image_url:
+                    # Загружаем изображение по URL (старая логика)
                     image_content = await self.llm_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
                     image_name = f"{uuid.uuid4().hex}.png"

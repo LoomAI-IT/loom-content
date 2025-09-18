@@ -1,3 +1,6 @@
+import json
+
+from fastapi import Form, UploadFile, File
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -133,39 +136,49 @@ class PublicationController(interface.IPublicationController):
 
     async def create_publication(
             self,
-            body: CreatePublicationBody,
+            organization_id: int = Form(...),
+            category_id: int = Form(...),
+            creator_id: int = Form(...),
+            text_reference: str = Form(...),
+            name: str = Form(...),
+            text: str = Form(...),
+            tags: str = Form(...),
+            moderation_status: str = Form(...),
+            image_url: str = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.create_publication",
                 kind=SpanKind.INTERNAL,
                 attributes={
-                    "organization_id": body.organization_id,
-                    "category_id": body.category_id,
-                    "creator_id": body.creator_id
+                    "organization_id": organization_id,
+                    "category_id": category_id,
+                    "creator_id": creator_id
                 }
         ) as span:
             try:
                 self.logger.info("Create publication request", {
-                    "organization_id": body.organization_id,
-                    "category_id": body.category_id,
-                    "creator_id": body.creator_id
+                    "organization_id": organization_id,
+                    "category_id": category_id,
+                    "creator_id": creator_id
                 })
 
                 publication_id = await self.publication_service.create_publication(
-                    organization_id=body.organization_id,
-                    category_id=body.category_id,
-                    creator_id=body.creator_id,
-                    text_reference=body.text_reference,
-                    name=body.name,
-                    text=body.text,
-                    tags=body.tags,
-                    moderation_status=body.moderation_status,
-                    image_url=body.image_url,
+                    organization_id=organization_id,
+                    category_id=category_id,
+                    creator_id=creator_id,
+                    text_reference=text_reference,
+                    name=name,
+                    text=text,
+                    tags=json.loads(tags),
+                    moderation_status=moderation_status,
+                    image_url=image_url,
+                    image_file=image_file
                 )
 
                 self.logger.info("Publication created successfully", {
                     "publication_id": publication_id,
-                    "organization_id": body.organization_id
+                    "organization_id": organization_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
