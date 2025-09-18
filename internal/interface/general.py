@@ -138,7 +138,7 @@ class ILLMClient(Protocol):
             temperature: float,
             llm_model: str,
             pdf_file: bytes = None,
-    ) -> tuple[str, model.OpenAICostInfo]: pass
+    ) -> str: pass
 
     @abstractmethod
     async def generate_json(
@@ -148,14 +148,14 @@ class ILLMClient(Protocol):
             temperature: float,
             llm_model: str,
             pdf_file: bytes = None,
-    ) -> tuple[dict, model.OpenAICostInfo]: pass
+    ) -> dict: pass
 
     @abstractmethod
     async def transcribe_audio(
             self,
             audio_file: bytes,
             filename: str = "audio.wav"
-    ) -> tuple[str, model.OpenAITranscriptionCostInfo]: pass
+    ) -> str: pass
 
     @abstractmethod
     async def text_to_speech(
@@ -163,7 +163,7 @@ class ILLMClient(Protocol):
             text: str,
             voice: str = "alloy",
             tts_model: str = "tts-1-hd"
-    ) -> tuple[bytes, model.OpenAITTSCostInfo]: pass
+    ) -> bytes: pass
 
     @abstractmethod
     async def generate_image(
@@ -176,31 +176,7 @@ class ILLMClient(Protocol):
             n: int = 1,
             response_format: str = "url",
             user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
-
-    @abstractmethod
-    async def edit_image(
-            self,
-            image: bytes,
-            prompt: str,
-            mask: bytes = None,
-            llm_model: str = "dall-e-2",
-            size: str = "1024x1024",
-            n: int = 1,
-            response_format: str = "url",
-            user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
-
-    @abstractmethod
-    async def create_image_variation(
-            self,
-            image: bytes,
-            llm_model: str = "dall-e-2",
-            size: str = "1024x1024",
-            n: int = 1,
-            response_format: str = "url",
-            user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+    ) ->list[str]: pass
 
     @abstractmethod
     async def download_image_from_url(
