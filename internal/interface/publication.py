@@ -57,7 +57,7 @@ class IPublicationController(Protocol):
             tg_source_id: int = Form(None),
             name: str = Form(None),
             text: str = Form(None),
-            tags: list[str] = Form(None),
+            tags: str = Form(None),
             time_for_publication: datetime = Form(None),
             image_url: str = Form(None),
             image_file: UploadFile = File(None),
