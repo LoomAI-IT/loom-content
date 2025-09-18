@@ -264,8 +264,8 @@ class PublicationService(interface.IPublicationService):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                image_fid = ""
-                image_name = ""
+                image_fid = None
+                image_name = None
 
                 if image_file and image_file.filename:
                     # Загружаем файл изображения
