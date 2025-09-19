@@ -755,45 +755,11 @@ class PublicationService(interface.IPublicationService):
                     headline_switch=True,
                     project_name=f"Video cut for org {organization_id}"
                 )
-
-                video_cut_rub_cost = int(self.vizard_client.calculate_price(
-                    5,
-                    3
-                )["estimated_cost"] * 100)
-
-                project_id = vizard_project.get("project_id")
-                if not project_id:
-                    raise ValueError("Failed to create Vizard project")
-
-                name = vizard_project.get("name")
-                description = vizard_project.get("description")
-                tags = vizard_project.get("tags")
-
-                # Парсим теги
-                tags = [tag.strip().replace('#', '') for tag in tags.split(',')]
-                tags = [f"#{tag}" for tag in tags if tag]
-
-                # Создаем запись в БД
-                video_cut_id = await self.repo.create_video_cut(
-                    project_id=int(project_id),
-                    organization_id=organization_id,
-                    creator_id=creator_id,
-                    youtube_video_reference=youtube_video_reference,
-                    name=name,
-                    description=description,
-                    tags=tags,
-                    time_for_publication=time_for_publication
-                )
-
-                try:
-                    await self.organization_client.debit_balance(organization_id, video_cut_rub_cost)
-                except Exception as billing_error:
-                    self.logger.error(
-                        f"Failed to debit balance for organization {organization_id}: {str(billing_error)}")
+                print(f"{vizard_project=}")
 
                 span.set_status(Status(StatusCode.OK))
 
-                return video_cut_id
+                return 0
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
@@ -996,6 +962,24 @@ class PublicationService(interface.IPublicationService):
 
                 span.set_status(Status(StatusCode.OK))
                 return video_io, content_type
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def transcribe_audio(
+            self,
+            audio_file: UploadFile,
+    ) -> str:
+        with self.tracer.start_as_current_span(
+                "PublicationService.transcribe_audio",
+                kind=SpanKind.INTERNAL
+        ) as span:
+            try:
+                audio_content = await audio_file.read()
+                transcribed_text, cost = await self.llm_client.transcribe_audio(audio_content, audio_file.filename)
+                return transcribed_text
 
             except Exception as err:
                 span.record_exception(err)

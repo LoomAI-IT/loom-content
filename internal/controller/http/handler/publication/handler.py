@@ -281,10 +281,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Delete publication image failed", {
-                    "publication_id": publication_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def send_publication_to_moderation(
@@ -321,10 +317,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Send publication to moderation failed", {
-                    "publication_id": publication_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def moderate_publication(
@@ -400,10 +392,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get publication by ID failed", {
-                    "publication_id": publication_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def get_publications_by_organization(self, organization_id: int) -> JSONResponse:
@@ -433,10 +421,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get publications by organization failed", {
-                    "organization_id": organization_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def download_publication_image(
@@ -481,10 +465,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Download publication image failed", {
-                    "publication_id": publication_id,
-                    "error": str(err)
-                })
                 raise err
 
     # РУБРИКИ
@@ -554,10 +534,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get category by ID failed", {
-                    "category_id": category_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def get_categories_by_organization(self, organization_id: int) -> JSONResponse:
@@ -587,10 +563,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get categories by organization failed", {
-                    "organization_id": organization_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def update_category(
@@ -661,10 +633,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Delete category failed", {
-                    "category_id": category_id,
-                    "error": str(err)
-                })
                 raise err
 
     # АВТОПОСТИНГ
@@ -738,10 +706,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get autoposting by organization failed", {
-                    "organization_id": organization_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def update_autoposting(
@@ -813,10 +777,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Delete autoposting failed", {
-                    "autoposting_id": autoposting_id,
-                    "error": str(err)
-                })
                 raise err
 
     # НАРЕЗКА
@@ -844,7 +804,6 @@ class PublicationController(interface.IPublicationController):
                     organization_id=body.organization_id,
                     creator_id=body.creator_id,
                     youtube_video_reference=body.youtube_video_reference,
-                    time_for_publication=body.time_for_publication
                 )
 
                 self.logger.info("Video cut generated successfully", {
@@ -940,10 +899,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Send video cut to moderation failed", {
-                    "video_cut_id": video_cut_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def get_video_cut_by_id(self, video_cut_id: int) -> JSONResponse:
@@ -975,10 +930,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get video cut by ID failed", {
-                    "video_cut_id": video_cut_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def get_video_cuts_by_organization(self, organization_id: int) -> JSONResponse:
@@ -1008,10 +959,6 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Get video cuts by organization failed", {
-                    "organization_id": organization_id,
-                    "error": str(err)
-                })
                 raise err
 
     async def moderate_video_cut(
@@ -1103,8 +1050,24 @@ class PublicationController(interface.IPublicationController):
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
-                self.logger.error("Download video cut failed", {
-                    "video_cut_id": video_cut_id,
-                    "error": str(err)
-                })
+                raise err
+
+    async def transcribe_audio(
+            self,
+            audio_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.transcribe_audio",
+                kind=SpanKind.INTERNAL
+        ) as span:
+            try:
+               text = await self.publication_service.transcribe_audio(audio_file)
+
+               return JSONResponse(
+                   content={"text": text},
+                   status_code=200
+               )
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err

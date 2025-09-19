@@ -56,7 +56,6 @@ class Config:
 
         # Vizard configuration
         self.vizard_api_key = os.getenv("VIZARD_API_KEY", "")
-        self.vizard_base_url = os.getenv("VIZARD_BASE_URL", "https://api.vizard.ai")
 
         # Storage configuration
         self.storage_host = os.getenv("STORAGE_CONTAINER_NAME", "localhost")

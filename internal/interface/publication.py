@@ -189,6 +189,13 @@ class IPublicationController(Protocol):
     ) -> StreamingResponse:
         pass
 
+    @abstractmethod
+    async def transcribe_audio(
+            self,
+            audio_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        pass
+
 
 class IPublicationService(Protocol):
     # Публикация
@@ -358,7 +365,6 @@ class IPublicationService(Protocol):
             organization_id: int,
             creator_id: int,
             youtube_video_reference: str,
-            time_for_publication: datetime = None
     ) -> int:
         pass
 
@@ -407,6 +413,13 @@ class IPublicationService(Protocol):
             self,
             video_cut_id: int
     ) -> tuple[io.BytesIO, str]:
+        pass
+
+    @abstractmethod
+    async def transcribe_audio(
+            self,
+            audio_file: UploadFile,
+    ) -> str:
         pass
 
 

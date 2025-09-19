@@ -293,6 +293,13 @@ def include_publication_handlers(
         response_class=StreamingResponse,
     )
 
+    app.add_api_route(
+        prefix + "/audio/transcribe",
+        publication_controller.transcribe_audio,
+        methods=["GET"],
+        tags=["Other"],
+    )
+
 
 def include_db_handler(app: FastAPI, db: interface.IDB, prefix: str):
     app.add_api_route(prefix + "/table/create", create_table_handler(db), methods=["GET"])

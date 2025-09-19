@@ -73,7 +73,6 @@ class GenerateVideoCutBody(BaseModel):
     organization_id: int
     creator_id: int
     youtube_video_reference: str
-    time_for_publication: Optional[datetime] = None
 
 
 class ChangeVideoCutBody(BaseModel):
@@ -87,7 +86,6 @@ class ModerateVideoCutBody(BaseModel):
     moderator_id: int
     moderation_status: ModerationStatusEnum
     moderation_comment: Optional[str] = ""
-
 
 # RESPONSE MODELS
 class PublicationResponse(BaseModel):
