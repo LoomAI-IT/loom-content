@@ -28,7 +28,8 @@ INSERT INTO video_cuts (
     tags,
     video_name,
     video_fid,
-    vizard_rub_cost
+    vizard_rub_cost,
+    moderation_status
 )
 VALUES (
     :project_id,
@@ -41,7 +42,8 @@ VALUES (
     :tags,
     :video_name,
     :video_fid,
-    :vizard_rub_cost
+    :vizard_rub_cost,
+    'draft'
 )
 RETURNING id;
 """
