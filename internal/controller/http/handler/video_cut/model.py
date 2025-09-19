@@ -30,10 +30,12 @@ class CreateVizardVideoCutsBody(BaseModel):
 
 
 class ChangeVideoCutBody(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    time_for_publication: Optional[datetime] = None
+    video_cut_id: int
+    name: str | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    inst_source_id: int | None = None
+    youtube_source_id: int | None = None
 
 
 class ModerateVideoCutBody(BaseModel):

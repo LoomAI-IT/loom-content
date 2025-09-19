@@ -84,7 +84,8 @@ class IVideoCutService(Protocol):
             name: str = None,
             description: str = None,
             tags: list[str] = None,
-            time_for_publication: datetime = None
+            inst_source_id: int = None,
+            youtube_source_id: int = None,
     ) -> None: pass
 
     @abstractmethod
