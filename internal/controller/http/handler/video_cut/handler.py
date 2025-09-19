@@ -106,8 +106,8 @@ class VideoCutController(interface.IVideoCutController):
                     name=body.name,
                     description=body.description,
                     tags=body.tags,
-                    inst_source_id=body.inst_source_id,
-                    youtube_source_id=body.youtube_source_id
+                    inst_source=body.inst_source,
+                    youtube_source=body.youtube_source
                 )
 
                 self.logger.info("Video cut changed successfully", {

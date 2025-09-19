@@ -34,8 +34,8 @@ class ChangeVideoCutBody(BaseModel):
     name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
-    inst_source_id: int | None = None
-    youtube_source_id: int | None = None
+    inst_source: bool | None = None
+    youtube_source: bool | None = None
 
 
 class ModerateVideoCutBody(BaseModel):

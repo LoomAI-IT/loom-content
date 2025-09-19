@@ -198,8 +198,8 @@ class PublicationController(interface.IPublicationController):
     async def change_publication(
             self,
             publication_id: int,
-            vk_source_id: int = Form(None),
-            tg_source_id: int = Form(None),
+            vk_source: bool = Form(None),
+            tg_source: bool = Form(None),
             name: str = Form(None),
             text: str = Form(None),
             tags: str = Form(None),
@@ -219,8 +219,8 @@ class PublicationController(interface.IPublicationController):
 
                 await self.publication_service.change_publication(
                     publication_id=publication_id,
-                    vk_source_id=vk_source_id,
-                    tg_source_id=tg_source_id,
+                    vk_source=vk_source,
+                    tg_source=tg_source,
                     name=name,
                     text=text,
                     tags=json.loads(tags),
