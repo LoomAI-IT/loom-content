@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     creator_id INTEGER NOT NULL,
     moderator_id INTEGER DEFAULT 0,
     
-    inst_source_id INTEGER DEFAULT 0,
-    youtube_source_id INTEGER DEFAULT 0,
+    inst_source_id INTEGER DEFAULT NULL,
+    youtube_source_id INTEGER DEFAULT NULL,
     
     youtube_video_reference TEXT NOT NULL,
     name TEXT DEFAULT '',
@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS publications (
     
     creator_id INTEGER NOT NULL,
     moderator_id INTEGER DEFAULT NULL,
-    vk_source_id INTEGER,
-    tg_source_id INTEGER,
+    vk_source_id INTEGER DEFAULT NULL,
+    tg_source_id INTEGER DEFAULT NULL,
     
     text_reference TEXT NOT NULL,
     name TEXT NOT NULL,
