@@ -8,6 +8,7 @@ from internal.controller.http.handler.publication.model import *
 def NewHTTP(
         db: interface.IDB,
         publication_controller: interface.IPublicationController,
+        video_cut_controller: interface.IVideoCutController,
         http_middleware: interface.IHttpMiddleware,
         prefix: str
 ):
@@ -20,6 +21,7 @@ def NewHTTP(
     include_db_handler(app, db, prefix)
 
     include_publication_handlers(app, publication_controller, prefix)
+    include_video_cut_handlers(app, video_cut_controller, prefix)
 
     return app
 
@@ -39,11 +41,9 @@ def include_publication_handlers(
         publication_controller: interface.IPublicationController,
         prefix: str
 ):
-    # ПУБЛИКАЦИИ
-
     # Генерация публикации
     app.add_api_route(
-        prefix + "/text/generate",
+        prefix + "/publication/text/generate",
         publication_controller.generate_publication_text,
         methods=["POST"],
         tags=["Publication"],
@@ -51,13 +51,13 @@ def include_publication_handlers(
 
     # Регенерация изображения публикации
     app.add_api_route(
-        prefix + "/text/regenerate",
+        prefix + "/publication/text/regenerate",
         publication_controller.regenerate_publication_text,
         methods=["POST"],
         tags=["Publication"],
     )
     app.add_api_route(
-        prefix + "/image/generate",
+        prefix + "/publication/image/generate",
         publication_controller.generate_publication_image,
         methods=["POST"],
         tags=["Publication"],
@@ -65,7 +65,7 @@ def include_publication_handlers(
 
     # Регенерация изображения публикации
     app.add_api_route(
-        prefix + "/create",
+        prefix + "/publication/create",
         publication_controller.create_publication,
         methods=["POST"],
         tags=["Publication"],
@@ -73,52 +73,47 @@ def include_publication_handlers(
 
     # Регенерация текста публикации
     app.add_api_route(
-        prefix + "/{publication_id}/text/regenerate",
+        prefix + "/publication/text/regenerate",
         publication_controller.regenerate_publication_text,
         methods=["POST"],
-        tags=["Publication"],
-        response_model=DataResponse,
+        tags=["Publication"]
     )
 
     # Изменение публикации
     app.add_api_route(
-        prefix + "/{publication_id}",
+        prefix + "/publication/{publication_id}",
         publication_controller.change_publication,
         methods=["PUT"],
-        tags=["Publication"],
-        response_model=SuccessResponse,
+        tags=["Publication"]
     )
 
     # Удаление изображения публикации
     app.add_api_route(
-        prefix + "/{publication_id}/image",
+        prefix + "/publication/{publication_id}/image",
         publication_controller.delete_publication_image,
         methods=["DELETE"],
-        tags=["Publication"],
-        response_model=SuccessResponse,
+        tags=["Publication"]
     )
 
     # Отправка публикации на модерацию
     app.add_api_route(
-        prefix + "/{publication_id}/moderation/send",
+        prefix + "/publication/{publication_id}/moderation/send",
         publication_controller.send_publication_to_moderation,
         methods=["POST"],
-        tags=["Publication"],
-        response_model=SuccessResponse,
+        tags=["Publication"]
     )
 
     # Модерация публикации
     app.add_api_route(
-        prefix + "/moderate",
+        prefix + "/publication/moderate",
         publication_controller.moderate_publication,
         methods=["POST"],
-        tags=["Publication"],
-        response_model=SuccessResponse,
+        tags=["Publication"]
     )
 
     # Получение публикации по ID
     app.add_api_route(
-        prefix + "/{publication_id}",
+        prefix + "/publication/{publication_id}",
         publication_controller.get_publication_by_id,
         methods=["GET"],
         tags=["Publication"],
@@ -127,7 +122,7 @@ def include_publication_handlers(
 
     # Получение публикаций по организации
     app.add_api_route(
-        prefix + "/organization/{organization_id}/publications",
+        prefix + "/publication/organization/{organization_id}/publications",
         publication_controller.get_publications_by_organization,
         methods=["GET"],
         tags=["Publication"],
@@ -136,7 +131,7 @@ def include_publication_handlers(
 
     # Скачивание изображения публикации
     app.add_api_route(
-        prefix + "/{publication_id}/image/download",
+        prefix + "/publication/{publication_id}/image/download",
         publication_controller.download_publication_image,
         methods=["GET"],
         tags=["Publication"],
@@ -144,28 +139,25 @@ def include_publication_handlers(
     )
 
     # РУБРИКИ
-
     # Создание рубрики
     app.add_api_route(
-        prefix + "/category",
+        prefix + "/publication/category",
         publication_controller.create_category,
         methods=["POST"],
-        tags=["Category"],
-        response_model=CategoryResponse,
+        tags=["Category"]
     )
 
     # Получение рубрики по ID
     app.add_api_route(
-        prefix + "/category/{category_id}",
+        prefix + "/publication/category/{category_id}",
         publication_controller.get_category_by_id,
         methods=["GET"],
-        tags=["Category"],
-        response_model=DataResponse,
+        tags=["Category"]
     )
 
     # Получение рубрик по организации
     app.add_api_route(
-        prefix + "/organization/{organization_id}/categories",
+        prefix + "/publication/organization/{organization_id}/categories",
         publication_controller.get_categories_by_organization,
         methods=["GET"],
         tags=["Category"],
@@ -174,102 +166,112 @@ def include_publication_handlers(
 
     # Обновление рубрики
     app.add_api_route(
-        prefix + "/category/{category_id}",
+        prefix + "/publication/category/{category_id}",
         publication_controller.update_category,
         methods=["PUT"],
-        tags=["Category"],
-        response_model=SuccessResponse,
+        tags=["Category"]
     )
 
     # Удаление рубрики
     app.add_api_route(
-        prefix + "/category/{category_id}",
+        prefix + "/publication/category/{category_id}",
         publication_controller.delete_category,
         methods=["DELETE"],
-        tags=["Category"],
-        response_model=SuccessResponse,
+        tags=["Category"]
     )
 
     # АВТОПОСТИНГ
 
     # Создание автопостинга
     app.add_api_route(
-        prefix + "/autoposting",
+        prefix + "/publication/autoposting",
         publication_controller.create_autoposting,
         methods=["POST"],
-        tags=["Autoposting"],
-        response_model=AutopostingResponse,
+        tags=["Autoposting"]
     )
 
     # Получение автопостингов по организации
     app.add_api_route(
-        prefix + "/organization/{organization_id}/autopostings",
+        prefix + "/publication/organization/{organization_id}/autopostings",
         publication_controller.get_autoposting_by_organization,
         methods=["GET"],
-        tags=["Autoposting"],
-        response_model=ListDataResponse,
+        tags=["Autoposting"]
     )
 
     # Обновление автопостинга
     app.add_api_route(
-        prefix + "/autoposting/{autoposting_id}",
+        prefix + "/publication/autoposting/{autoposting_id}",
         publication_controller.update_autoposting,
         methods=["PUT"],
-        tags=["Autoposting"],
-        response_model=SuccessResponse,
+        tags=["Autoposting"]
     )
 
     # Удаление автопостинга
     app.add_api_route(
-        prefix + "/autoposting/{autoposting_id}",
+        prefix + "/publication/autoposting/{autoposting_id}",
         publication_controller.delete_autoposting,
         methods=["DELETE"],
-        tags=["Autoposting"],
-        response_model=SuccessResponse,
+        tags=["Autoposting"]
     )
 
+    app.add_api_route(
+        prefix + "/publication/audio/transcribe",
+        publication_controller.transcribe_audio,
+        methods=["GET"],
+        tags=["Other"]
+    )
+
+
+def include_video_cut_handlers(
+        app: FastAPI,
+        video_cut_controller: interface.IVideoCutController,
+        prefix: str
+):
     # НАРЕЗКА ВИДЕО
 
     # Генерация нарезки видео
     app.add_api_route(
-        prefix + "/video-cut/generate",
-        publication_controller.generate_video_cut,
+        prefix + "/video-cut/vizard/generate",
+        video_cut_controller.generate_vizard_video_cuts,
         methods=["POST"],
-        tags=["VideoCut"],
-        response_model=VideoCutResponse,
+        tags=["VideoCut"]
+    )
+
+    app.add_api_route(
+        prefix + "/video-cut/vizard/create",
+        video_cut_controller.create_vizard_video_cuts,
+        methods=["POST"],
+        tags=["VideoCut"]
     )
 
     # Изменение нарезки видео
     app.add_api_route(
         prefix + "/video-cut/{video_cut_id}",
-        publication_controller.change_video_cut,
+        video_cut_controller.change_video_cut,
         methods=["PUT"],
-        tags=["VideoCut"],
-        response_model=SuccessResponse,
+        tags=["VideoCut"]
     )
 
     # Отправка нарезки на модерацию
     app.add_api_route(
         prefix + "/video-cut/{video_cut_id}/moderation/send",
-        publication_controller.send_video_cut_to_moderation,
+        video_cut_controller.send_video_cut_to_moderation,
         methods=["POST"],
-        tags=["VideoCut"],
-        response_model=SuccessResponse,
+        tags=["VideoCut"]
     )
 
     # Получение нарезки по ID
     app.add_api_route(
         prefix + "/video-cut/{video_cut_id}",
-        publication_controller.get_video_cut_by_id,
+        video_cut_controller.get_video_cut_by_id,
         methods=["GET"],
-        tags=["VideoCut"],
-        response_model=DataResponse,
+        tags=["VideoCut"]
     )
 
     # Получение нарезок по организации
     app.add_api_route(
         prefix + "/organization/{organization_id}/video-cuts",
-        publication_controller.get_video_cuts_by_organization,
+        video_cut_controller.get_video_cuts_by_organization,
         methods=["GET"],
         tags=["VideoCut"],
         response_model=list[model.VideoCut],
@@ -278,26 +280,18 @@ def include_publication_handlers(
     # Модерация нарезки видео
     app.add_api_route(
         prefix + "/video-cut/moderate",
-        publication_controller.moderate_video_cut,
+        video_cut_controller.moderate_video_cut,
         methods=["POST"],
-        tags=["VideoCut"],
-        response_model=SuccessResponse,
+        tags=["VideoCut"]
     )
 
     # Скачивание нарезки видео
     app.add_api_route(
         prefix + "/video-cut/{video_cut_id}/download",
-        publication_controller.download_video_cut,
+        video_cut_controller.download_video_cut,
         methods=["GET"],
         tags=["VideoCut"],
         response_class=StreamingResponse,
-    )
-
-    app.add_api_route(
-        prefix + "/audio/transcribe",
-        publication_controller.transcribe_audio,
-        methods=["GET"],
-        tags=["Other"],
     )
 
 

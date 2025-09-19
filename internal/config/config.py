@@ -5,21 +5,21 @@ class Config:
     def __init__(self):
         # Service configuration
         self.environment = os.getenv("ENVIRONMENT", "dev")
-        self.service_name = os.getenv("KONTUR_PUBLICATION_CONTAINER_NAME", "kontur-publication")
-        self.http_port = os.getenv("KONTUR_PUBLICATION_PORT", "8000")
+        self.service_name = os.getenv("KONTUR_CONTENT_CONTAINER_NAME", "kontur-content")
+        self.http_port = os.getenv("KONTUR_CONTENT_PORT", "8000")
         self.service_version = os.getenv("SERVICE_VERSION", "1.0.0")
         self.root_path = os.getenv("ROOT_PATH", "/")
-        self.prefix = os.getenv("KONTUR_PUBLICATION_PREFIX", "/api/publication")
+        self.prefix = os.getenv("KONTUR_CONTENT_PREFIX", "/api/content")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
         self.interserver_secret_key = os.getenv("KONTUR_INTERSERVER_SECRET_KEY")
 
         # PostgreSQL configuration
-        self.db_host = os.getenv("KONTUR_EMPLOYEE_POSTGRES_CONTAINER_NAME", "localhost")
+        self.db_host = os.getenv("KONTUR_CONTENT_POSTGRES_CONTAINER_NAME", "localhost")
         self.db_port = "5432"
-        self.db_name = os.getenv("KONTUR_EMPLOYEE_POSTGRES_DB_NAME", "hr_interview")
-        self.db_user = os.getenv("KONTUR_EMPLOYEE_POSTGRES_USER", "postgres")
-        self.db_pass = os.getenv("KONTUR_EMPLOYEE_POSTGRES_PASSWORD", "password")
+        self.db_name = os.getenv("KONTUR_CONTENT_POSTGRES_DB_NAME", "hr_interview")
+        self.db_user = os.getenv("KONTUR_CONTENT_POSTGRES_USER", "postgres")
+        self.db_pass = os.getenv("KONTUR_CONTENT_POSTGRES_PASSWORD", "password")
 
         self.weed_master_host = os.getenv("KONTUR_WEED_MASTER_CONTAINER_NAME", "localhost")
         self.weed_master_port = int(os.getenv("KONTUR_WEED_MASTER_PORT", "9333"))
@@ -56,10 +56,3 @@ class Config:
 
         # Vizard configuration
         self.vizard_api_key = os.getenv("VIZARD_API_KEY", "")
-
-        # Storage configuration
-        self.storage_host = os.getenv("STORAGE_CONTAINER_NAME", "localhost")
-        self.storage_port = int(os.getenv("STORAGE_PORT", "9333"))
-
-        # Password secret key
-        self.password_secret_key = os.getenv("PASSWORD_SECRET_KEY", "default_secret_key")

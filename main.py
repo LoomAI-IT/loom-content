@@ -13,11 +13,14 @@ from pkg.client.internal.kontur_organization.client import KonturOrganizationCli
 
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
+from internal.controller.http.handler.video_cut.handler import VideoCutController
 
+from internal.service.video_cut.service import VideoCutService
 from internal.service.publication.service import PublicationService
 from internal.service.publication.prompt import PublicationPromptGenerator
 
 from internal.repo.publication.repo import PublicationRepo
+from internal.repo.video_cut.repo import VideoCutRepo
 
 from internal.app.http.app import NewHTTP
 
@@ -77,6 +80,7 @@ vizard_client = VizardClient(
 
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
+video_cut_repo = VideoCutRepo(tel, db)
 
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
@@ -92,8 +96,17 @@ publication_service = PublicationService(
     vizard_client=vizard_client,
 )
 
+video_cut_service = VideoCutService(
+    tel=tel,
+    repo=video_cut_repo,
+    storage=storage,
+    organization_client=kontur_organization_client,
+    vizard_client=vizard_client,
+)
+
 # Инициализация контроллеров
 publication_controller = PublicationController(tel, publication_service)
+video_cut_controller = VideoCutController(tel, video_cut_service)
 
 # Инициализация middleware
 http_middleware = HttpMiddleware(tel, cfg.prefix, kontur_authorization_client)
@@ -102,6 +115,7 @@ if __name__ == "__main__":
     app = NewHTTP(
         db=db,
         publication_controller=publication_controller,
+        video_cut_controller=video_cut_controller,
         http_middleware=http_middleware,
         prefix=cfg.prefix,
     )
