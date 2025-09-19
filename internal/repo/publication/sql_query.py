@@ -34,7 +34,6 @@ SET
     tags = COALESCE(:tags, tags),
     moderation_status = COALESCE(:moderation_status, moderation_status),
     moderation_comment = COALESCE(:moderation_comment, moderation_comment),
-    time_for_publication = COALESCE(:time_for_publication, time_for_publication),
     publication_at = COALESCE(:publication_at, publication_at),
     image_fid = COALESCE(:image_fid, image_fid),
     image_name = COALESCE(:image_name, image_name)

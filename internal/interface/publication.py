@@ -58,7 +58,6 @@ class IPublicationController(Protocol):
             name: str = Form(None),
             text: str = Form(None),
             tags: str = Form(None),
-            time_for_publication: datetime = Form(None),
             image_url: str = Form(None),
             image_file: UploadFile = File(None),
     ) -> JSONResponse: pass
@@ -212,7 +211,6 @@ class IPublicationService(Protocol):
             name: str = None,
             text: str = None,
             tags: list[str] = None,
-            time_for_publication: datetime = None,
             image_url: str = None,
             image_file: UploadFile = None,
     ) -> None: pass
@@ -368,7 +366,6 @@ class IPublicationRepo(Protocol):
             tags: list[str] = None,
             moderation_status: str = None,
             moderation_comment: str = None,
-            time_for_publication: datetime = None,
             publication_at: datetime = None,
             image_fid: str = None,
             image_name: str = None,

@@ -203,7 +203,6 @@ class PublicationController(interface.IPublicationController):
             name: str = Form(None),
             text: str = Form(None),
             tags: str = Form(None),
-            time_for_publication: datetime = Form(None),
             image_url: str = Form(None),
             image_file: UploadFile = File(None),
     ) -> JSONResponse:
@@ -224,7 +223,6 @@ class PublicationController(interface.IPublicationController):
                     name=name,
                     text=text,
                     tags=json.loads(tags),
-                    time_for_publication=time_for_publication,
                     image_url=image_url,
                     image_file=image_file,
                 )

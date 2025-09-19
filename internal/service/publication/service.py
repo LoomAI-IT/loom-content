@@ -254,7 +254,6 @@ class PublicationService(interface.IPublicationService):
             name: str = None,
             text: str = None,
             tags: list[str] = None,
-            time_for_publication: datetime = None,
             image_url: str = None,
             image_file: UploadFile = None,
     ) -> None:
@@ -313,7 +312,6 @@ class PublicationService(interface.IPublicationService):
                     name=name,
                     text=text,
                     tags=tags,
-                    time_for_publication=time_for_publication,
                     image_fid=image_fid,
                     image_name=image_name,
                 )
