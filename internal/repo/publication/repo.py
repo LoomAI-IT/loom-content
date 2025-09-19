@@ -394,7 +394,40 @@ class PublicationRepo(interface.IPublicationRepo):
                 raise err
 
     # НАРЕЗКА
-    async def create_video_cut(
+    async def create_vizard_project(
+            self,
+            project_id: int,
+            organization_id: int,
+            creator_id: int,
+            youtube_video_reference: str,
+    ) -> int:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.create_video_cut",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "project_id": project_id,
+                    "organization_id": organization_id,
+                    "creator_id": creator_id
+                }
+        ) as span:
+            try:
+                args = {
+                    'project_id': project_id,
+                    'organization_id': organization_id,
+                    'creator_id': creator_id,
+                    'youtube_video_reference': youtube_video_reference,
+                }
+
+                video_cut_id = await self.db.insert(create_vizard_project, args)
+
+                span.set_status(Status(StatusCode.OK))
+                return video_cut_id
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def create_vizard_video_cut(
             self,
             project_id: int,
             organization_id: int,
@@ -403,7 +436,8 @@ class PublicationRepo(interface.IPublicationRepo):
             name: str,
             description: str,
             tags: list[str],
-            time_for_publication: datetime = None
+            video_name: str,
+            video_fid: str,
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_video_cut",
@@ -423,10 +457,11 @@ class PublicationRepo(interface.IPublicationRepo):
                     'name': name,
                     'description': description,
                     'tags': tags,
-                    'time_for_publication': time_for_publication,
+                    'video_name': video_name,
+                    'video_fid': video_fid,
                 }
 
-                video_cut_id = await self.db.insert(create_video_cut, args)
+                video_cut_id = await self.db.insert(create_vizard_project, args)
 
                 span.set_status(Status(StatusCode.OK))
                 return video_cut_id

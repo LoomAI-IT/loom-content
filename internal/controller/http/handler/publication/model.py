@@ -4,14 +4,6 @@ from datetime import datetime
 from enum import Enum
 
 
-class ModerationStatusEnum(str, Enum):
-    DRAFT = "draft"
-    MODERATION = "moderation"
-    REJECTED = "rejected"
-    APPROVED = "approved"
-    PUBLISHED = "published"
-
-
 # ПУБЛИКАЦИИ
 class GeneratePublicationTextBody(BaseModel):
     category_id: int
@@ -31,11 +23,10 @@ class GeneratePublicationImageBody(BaseModel):
     prompt: str | None = None
 
 
-
 class ModeratePublicationBody(BaseModel):
     publication_id: int
     moderator_id: int
-    moderation_status: ModerationStatusEnum
+    moderation_status: str
     moderation_comment: Optional[str] = ""
 
 
@@ -66,57 +57,3 @@ class UpdateAutopostingBody(BaseModel):
     rewrite_prompt: Optional[str] | None = None
     enabled: Optional[bool] | None = None
     tg_channels: Optional[List[str]] | None = None
-
-
-# НАРЕЗКА ВИДЕО
-class GenerateVideoCutBody(BaseModel):
-    organization_id: int
-    creator_id: int
-    youtube_video_reference: str
-
-
-class ChangeVideoCutBody(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    tags: Optional[List[str]] = None
-    time_for_publication: Optional[datetime] = None
-
-
-class ModerateVideoCutBody(BaseModel):
-    moderator_id: int
-    moderation_status: ModerationStatusEnum
-    moderation_comment: Optional[str] = ""
-
-# RESPONSE MODELS
-class PublicationResponse(BaseModel):
-    message: str
-    publication_id: int
-
-
-class CategoryResponse(BaseModel):
-    message: str
-    category_id: int
-
-
-class AutopostingResponse(BaseModel):
-    message: str
-    autoposting_id: int
-
-
-class VideoCutResponse(BaseModel):
-    message: str
-    video_cut_id: int
-
-
-class DataResponse(BaseModel):
-    message: str
-    data: dict
-
-
-class ListDataResponse(BaseModel):
-    message: str
-    data: List[dict]
-
-
-class SuccessResponse(BaseModel):
-    message: str

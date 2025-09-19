@@ -16,15 +16,15 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
     organization_id INTEGER NOT NULL,
-    
     creator_id INTEGER NOT NULL,
-    moderator_id INTEGER DEFAULT NULL,
-    inst_source_id INTEGER,
-    youtube_source_id INTEGER,
+    moderator_id INTEGER DEFAULT 0,
+    
+    inst_source_id INTEGER DEFAULT 0,
+    youtube_source_id INTEGER DEFAULT 0,
     
     youtube_video_reference TEXT NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL,
+    name TEXT DEFAULT '',
+    description TEXT DEFAULT '',
     tags TEXT[] DEFAULT '{}',
     video_fid TEXT DEFAULT '',
     video_name TEXT DEFAULT '',
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     moderation_comment TEXT DEFAULT '',
     
     time_for_publication TIMESTAMP DEFAULT NULL,
-    publication_at TIMESTAMP,
+    publication_at TIMESTAMP DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """

@@ -141,28 +141,34 @@ WHERE id = :autoposting_id;
 """
 
 # НАРЕЗКА
-create_video_cut = """
+create_vizard_project = """
 INSERT INTO video_cuts (
     project_id,
     organization_id,
     creator_id,
-    youtube_video_reference,
-    name,
-    description,
-    tags,
-    time_for_publication,
-    moderation_status
+    youtube_video_reference
 )
 VALUES (
     :project_id,
     :organization_id,
     :creator_id,
-    :youtube_video_reference,
-    :name,
-    :description,
-    :tags,
-    :time_for_publication,
-    'draft'
+    :youtube_video_reference
+)
+RETURNING id;
+"""
+
+create_vizard_video_cut= """
+INSERT INTO video_cuts (
+    project_id,
+    organization_id,
+    creator_id,
+    youtube_video_reference,
+)
+VALUES (
+    :project_id,
+    :organization_id,
+    :creator_id,
+    :youtube_video_reference
 )
 RETURNING id;
 """

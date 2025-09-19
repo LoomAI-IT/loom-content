@@ -147,48 +147,6 @@ class IPublicationController(Protocol):
     async def delete_autoposting(self, autoposting_id: int) -> JSONResponse:
         pass
 
-    # НАРЕЗКА
-    @abstractmethod
-    async def generate_video_cut(
-            self,
-            body: GenerateVideoCutBody
-    ) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def change_video_cut(
-            self,
-            body: ChangeVideoCutBody
-    ) -> JSONResponse: pass
-
-    @abstractmethod
-    async def send_video_cut_to_moderation(
-            self,
-            video_cut_id: int,
-    ): pass
-
-    @abstractmethod
-    async def get_video_cut_by_id(self, video_cut_id: int) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def get_video_cuts_by_organization(self, organization_id: int) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def moderate_video_cut(
-            self,
-            body: ModerateVideoCutBody
-    ) -> JSONResponse:
-        pass
-
-    @abstractmethod
-    async def download_video_cut(
-            self,
-            video_cut_id: int
-    ) -> StreamingResponse:
-        pass
-
     @abstractmethod
     async def transcribe_audio(
             self,
@@ -358,63 +316,6 @@ class IPublicationService(Protocol):
     async def delete_autoposting(self, autoposting_id: int) -> None:
         pass
 
-    # НАРЕЗКА
-    @abstractmethod
-    async def generate_video_cut(
-            self,
-            organization_id: int,
-            creator_id: int,
-            youtube_video_reference: str,
-    ) -> int:
-        pass
-
-    @abstractmethod
-    async def change_video_cut(
-            self,
-            video_cut_id: int,
-            name: str = None,
-            description: str = None,
-            tags: list[str] = None,
-            time_for_publication: datetime = None
-    ) -> None: pass
-
-    @abstractmethod
-    async def send_video_cut_to_moderation(
-            self,
-            video_cut_id: int,
-    ) -> None: pass
-
-    @abstractmethod
-    async def publish_video_cut(
-            self,
-            video_cut_id: int,
-    ) -> None: pass
-
-    @abstractmethod
-    async def get_video_cut_by_id(self, video_cut_id: int) -> model.VideoCut:
-        pass
-
-    @abstractmethod
-    async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]:
-        pass
-
-    @abstractmethod
-    async def moderate_video_cut(
-            self,
-            video_cut_id: int,
-            moderator_id: int,
-            moderation_status: str,
-            moderation_comment: str = ""
-    ) -> None:
-        pass
-
-    @abstractmethod
-    async def download_video_cut(
-            self,
-            video_cut_id: int
-    ) -> tuple[io.BytesIO, str]:
-        pass
-
     @abstractmethod
     async def transcribe_audio(
             self,
@@ -532,50 +433,6 @@ class IPublicationRepo(Protocol):
     @abstractmethod
     async def delete_autoposting(self, autoposting_id: int) -> None:
         pass
-
-    # НАРЕЗКА
-    @abstractmethod
-    async def create_video_cut(
-            self,
-            project_id: int,
-            organization_id: int,
-            creator_id: int,
-            youtube_video_reference: str,
-            name: str,
-            description: str,
-            tags: list[str],
-            time_for_publication: datetime = None
-    ) -> int:
-        pass
-
-    @abstractmethod
-    async def change_video_cut(
-            self,
-            video_cut_id: int,
-            moderator_id: int = None,
-            inst_source_id: int = None,
-            youtube_source_id: int = None,
-            name: str = None,
-            description: str = None,
-            tags: list[str] = None,
-            moderation_status: str = None,
-            moderation_comment: str = None,
-            time_for_publication: datetime = None
-    ) -> None: pass
-
-    @abstractmethod
-    async def add_vizard_rub_cost_to_video_cut(
-            self,
-            video_cut_id: int,
-            amount_rub: int
-    ) -> None: pass
-
-    @abstractmethod
-    async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:
-        pass
-
-    @abstractmethod
-    async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]: pass
 
 
 class IPublicationPromptGenerator(Protocol):
