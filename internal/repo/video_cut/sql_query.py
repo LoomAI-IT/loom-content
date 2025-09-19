@@ -28,6 +28,7 @@ INSERT INTO video_cuts (
     tags,
     video_name,
     video_fid,
+    original_url,
     vizard_rub_cost,
     moderation_status
 )
@@ -42,6 +43,7 @@ VALUES (
     :tags,
     :video_name,
     :video_fid,
+    :original_url,
     :vizard_rub_cost,
     'draft'
 )

@@ -127,6 +127,7 @@ class VideoCutService(interface.IVideoCutService):
                         transcript=video.transcript or "",
                         tags=tags,
                         video_name=video_name,
+                        original_url=video.videoUrl,
                         video_fid=upload_response.fid,
                         vizard_rub_cost=rub_cost_per_video
                     )

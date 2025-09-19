@@ -158,6 +158,7 @@ class IVideoCutRepo(Protocol):
             tags: list[str],
             video_name: str,
             video_fid: str,
+            original_url: str,
             vizard_rub_cost: int
     ) -> int: pass
 

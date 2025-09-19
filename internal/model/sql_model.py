@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     tags TEXT[] DEFAULT '{}',
     video_fid TEXT DEFAULT '',
     video_name TEXT DEFAULT '',
+    original_url TEXT DEFAULT '',
     
     vizard_rub_cost INTEGER DEFAULT 0,
     moderation_status TEXT DEFAULT '',

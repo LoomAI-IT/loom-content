@@ -20,6 +20,7 @@ class VideoCut:
     tags: list[str]
     video_fid: str
     video_name: str
+    original_url: str
 
     vizard_rub_cost: int
     moderation_status: str
@@ -46,6 +47,7 @@ class VideoCut:
                 tags=row.tags,
                 video_fid=row.video_fid,
                 video_name=row.video_name,
+                original_url=row.original_url,
                 vizard_rub_cost=row.vizard_rub_cost,
                 moderation_status=row.moderation_status,
                 moderation_comment=row.moderation_comment,
@@ -71,6 +73,7 @@ class VideoCut:
             "tags": self.tags,
             "video_fid": self.video_fid,
             "video_name": self.video_name,
+            "original_url": self.original_url,
             "vizard_rub_cost": self.vizard_rub_cost,
             "moderation_status": self.moderation_status,
             "moderation_comment": self.moderation_comment,

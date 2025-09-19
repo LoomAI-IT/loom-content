@@ -60,6 +60,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
             tags: list[str],
             video_name: str,
             video_fid: str,
+            original_url: str,
             vizard_rub_cost: int
     ) -> int:
         with self.tracer.start_as_current_span(
@@ -83,6 +84,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
                     'tags': tags,
                     'video_name': video_name,
                     'video_fid': video_fid,
+                    'original_url': original_url,
                     'vizard_rub_cost': vizard_rub_cost,
                 }
 
