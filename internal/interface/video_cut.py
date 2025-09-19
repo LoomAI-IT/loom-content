@@ -149,6 +149,7 @@ class IVideoCutRepo(Protocol):
             tags: list[str],
             video_name: str,
             video_fid: str,
+            amount_rub: int
     ) -> int: pass
 
     @abstractmethod
@@ -167,15 +168,11 @@ class IVideoCutRepo(Protocol):
     ) -> None: pass
 
     @abstractmethod
-    async def add_vizard_rub_cost_to_video_cut(
-            self,
-            video_cut_id: int,
-            amount_rub: int
-    ) -> None: pass
-
-    @abstractmethod
     async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:
         pass
+
+    @abstractmethod
+    async def get_video_cuts_by_project_id(self, project_id: int) -> list[model.VideoCut]: pass
 
     @abstractmethod
     async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]: pass

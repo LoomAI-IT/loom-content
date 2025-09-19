@@ -1,5 +1,7 @@
 import io
-from datetime import datetime
+import json
+
+import aiohttp
 
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
@@ -84,10 +86,53 @@ class VideoCutService(interface.IVideoCutService):
     ):
         with self.tracer.start_as_current_span(
                 "VideoCutService.create_vizard_video_cuts",
-                kind=SpanKind.INTERNAL
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "project_id": project_id,
+                    "videos_count": len(videos),
+                    "credit_usage": credit_usage
+                }
         ) as span:
             try:
-                pass
+                vizard_project = (await self.repo.get_video_cuts_by_project_id(project_id))[0]
+
+                created_video_cuts = []
+                rub_cost_per_credit = 10
+                total_rub_cost = credit_usage * rub_cost_per_credit
+                rub_cost_per_video = total_rub_cost // len(created_video_cuts)
+
+                for video in videos:
+                    # Скачиваем видео по URL
+                    video_content = await self._download_video_from_url(video.videoUrl)
+                    video_io = io.BytesIO(video_content)
+
+                    # Генерируем имя файла
+                    video_name = f"video_cut_{video.videoId}_{project_id}.mp4"
+
+                    # Загружаем видео в Storage
+                    upload_response = await self.storage.upload(video_io, video_name)
+
+                    # Извлекаем теги из связанной темы
+                    tags = json.loads(video.relatedTopic)
+
+                    # Создаём запись видеонарезки в базе данных
+                    video_cut_id = await self.repo.create_vizard_video_cut(
+                        project_id=project_id,
+                        organization_id=vizard_project.organization_id,
+                        creator_id=vizard_project.creator_id,
+                        youtube_video_reference=vizard_project.youtube_video_reference,
+                        name=video.title or f"Video Cut #{video.videoId}",
+                        description=video.viralReason or "",
+                        transcript=video.transcript or "",
+                        tags=tags,
+                        video_name=video_name,
+                        video_fid=upload_response.fid,
+                        amount_rub=rub_cost_per_video
+                    )
+                    created_video_cuts.append(video_cut_id)
+
+                span.set_status(Status(StatusCode.OK))
+
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
@@ -295,3 +340,14 @@ class VideoCutService(interface.IVideoCutService):
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
+
+    async def _download_video_from_url(self, video_url: str) -> bytes:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(video_url) as response:
+                    if response.status == 200:
+                        return await response.read()
+                    else:
+                        raise Exception(f"Failed to download video: HTTP {response.status}")
+        except Exception as err:
+            raise err

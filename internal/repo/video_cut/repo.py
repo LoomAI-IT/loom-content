@@ -60,6 +60,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
             tags: list[str],
             video_name: str,
             video_fid: str,
+            amount_rub: int
     ) -> int:
         with self.tracer.start_as_current_span(
                 "VideoCutRepo.create_video_cut",
@@ -82,6 +83,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
                     'tags': tags,
                     'video_name': video_name,
                     'video_fid': video_fid,
+                    'amount_rub': amount_rub,
                 }
 
                 video_cut_id = await self.db.insert(create_vizard_video_cut, args)
@@ -135,33 +137,6 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
-    async def add_vizard_rub_cost_to_video_cut(
-            self,
-            video_cut_id: int,
-            amount_rub: int
-    ) -> None:
-        with self.tracer.start_as_current_span(
-                "VideoCutRepo.add_vizard_rub_cost_to_video_cut",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "video_cut_id": video_cut_id,
-                    "amount_rub": amount_rub
-                }
-        ) as span:
-            try:
-                args = {
-                    'video_cut_id': video_cut_id,
-                    'amount_rub': amount_rub,
-                }
-
-                await self.db.update(add_vizard_rub_cost_to_video_cut, args)
-
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
-                raise err
-
     async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:
         with self.tracer.start_as_current_span(
                 "VideoCutRepo.get_video_cut_by_id",
@@ -173,6 +148,24 @@ class VideoCutRepo(interface.IVideoCutRepo):
             try:
                 args = {'video_cut_id': video_cut_id}
                 rows = await self.db.select(get_video_cut_by_id, args)
+                video_cuts = model.VideoCut.serialize(rows) if rows else []
+
+                span.set_status(Status(StatusCode.OK))
+                return video_cuts
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def get_video_cuts_by_project_id(self, project_id: int) -> list[model.VideoCut]:
+        with self.tracer.start_as_current_span(
+                "VideoCutRepo.get_video_cuts_by_project_id",
+                kind=SpanKind.INTERNAL,
+                attributes={"project_id": project_id}
+        ) as span:
+            try:
+                args = {'project_id': project_id}
+                rows = await self.db.select(get_video_cuts_by_project_id, args)
                 video_cuts = model.VideoCut.serialize(rows) if rows else []
 
                 span.set_status(Status(StatusCode.OK))

@@ -27,7 +27,8 @@ INSERT INTO video_cuts (
     transcript,
     tags,
     video_name,
-    video_fid
+    video_fid,
+    amount_rub,
 )
 VALUES (
     :project_id,
@@ -39,7 +40,8 @@ VALUES (
     :transcript,
     :tags,
     :video_name,
-    :video_fid
+    :video_fid,
+    :amount_rub,
 )
 RETURNING id;
 """
@@ -59,15 +61,16 @@ SET
 WHERE id = :video_cut_id;
 """
 
-add_vizard_rub_cost_to_video_cut = """
-UPDATE video_cuts
-SET vizard_rub_cost = vizard_rub_cost + :amount_rub
-WHERE id = :video_cut_id;
-"""
 
 get_video_cut_by_id = """
 SELECT * FROM video_cuts
 WHERE id = :video_cut_id;
+"""
+
+get_video_cuts_by_project_id = """
+SELECT * FROM video_cuts
+WHERE project_id = :project_id
+ORDER BY created_at DESC;
 """
 
 get_video_cuts_by_organization = """
