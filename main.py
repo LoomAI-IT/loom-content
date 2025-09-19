@@ -74,7 +74,6 @@ openai_client = GPTClient(
     api_key=cfg.openai_api_key
 )
 vizard_client = VizardClient(
-    tel=tel,
     api_key=cfg.vizard_api_key
 )
 
