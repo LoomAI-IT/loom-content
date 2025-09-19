@@ -137,6 +137,22 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_video_cut(self, video_cut_id: int) -> None:
+        with self.tracer.start_as_current_span(
+                "VideoCutRepo.delete_video_cut",
+                kind=SpanKind.INTERNAL,
+                attributes={"video_cut_id": video_cut_id}
+        ) as span:
+            try:
+                args = {'video_cut_id': video_cut_id}
+                await self.db.delete(delete_video_cut, args)
+
+                span.set_status(Status(StatusCode.OK))
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:
         with self.tracer.start_as_current_span(
                 "VideoCutRepo.get_video_cut_by_id",

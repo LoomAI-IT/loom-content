@@ -246,6 +246,13 @@ def include_video_cut_handlers(
         tags=["VideoCut"]
     )
 
+    app.add_api_route(
+        prefix + "/video-cut/{video_cut_id}",
+        video_cut_controller.delete_video_cut,
+        methods=["DELETE"],
+        tags=["VideoCut"]
+    )
+
     # Отправка нарезки на модерацию
     app.add_api_route(
         prefix + "/video-cut/{video_cut_id}/moderation/send",

@@ -61,6 +61,10 @@ SET
 WHERE id = :video_cut_id;
 """
 
+delete_video_cut = """
+DELETE FROM video_cuts
+WHERE id = :video_cut_id;
+"""
 
 get_video_cut_by_id = """
 SELECT * FROM video_cuts

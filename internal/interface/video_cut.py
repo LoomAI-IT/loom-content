@@ -31,6 +31,10 @@ class IVideoCutController(Protocol):
     ) -> JSONResponse: pass
 
     @abstractmethod
+    async def delete_video_cut(self, video_cut_id: int) -> JSONResponse:
+        pass
+
+    @abstractmethod
     async def send_video_cut_to_moderation(
             self,
             video_cut_id: int,
@@ -87,6 +91,10 @@ class IVideoCutService(Protocol):
             inst_source: bool = None,
             youtube_source: bool = None,
     ) -> None: pass
+
+    @abstractmethod
+    async def delete_video_cut(self, video_cut_id: int) -> None:
+        pass
 
     @abstractmethod
     async def send_video_cut_to_moderation(
@@ -167,6 +175,10 @@ class IVideoCutRepo(Protocol):
             moderation_comment: str = None,
             time_for_publication: datetime = None
     ) -> None: pass
+
+    @abstractmethod
+    async def delete_video_cut(self, video_cut_id: int) -> None:
+        pass
 
     @abstractmethod
     async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:

@@ -128,6 +128,37 @@ class VideoCutController(interface.IVideoCutController):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_video_cut(self, video_cut_id: int) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "VideoCutController.delete_video_cut",
+                kind=SpanKind.INTERNAL,
+                attributes={"video_cut_id": video_cut_id}
+        ) as span:
+            try:
+                self.logger.info("Delete video cut request", {
+                    "video_cut_id": video_cut_id
+                })
+
+                await self.video_cut_service.delete_video_cut(video_cut_id)
+
+                self.logger.info("Video cut deleted successfully", {
+                    "video_cut_id": video_cut_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Video cut deleted successfully",
+                        "video_cut_id": video_cut_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def send_video_cut_to_moderation(
             self,
             video_cut_id: int,

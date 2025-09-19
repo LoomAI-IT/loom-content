@@ -174,6 +174,29 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_video_cut(self, video_cut_id: int) -> None:
+        with self.tracer.start_as_current_span(
+                "VideoCutService.delete_video_cut",
+                kind=SpanKind.INTERNAL,
+                attributes={"video_cut_id": video_cut_id}
+        ) as span:
+            try:
+                # Получаем видеонарезку для проверки существования и получения информации о файле
+                video_cut = (await self.repo.get_video_cut_by_id(video_cut_id))[0]
+
+                if video_cut.video_fid and video_cut.video_name:
+                     await self.storage.delete(video_cut.video_fid, video_cut.video_name)
+
+                await self.repo.delete_video_cut(video_cut_id)
+
+                self.logger.info(f"Video cut {video_cut_id} deleted successfully")
+                span.set_status(Status(StatusCode.OK))
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def send_video_cut_to_moderation(
             self,
             video_cut_id: int,
