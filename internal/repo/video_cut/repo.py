@@ -60,7 +60,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
             tags: list[str],
             video_name: str,
             video_fid: str,
-            amount_rub: int
+            vizard_rub_cost: int
     ) -> int:
         with self.tracer.start_as_current_span(
                 "VideoCutRepo.create_video_cut",
@@ -83,7 +83,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
                     'tags': tags,
                     'video_name': video_name,
                     'video_fid': video_fid,
-                    'amount_rub': amount_rub,
+                    'vizard_rub_cost': vizard_rub_cost,
                 }
 
                 video_cut_id = await self.db.insert(create_vizard_video_cut, args)

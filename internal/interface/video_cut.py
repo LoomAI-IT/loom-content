@@ -149,7 +149,7 @@ class IVideoCutRepo(Protocol):
             tags: list[str],
             video_name: str,
             video_fid: str,
-            amount_rub: int
+            vizard_rub_cost: int
     ) -> int: pass
 
     @abstractmethod

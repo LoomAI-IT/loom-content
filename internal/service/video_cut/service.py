@@ -126,7 +126,7 @@ class VideoCutService(interface.IVideoCutService):
                         tags=tags,
                         video_name=video_name,
                         video_fid=upload_response.fid,
-                        amount_rub=rub_cost_per_video
+                        vizard_rub_cost=rub_cost_per_video
                     )
 
                 span.set_status(Status(StatusCode.OK))
