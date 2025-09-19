@@ -172,8 +172,7 @@ class IVideoCutRepo(Protocol):
             description: str = None,
             tags: list[str] = None,
             moderation_status: str = None,
-            moderation_comment: str = None,
-            time_for_publication: datetime = None
+            moderation_comment: str = None
     ) -> None: pass
 
     @abstractmethod

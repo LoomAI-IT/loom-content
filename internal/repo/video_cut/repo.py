@@ -105,8 +105,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
             description: str = None,
             tags: list[str] = None,
             moderation_status: str = None,
-            moderation_comment: str = None,
-            time_for_publication: datetime = None
+            moderation_comment: str = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "VideoCutRepo.change_video_cut",
@@ -125,8 +124,7 @@ class VideoCutRepo(interface.IVideoCutRepo):
                     'description': description,
                     'tags': tags,
                     'moderation_status': moderation_status if moderation_status else None,
-                    'moderation_comment': moderation_comment,
-                    'time_for_publication': time_for_publication,
+                    'moderation_comment': moderation_comment
                 }
 
                 await self.db.update(change_video_cut, args)

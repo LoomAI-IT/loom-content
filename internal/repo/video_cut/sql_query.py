@@ -58,8 +58,7 @@ SET
     description = COALESCE(:description, description),
     tags = COALESCE(:tags, tags),
     moderation_status = COALESCE(:moderation_status, moderation_status),
-    moderation_comment = COALESCE(:moderation_comment, moderation_comment),
-    time_for_publication = COALESCE(:time_for_publication, time_for_publication)
+    moderation_comment = COALESCE(:moderation_comment, moderation_comment)
 WHERE id = :video_cut_id;
 """
 
