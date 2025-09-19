@@ -55,7 +55,7 @@ class VideoCutService(interface.IVideoCutService):
                     headline_switch=True,
                     project_name=f"Video cut for org {organization_id}"
                 )
-                print(f"{vizard_project=}")
+                print(f"{vizard_project=}", flush=True)
 
                 await self.repo.create_vizard_project(
                     vizard_project.get("project_id"),
