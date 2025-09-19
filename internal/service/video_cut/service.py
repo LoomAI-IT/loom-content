@@ -46,18 +46,18 @@ class VideoCutService(interface.IVideoCutService):
             try:
                 # Создаем проект в Vizard
                 vizard_project = await self.vizard_client.create_project(
-                    video_url=youtube_video_reference,
-                    video_type=1,
+                    video_url="https://www.youtube.com/watch?v=M3eE7J_Ul3s",
+                    video_type=2,
                     lang="ru",
                     prefer_length=0,
                     ratio_of_clip=1,  # 9:16 для вертикальных видео
                     remove_silence=True,
-                    max_clip_number=3,
+                    max_clip_number=2,
                     subtitle_switch=True,
                     emoji_switch=True,
                     highlight_switch=True,
                     headline_switch=True,
-                    project_name=f"Video cut for org {organization_id}"
+                    project_name=youtube_video_reference
                 )
                 print(vizard_project, flush=True)
 
