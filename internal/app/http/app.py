@@ -71,14 +71,6 @@ def include_publication_handlers(
         tags=["Publication"],
     )
 
-    # Регенерация текста публикации
-    app.add_api_route(
-        prefix + "/publication/text/regenerate",
-        publication_controller.regenerate_publication_text,
-        methods=["POST"],
-        tags=["Publication"]
-    )
-
     # Изменение публикации
     app.add_api_route(
         prefix + "/publication/{publication_id}",

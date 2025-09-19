@@ -37,14 +37,14 @@ class VideoCutController(interface.IVideoCutController):
                     "youtube_video_reference": body.youtube_video_reference
                 })
 
-                video_cut_id = await self.video_cut_service.generate_vizard_video_cuts(
+                project_id = await self.video_cut_service.generate_vizard_video_cuts(
                     organization_id=body.organization_id,
                     creator_id=body.creator_id,
                     youtube_video_reference=body.youtube_video_reference,
                 )
 
                 self.logger.info("Video cut generated successfully", {
-                    "video_cut_id": video_cut_id,
+                    "project_id": project_id,
                     "organization_id": body.organization_id
                 })
 
@@ -53,7 +53,7 @@ class VideoCutController(interface.IVideoCutController):
                     status_code=201,
                     content={
                         "message": "Video cut generated successfully",
-                        "video_cut_id": video_cut_id
+                        "project_id": project_id
                     }
                 )
 
