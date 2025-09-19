@@ -222,7 +222,7 @@ class PublicationController(interface.IPublicationController):
                     tg_source=tg_source,
                     name=name,
                     text=text,
-                    tags=json.loads(tags),
+                    tags=json.loads(tags) if tags else None,
                     image_url=image_url,
                     image_file=image_file,
                 )
