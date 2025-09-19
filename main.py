@@ -15,13 +15,16 @@ from pkg.client.internal.kontur_tg_bot.client import KonturTgBotClient
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
 from internal.controller.http.handler.video_cut.handler import VideoCutController
+from internal.controller.http.handler.social_network.handler import SocialNetworkController
 
 from internal.service.video_cut.service import VideoCutService
 from internal.service.publication.service import PublicationService
+from internal.service.social_network.service import SocialNetworkService
 from internal.service.publication.prompt import PublicationPromptGenerator
 
 from internal.repo.publication.repo import PublicationRepo
 from internal.repo.video_cut.repo import VideoCutRepo
+from internal.repo.social_network.repo import SocialNetworkRepo
 
 from internal.app.http.app import NewHTTP
 
@@ -87,6 +90,7 @@ vizard_client = VizardClient(
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
+social_network_repo = SocialNetworkRepo(tel, db)
 
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
@@ -111,9 +115,15 @@ video_cut_service = VideoCutService(
     vizard_client=vizard_client,
 )
 
+social_network_service = SocialNetworkService(
+    tel=tel,
+    repo=social_network_repo,
+)
+
 # Инициализация контроллеров
 publication_controller = PublicationController(tel, publication_service)
 video_cut_controller = VideoCutController(tel, video_cut_service)
+social_network_controller = SocialNetworkController(tel, social_network_service)
 
 # Инициализация middleware
 http_middleware = HttpMiddleware(tel, cfg.prefix, kontur_authorization_client)
@@ -123,6 +133,7 @@ if __name__ == "__main__":
         db=db,
         publication_controller=publication_controller,
         video_cut_controller=video_cut_controller,
+        social_network_controller=social_network_controller,
         http_middleware=http_middleware,
         prefix=cfg.prefix,
     )

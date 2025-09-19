@@ -1,14 +1,135 @@
 import io
-from abc import abstractmethod
-from typing import Protocol, Sequence, Any
 
-from fastapi import FastAPI
+from abc import abstractmethod
+from typing import Protocol, Dict, List
+
 from fastapi.responses import JSONResponse
-from opentelemetry.metrics import Meter
-from opentelemetry.trace import Tracer
-from starlette.responses import StreamingResponse
 
 from internal import model
+from internal.controller.http.handler.social_network.model import *
+
+
+class ISocialNetworkController(Protocol):
+    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def create_youtube(
+            self,
+            body: CreateSocialNetworkBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def create_instagram(
+            self,
+            body: CreateSocialNetworkBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def create_telegram(
+            self,
+            body: CreateSocialNetworkBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            body: CreateSocialNetworkBody,
+    ) -> JSONResponse:
+        pass
+
+    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def get_social_networks_by_organization(self, organization_id: int) -> JSONResponse:
+        pass
+
+
+class ISocialNetworkService(Protocol):
+    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def create_youtube(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_instagram(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_telegram(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def get_social_networks_by_organization(
+            self,
+            organization_id: int
+    ) -> Dict[str, List]:
+        pass
+
+
+class ISocialNetworkRepo(Protocol):
+    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def create_youtube(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_instagram(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_telegram(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int
+    ) -> int:
+        pass
+
+    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @abstractmethod
+    async def get_youtubes_by_organization(self, organization_id: int) -> List[model.YouTube]:
+        pass
+
+    @abstractmethod
+    async def get_instagrams_by_organization(self, organization_id: int) -> List[model.Instagram]:
+        pass
+
+    @abstractmethod
+    async def get_telegrams_by_organization(self, organization_id: int) -> List[model.Telegram]:
+        pass
+
+    @abstractmethod
+    async def get_vkontakte_by_organization(self, organization_id: int) -> List[model.Vkontakte]:
+        pass
 
 
 class IInstagramClient(Protocol):
@@ -31,6 +152,7 @@ class IInstagramClient(Protocol):
             cover_url: str = None,
             share_to_feed: bool = True
     ) -> dict: pass
+
 
 class IYouTubeClient(Protocol):
     @abstractmethod
@@ -61,6 +183,7 @@ class IYouTubeClient(Protocol):
 
     @abstractmethod
     async def get_video_info(self, access_token: str, video_id: str) -> dict: pass
+
 
 class IVkClient(Protocol):
     @abstractmethod

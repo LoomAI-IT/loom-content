@@ -9,6 +9,7 @@ def NewHTTP(
         db: interface.IDB,
         publication_controller: interface.IPublicationController,
         video_cut_controller: interface.IVideoCutController,
+        social_network_controller: interface.ISocialNetworkController,
         http_middleware: interface.IHttpMiddleware,
         prefix: str
 ):
@@ -22,6 +23,7 @@ def NewHTTP(
 
     include_publication_handlers(app, publication_controller, prefix)
     include_video_cut_handlers(app, video_cut_controller, prefix)
+    include_social_network_handlers(app, social_network_controller, prefix)
 
     return app
 
@@ -284,6 +286,56 @@ def include_video_cut_handlers(
         methods=["GET"],
         tags=["VideoCut"],
         response_class=StreamingResponse,
+    )
+
+
+def include_social_network_handlers(
+        app: FastAPI,
+        social_network_controller: interface.ISocialNetworkController,
+        prefix: str
+):
+    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+
+    # Создание YouTube
+    app.add_api_route(
+        prefix + "/social-network/youtube",
+        social_network_controller.create_youtube,
+        methods=["POST"],
+        tags=["SocialNetwork"]
+    )
+
+    # Создание Instagram
+    app.add_api_route(
+        prefix + "/social-network/instagram",
+        social_network_controller.create_instagram,
+        methods=["POST"],
+        tags=["SocialNetwork"]
+    )
+
+    # Создание Telegram
+    app.add_api_route(
+        prefix + "/social-network/telegram",
+        social_network_controller.create_telegram,
+        methods=["POST"],
+        tags=["SocialNetwork"]
+    )
+
+    # Создание VKontakte
+    app.add_api_route(
+        prefix + "/social-network/vkontakte",
+        social_network_controller.create_vkontakte,
+        methods=["POST"],
+        tags=["SocialNetwork"]
+    )
+
+    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+
+    # Получение всех социальных сетей по организации
+    app.add_api_route(
+        prefix + "/social-network/organization/{organization_id}",
+        social_network_controller.get_social_networks_by_organization,
+        methods=["GET"],
+        tags=["SocialNetwork"]
     )
 
 
