@@ -41,6 +41,11 @@ SET
 WHERE id = :publication_id;
 """
 
+delete_publication = """
+DELETE FROM publications
+WHERE id = :publication_id;
+"""
+
 add_openai_rub_cost_to_publication = """
 UPDATE publications
 SET openai_rub_cost = openai_rub_cost + :amount_rub

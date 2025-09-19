@@ -467,6 +467,42 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_publication(
+            self,
+            publication_id: int,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.delete_publication",
+                kind=SpanKind.INTERNAL,
+                attributes={"publication_id": publication_id}
+        ) as span:
+            try:
+                self.logger.info("Delete publication request", {
+                    "publication_id": publication_id
+                })
+
+                await self.publication_service.delete_publication(
+                    publication_id=publication_id
+                )
+
+                self.logger.info("Publication deleted successfully", {
+                    "publication_id": publication_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Publication deleted successfully",
+                        "publication_id": publication_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     # РУБРИКИ
     async def create_category(
             self,

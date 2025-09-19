@@ -104,6 +104,22 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_publication(self, publication_id: int) -> None:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.delete_publication",
+                kind=SpanKind.INTERNAL,
+                attributes={"publication_id": publication_id}
+        ) as span:
+            try:
+                args = {'publication_id': publication_id}
+                await self.db.delete(delete_publication, args)
+
+                span.set_status(Status(StatusCode.OK))
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def add_openai_rub_cost_to_publication(
             self,
             publication_id: int,

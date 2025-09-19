@@ -132,6 +132,13 @@ def include_publication_handlers(
         response_class=StreamingResponse,
     )
 
+    app.add_api_route(
+        prefix + "/publication/{publication_id}",
+        publication_controller.delete_publication,
+        methods=["DELETE"],
+        tags=["Publication"]
+    )
+
     # РУБРИКИ
     # Создание рубрики
     app.add_api_route(

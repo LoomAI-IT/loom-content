@@ -325,6 +325,48 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def delete_publication(
+            self,
+            publication_id: int,
+    ) -> None:
+        with self.tracer.start_as_current_span(
+                "PublicationService.delete_publication",
+                kind=SpanKind.INTERNAL,
+                attributes={"publication_id": publication_id}
+        ) as span:
+            try:
+                # Получаем публикацию для проверки существования и получения информации о файле
+                publications = await self.repo.get_publication_by_id(publication_id)
+                if not publications:
+                    raise ValueError(f"Publication {publication_id} not found")
+
+                publication = publications[0]
+
+                # Удаляем файл изображения из Storage если есть
+                if publication.image_fid and publication.image_name:
+                    try:
+                        await self.storage.delete(publication.image_fid, publication.image_name)
+                        self.logger.info(f"Deleted image file for publication {publication_id}", {
+                            "image_fid": publication.image_fid,
+                            "image_name": publication.image_name
+                        })
+                    except Exception as delete_error:
+                        self.logger.warning(f"Failed to delete image file: {str(delete_error)}", {
+                            "publication_id": publication_id,
+                            "image_fid": publication.image_fid
+                        })
+
+                # Удаляем публикацию из БД
+                await self.repo.delete_publication(publication_id)
+
+                self.logger.info(f"Publication {publication_id} deleted successfully")
+                span.set_status(Status(StatusCode.OK))
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def publish_publication(
             self,
             publication_id: int,

@@ -64,6 +64,13 @@ class IPublicationController(Protocol):
     ) -> JSONResponse: pass
 
     @abstractmethod
+    async def delete_publication(
+            self,
+            publication_id: int,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
     async def delete_publication_image(
             self,
             publication_id: int,
@@ -211,6 +218,13 @@ class IPublicationService(Protocol):
     ) -> None: pass
 
     @abstractmethod
+    async def delete_publication(
+            self,
+            publication_id: int,
+    ) -> None:
+        pass
+
+    @abstractmethod
     async def publish_publication(
             self,
             publication_id: int,
@@ -252,6 +266,9 @@ class IPublicationService(Protocol):
             publication_id: int
     ) -> tuple[io.BytesIO, str]:
         pass
+
+
+
 
     # РУБРИКИ
     @abstractmethod
@@ -356,6 +373,9 @@ class IPublicationRepo(Protocol):
             image_fid: str = None,
             image_name: str = None,
     ) -> None: pass
+
+    @abstractmethod
+    async def delete_publication(self, publication_id: int) -> None: pass
 
     @abstractmethod
     async def add_openai_rub_cost_to_publication(
