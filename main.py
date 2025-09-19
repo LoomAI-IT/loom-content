@@ -107,6 +107,7 @@ video_cut_service = VideoCutService(
     repo=video_cut_repo,
     storage=storage,
     organization_client=kontur_organization_client,
+    kontur_tg_bot_client=kontur_tg_bot_client,
     vizard_client=vizard_client,
 )
 
