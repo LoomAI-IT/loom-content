@@ -59,7 +59,6 @@ class VideoCutService(interface.IVideoCutService):
                     headline_switch=True,
                     project_name=youtube_video_reference
                 )
-                print(vizard_project, flush=True)
 
                 project_id = vizard_project["projectId"]
 
@@ -72,7 +71,7 @@ class VideoCutService(interface.IVideoCutService):
 
                 span.set_status(Status(StatusCode.OK))
 
-                return vizard_project.get("project_id")
+                return project_id
 
             except Exception as err:
                 span.record_exception(err)
@@ -97,10 +96,9 @@ class VideoCutService(interface.IVideoCutService):
             try:
                 vizard_project = (await self.repo.get_video_cuts_by_project_id(project_id))[0]
 
-                created_video_cuts = []
                 rub_cost_per_credit = 10
                 total_rub_cost = credit_usage * rub_cost_per_credit
-                rub_cost_per_video = total_rub_cost // len(created_video_cuts)
+                rub_cost_per_video = total_rub_cost // len(videos)
 
                 for video in videos:
                     # Скачиваем видео по URL
@@ -130,7 +128,6 @@ class VideoCutService(interface.IVideoCutService):
                         video_fid=upload_response.fid,
                         amount_rub=rub_cost_per_video
                     )
-                    created_video_cuts.append(video_cut_id)
 
                 span.set_status(Status(StatusCode.OK))
 
