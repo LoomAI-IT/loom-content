@@ -149,8 +149,8 @@ class VideoCutService(interface.IVideoCutService):
             name: str = None,
             description: str = None,
             tags: list[str] = None,
-            inst_source_id: int = None,
-            youtube_source_id: int = None,
+            inst_source: bool = None,
+            youtube_source: bool = None,
     ) -> None:
         with self.tracer.start_as_current_span(
                 "VideoCutService.change_video_cut",
@@ -163,8 +163,8 @@ class VideoCutService(interface.IVideoCutService):
                     name=name,
                     description=description,
                     tags=tags,
-                    inst_source_id=inst_source_id,
-                    youtube_source_id=youtube_source_id,
+                    inst_source=inst_source,
+                    youtube_source=youtube_source,
                 )
 
                 span.set_status(Status(StatusCode.OK))

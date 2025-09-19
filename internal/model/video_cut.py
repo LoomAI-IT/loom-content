@@ -10,8 +10,8 @@ class VideoCut:
     creator_id: int
     moderator_id: int
 
-    inst_source_id: int
-    youtube_source_id: int
+    inst_source: bool
+    youtube_source: bool
 
     youtube_video_reference: str
     name: str
@@ -25,7 +25,6 @@ class VideoCut:
     moderation_status: str
     moderation_comment: str
 
-    time_for_publication: datetime
     publication_at: datetime
     created_at: datetime
 
@@ -38,8 +37,8 @@ class VideoCut:
                 organization_id=row.organization_id,
                 creator_id=row.creator_id,
                 moderator_id=row.moderator_id,
-                inst_source_id=row.inst_source_id,
-                youtube_source_id=row.youtube_source_id,
+                inst_source=row.inst_source,
+                youtube_source=row.youtube_source,
                 youtube_video_reference=row.youtube_video_reference,
                 name=row.name,
                 description=row.description,
@@ -50,7 +49,6 @@ class VideoCut:
                 vizard_rub_cost=row.vizard_rub_cost,
                 moderation_status=row.moderation_status,
                 moderation_comment=row.moderation_comment,
-                time_for_publication=row.time_for_publication,
                 publication_at=row.publication_at,
                 created_at=row.created_at
             )
@@ -64,8 +62,8 @@ class VideoCut:
             "organization_id": self.organization_id,
             "creator_id": self.creator_id,
             "moderator_id": self.moderator_id,
-            "inst_source_id": self.inst_source_id,
-            "youtube_source_id": self.youtube_source_id,
+            "inst_source": self.inst_source,
+            "youtube_source": self.youtube_source,
             "youtube_video_reference": self.youtube_video_reference,
             "name": self.name,
             "description": self.description,
@@ -76,7 +74,6 @@ class VideoCut:
             "vizard_rub_cost": self.vizard_rub_cost,
             "moderation_status": self.moderation_status,
             "moderation_comment": self.moderation_comment,
-            "time_for_publication": self.time_for_publication.isoformat() if self.time_for_publication else None,
             "publication_at": self.publication_at.isoformat() if self.publication_at else None,
             "created_at": self.created_at.isoformat()
         }

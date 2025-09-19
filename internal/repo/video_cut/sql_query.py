@@ -50,8 +50,8 @@ change_video_cut = """
 UPDATE video_cuts
 SET 
     moderator_id = COALESCE(:moderator_id, moderator_id),
-    inst_source_id = COALESCE(:inst_source_id, inst_source_id),
-    youtube_source_id = COALESCE(:youtube_source_id, youtube_source_id),
+    inst_source = COALESCE(:inst_source, inst_source),
+    youtube_source = COALESCE(:youtube_source, youtube_source),
     name = COALESCE(:name, name),
     description = COALESCE(:description, description),
     tags = COALESCE(:tags, tags),

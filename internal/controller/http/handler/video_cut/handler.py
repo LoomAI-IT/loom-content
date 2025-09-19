@@ -1,5 +1,4 @@
 from opentelemetry.trace import Status, StatusCode, SpanKind
-from fastapi import Request
 
 from fastapi.responses import JSONResponse, StreamingResponse
 

@@ -249,8 +249,8 @@ class PublicationService(interface.IPublicationService):
     async def change_publication(
             self,
             publication_id: int,
-            vk_source_id: int = None,
-            tg_source_id: int = None,
+            vk_source: bool = None,
+            tg_source: bool = None,
             name: str = None,
             text: str = None,
             tags: list[str] = None,
@@ -308,8 +308,8 @@ class PublicationService(interface.IPublicationService):
                 # Обновляем публикацию
                 await self.repo.change_publication(
                     publication_id=publication_id,
-                    vk_source_id=vk_source_id,
-                    tg_source_id=tg_source_id,
+                    vk_source=vk_source,
+                    tg_source=tg_source,
                     name=name,
                     text=text,
                     tags=tags,
