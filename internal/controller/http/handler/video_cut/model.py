@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-from enum import Enum
 
 
 # НАРЕЗКА ВИДЕО
@@ -11,8 +10,23 @@ class GenerateVizardVideoCutsBody(BaseModel):
     youtube_video_reference: str
 
 
+class Video(BaseModel):
+    viralScore: str
+    relatedTopic: str
+    transcript: str
+    videoUrl: str
+    clipEditorUrl: str
+    videoMsDuration: int
+    videoId: int
+    title: str
+    viralReason: str
+
+
 class CreateVizardVideoCutsBody(BaseModel):
-    project_id: int
+    code: int
+    videos: list[Video]
+    projectId: int
+    creditsUsed: int
 
 
 class ChangeVideoCutBody(BaseModel):

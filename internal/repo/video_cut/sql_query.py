@@ -24,6 +24,7 @@ INSERT INTO video_cuts (
     youtube_video_reference,
     name,
     description,
+    transcript,
     tags,
     video_name,
     video_fid
@@ -35,6 +36,7 @@ VALUES (
     :youtube_video_reference,
     :name,
     :description,
+    :transcript,
     :tags,
     :video_name,
     :video_fid

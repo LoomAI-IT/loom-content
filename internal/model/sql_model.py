@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS video_cuts (
     youtube_video_reference TEXT NOT NULL,
     name TEXT DEFAULT '',
     description TEXT DEFAULT '',
+    transcript TEXT DEFAULT '',
     tags TEXT[] DEFAULT '{}',
     video_fid TEXT DEFAULT '',
     video_name TEXT DEFAULT '',

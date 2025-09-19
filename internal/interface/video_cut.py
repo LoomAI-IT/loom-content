@@ -21,7 +21,7 @@ class IVideoCutController(Protocol):
     @abstractmethod
     async def create_vizard_video_cuts(
             self,
-            body
+            body: CreateVizardVideoCutsBody
     ): pass
 
     @abstractmethod
@@ -73,6 +73,8 @@ class IVideoCutService(Protocol):
     async def create_vizard_video_cuts(
             self,
             project_id: int,
+            videos: list[Video],
+            credit_usage: int
     ): pass
 
     @abstractmethod
@@ -143,6 +145,7 @@ class IVideoCutRepo(Protocol):
             youtube_video_reference: str,
             name: str,
             description: str,
+            transcript: str,
             tags: list[str],
             video_name: str,
             video_fid: str,

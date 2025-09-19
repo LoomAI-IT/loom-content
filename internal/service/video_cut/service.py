@@ -5,6 +5,8 @@ from opentelemetry.trace import Status, StatusCode, SpanKind
 
 from internal import interface, model
 
+from internal.controller.http.handler.video_cut.model import *
+
 
 class VideoCutService(interface.IVideoCutService):
     def __init__(
@@ -77,6 +79,8 @@ class VideoCutService(interface.IVideoCutService):
     async def create_vizard_video_cuts(
             self,
             project_id: int,
+            videos: list[Video],
+            credit_usage: int
     ):
         with self.tracer.start_as_current_span(
                 "VideoCutService.create_vizard_video_cuts",

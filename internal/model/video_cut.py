@@ -16,6 +16,7 @@ class VideoCut:
     youtube_video_reference: str
     name: str
     description: str
+    transcript: str
     tags: list[str]
     video_fid: str
     video_name: str
@@ -42,11 +43,12 @@ class VideoCut:
                 youtube_video_reference=row.youtube_video_reference,
                 name=row.name,
                 description=row.description,
+                transcript=row.transcript,
                 tags=row.tags,
                 video_fid=row.video_fid,
                 video_name=row.video_name,
                 vizard_rub_cost=row.vizard_rub_cost,
-                moderation_status=ModerationStatus(row.moderation_status),
+                moderation_status=row.moderation_status,
                 moderation_comment=row.moderation_comment,
                 time_for_publication=row.time_for_publication,
                 publication_at=row.publication_at,
@@ -67,11 +69,12 @@ class VideoCut:
             "youtube_video_reference": self.youtube_video_reference,
             "name": self.name,
             "description": self.description,
+            "transcript": self.transcript,
             "tags": self.tags,
             "video_fid": self.video_fid,
             "video_name": self.video_name,
             "vizard_rub_cost": self.vizard_rub_cost,
-            "moderation_status": self.moderation_status.value,
+            "moderation_status": self.moderation_status,
             "moderation_comment": self.moderation_comment,
             "time_for_publication": self.time_for_publication.isoformat() if self.time_for_publication else None,
             "publication_at": self.publication_at.isoformat() if self.publication_at else None,
