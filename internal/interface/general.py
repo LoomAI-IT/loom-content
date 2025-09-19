@@ -112,7 +112,7 @@ class IVizardClient(Protocol):
     async def create_project(
             self,
             video_url: str,
-            video_type: str,
+            video_type: int,
             lang: str = "en",
             prefer_length: int = None,
             ratio_of_clip: int = None,

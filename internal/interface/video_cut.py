@@ -21,7 +21,7 @@ class IVideoCutController(Protocol):
     @abstractmethod
     async def create_vizard_video_cuts(
             self,
-            body: CreateVizardVideoCutsBody,
+            body
     ): pass
 
     @abstractmethod

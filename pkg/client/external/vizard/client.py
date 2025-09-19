@@ -75,11 +75,9 @@ class VizardClient(interface.IVizardClient):
 
     def __init__(
             self,
-            tel: interface.ITelemetry,
             api_key: str,
             plan: PricingPlan = PricingPlan.CREATOR
     ):
-        self.logger = tel.logger()
 
         self.api_key = api_key
         self.plan = plan
@@ -93,14 +91,13 @@ class VizardClient(interface.IVizardClient):
             443,
             prefix="/hvizard-server-front/open-api/v1",
             use_tracing=True,
-            logger=self.logger,
             use_https=True
         )
 
     async def create_project(
             self,
             video_url: str,
-            video_type: str,
+            video_type: int,
             lang: str = "en",
             prefer_length: int = None,
             ratio_of_clip: int = None,
@@ -265,3 +262,40 @@ class VizardClient(interface.IVizardClient):
                 price_info["notes"].append("Максимум 100 клипов за один запрос")
 
         return price_info
+
+
+import asyncio
+
+
+async def basic_example():
+    """Базовый пример создания проекта"""
+
+    # Инициализация клиента
+    client = VizardClient(
+        api_key="61be2e491cbd416099ada26810de0fb9",
+        plan=PricingPlan.CREATOR
+    )
+
+    vizard_project = await client.create_project(
+        video_url="https://www.youtube.com/watch?v=HcxOzTJpUV4",
+        video_type=2,
+        lang="ru",
+        prefer_length=0,
+        ratio_of_clip=1,  # 9:16 для вертикальных видео
+        remove_silence=True,
+        max_clip_number=3,
+        subtitle_switch=True,
+        emoji_switch=True,
+        highlight_switch=True,
+        headline_switch=True,
+        project_name=f"Yrrj"
+    )
+    print(f"{vizard_project=}", flush=True)
+
+
+
+
+# Запуск примеров
+if __name__ == "__main__":
+    print("=== Базовый пример ===")
+    asyncio.run(basic_example())

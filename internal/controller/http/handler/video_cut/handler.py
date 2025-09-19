@@ -64,14 +64,16 @@ class VideoCutController(interface.IVideoCutController):
 
     async def create_vizard_video_cuts(
             self,
-            body: CreateVizardVideoCutsBody
+            body
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "VideoCutController.create_vizard_video_cuts",
                 kind=SpanKind.INTERNAL
         ) as span:
             try:
-                await self.video_cut_service.create_vizard_video_cuts(body.project_id)
+                self.logger.info("Create video cut request", {"body": body})
+                print(f"Тело от визарда {body=}", flush=True)
+                pass
 
                 return JSONResponse(
                     content={"message": "Video cut created successfully"},

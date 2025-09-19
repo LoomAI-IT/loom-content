@@ -43,10 +43,10 @@ class VideoCutService(interface.IVideoCutService):
                 # Создаем проект в Vizard
                 vizard_project = await self.vizard_client.create_project(
                     video_url=youtube_video_reference,
-                    video_type="youtube",
+                    video_type=1,
                     lang="ru",
                     prefer_length=0,
-                    ratio_of_clip=9,  # 9:16 для вертикальных видео
+                    ratio_of_clip=1,  # 9:16 для вертикальных видео
                     remove_silence=True,
                     max_clip_number=3,
                     subtitle_switch=True,
