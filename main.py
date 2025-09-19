@@ -10,6 +10,7 @@ from pkg.client.external.openai.client import GPTClient
 
 from pkg.client.internal.kontur_authorization.client import KonturAuthorizationClient
 from pkg.client.internal.kontur_organization.client import KonturOrganizationClient
+from pkg.client.internal.kontur_tg_bot.client import KonturTgBotClient
 
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
@@ -66,6 +67,12 @@ kontur_organization_client = KonturOrganizationClient(
     tel=tel,
     host=cfg.kontur_organization_host,
     port=cfg.kontur_organization_port,
+    interserver_secret_key=cfg.interserver_secret_key
+)
+kontur_tg_bot_client = KonturTgBotClient(
+    tel=tel,
+    host=cfg.kontur_tg_bot_host,
+    port=cfg.kontur_tg_bot_port,
     interserver_secret_key=cfg.interserver_secret_key
 )
 

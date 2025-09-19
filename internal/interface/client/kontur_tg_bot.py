@@ -6,10 +6,9 @@ from internal import model
 
 class IKonturTgBotClient(Protocol):
     @abstractmethod
-    async def send_generated_video_cut(
+    async def notify_vizard_video_cut_generated(
             self,
-            video_cut_id: int,
-            name: str,
-            description: str,
-            tags: str,
+            account_id: int,
+            youtube_video_reference: str,
+            video_count: int
     ) -> None: pass

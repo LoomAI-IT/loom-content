@@ -17,6 +17,7 @@ class VideoCutService(interface.IVideoCutService):
             repo: interface.IVideoCutRepo,
             storage: interface.IStorage,
             organization_client: interface.IKonturOrganizationClient,
+            kontur_tg_bot_client: interface.IKonturTgBotClient,
             vizard_client: interface.IVizardClient,
 
     ):
@@ -25,6 +26,7 @@ class VideoCutService(interface.IVideoCutService):
         self.repo = repo
         self.storage = storage
         self.organization_client = organization_client
+        self.kontur_tg_bot_client = kontur_tg_bot_client
         self.vizard_client = vizard_client
 
     # НАРЕЗКА
@@ -129,6 +131,11 @@ class VideoCutService(interface.IVideoCutService):
                         vizard_rub_cost=rub_cost_per_video
                     )
 
+                await self.kontur_tg_bot_client.notify_vizard_video_cut_generated(
+                    vizard_project.creator_id,
+                    vizard_project.youtube_video_reference,
+                    len(videos),
+                )
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
