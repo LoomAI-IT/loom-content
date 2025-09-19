@@ -728,7 +728,6 @@ class PublicationService(interface.IPublicationService):
             organization_id: int,
             creator_id: int,
             youtube_video_reference: str,
-            time_for_publication: datetime = None
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.generate_video_cut",
@@ -745,7 +744,7 @@ class PublicationService(interface.IPublicationService):
                     video_url=youtube_video_reference,
                     video_type="youtube",
                     lang="ru",
-                    prefer_length=[15, 30, 60],
+                    prefer_length=0,
                     ratio_of_clip=9,  # 9:16 для вертикальных видео
                     remove_silence=True,
                     max_clip_number=3,

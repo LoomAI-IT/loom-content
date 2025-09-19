@@ -114,7 +114,7 @@ class IVizardClient(Protocol):
             video_url: str,
             video_type: str,
             lang: str = "en",
-            prefer_length: list[int] = None,
+            prefer_length: int = None,
             ratio_of_clip: int = None,
             template_id: int = None,
             remove_silence: bool = False,

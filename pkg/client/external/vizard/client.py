@@ -102,7 +102,7 @@ class VizardClient(interface.IVizardClient):
             video_url: str,
             video_type: str,
             lang: str = "en",
-            prefer_length: list[int] = None,
+            prefer_length: int = None,
             ratio_of_clip: int = None,
             template_id: int = None,
             remove_silence: bool = False,
@@ -143,7 +143,7 @@ class VizardClient(interface.IVizardClient):
             "lang": lang,
             "videoUrl": video_url,
             "videoType": video_type,
-            "preferLength": [l.value for l in (prefer_length or [ClipLength.AUTO])]
+            "preferLength": [prefer_length]
         }
 
         # Опциональные параметры
