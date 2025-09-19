@@ -238,7 +238,7 @@ def include_video_cut_handlers(
 
     # Изменение нарезки видео
     app.add_api_route(
-        prefix + "/video-cut/{video_cut_id}",
+        prefix + "/video-cut",
         video_cut_controller.change_video_cut,
         methods=["PUT"],
         tags=["VideoCut"]
