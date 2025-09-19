@@ -59,6 +59,7 @@ class VideoCutService(interface.IVideoCutService):
                     headline_switch=True,
                     project_name=f"Video cut for org {organization_id}"
                 )
+                print(vizard_project, flush=True)
 
                 project_id = vizard_project["projectId"]
 
