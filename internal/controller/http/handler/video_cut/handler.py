@@ -1,4 +1,5 @@
 from opentelemetry.trace import Status, StatusCode, SpanKind
+from fastapi import Request
 
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -64,13 +65,14 @@ class VideoCutController(interface.IVideoCutController):
 
     async def create_vizard_video_cuts(
             self,
-            body
+            request: Request,
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "VideoCutController.create_vizard_video_cuts",
                 kind=SpanKind.INTERNAL
         ) as span:
             try:
+                body = await request.json()
                 self.logger.info("Create video cut request", {"body": body})
                 print(f"Тело от визарда {body=}", flush=True)
                 pass

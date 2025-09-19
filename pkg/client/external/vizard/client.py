@@ -277,13 +277,13 @@ async def basic_example():
     )
 
     vizard_project = await client.create_project(
-        video_url="https://www.youtube.com/watch?v=HcxOzTJpUV4",
+        video_url="https://www.youtube.com/watch?v=M3eE7J_Ul3s",
         video_type=2,
         lang="ru",
         prefer_length=0,
         ratio_of_clip=1,  # 9:16 для вертикальных видео
         remove_silence=True,
-        max_clip_number=3,
+        max_clip_number=2,
         subtitle_switch=True,
         emoji_switch=True,
         highlight_switch=True,
