@@ -62,7 +62,8 @@ class KonturTgBotClient(interface.IKonturTgBotClient):
             try:
                 body = {
                     "filename": filename,
-                    "file_id": file_id
+                    "file_id": file_id,
+                    "interserver_secret_key": self.interserver_secret_key,
                 }
                 response = await self.client.post("/file/cache", json=body)
 
