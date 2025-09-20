@@ -63,10 +63,7 @@ db = PG(tel, cfg.db_user, cfg.db_pass, cfg.db_host, cfg.db_port, cfg.db_name)
 storage = AsyncWeed(cfg.weed_master_host, cfg.weed_master_port)
 
 
-session = AiohttpSession(api=TelegramAPIServer(
-    base=f'https://{cfg.domain}/telegram-bot-api',
-    file=f'https://{cfg.domain}/telegram-bot-files',
-))
+session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/telegram-bot-api'))
 bot = Bot(token=cfg.tg_bot_token, session=session)
 
 # Инициализация клиентов

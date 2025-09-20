@@ -319,8 +319,7 @@ class VideoCutController(interface.IVideoCutController):
                 })
 
                 video_io, content_type, video_name = await self.video_cut_service.download_video_cut(video_cut_id)
-                print(content_type, flush=True)
-                print(video_name, flush=True)
+
                 video_content = video_io.read()
                 file_size = len(video_content)
                 video_io = io.BytesIO(video_content)

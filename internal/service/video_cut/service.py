@@ -140,8 +140,6 @@ class VideoCutService(interface.IVideoCutService):
                         252166008,
                         video=BufferedInputFile(video_content, filename=video_name)
                     )
-                    file = await self.bot.get_file(resp.video.file_id)
-                    print(file.file_path, flush=True)
                     await self.kontur_tg_bot_client.set_cache_file(
                         video_name,
                         resp.video.file_id
