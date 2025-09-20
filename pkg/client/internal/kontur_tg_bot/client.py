@@ -49,3 +49,25 @@ class KonturTgBotClient(interface.IKonturTgBotClient):
                 span.record_exception(e)
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise
+
+    async def set_cache_file(
+            self,
+            filename: str,
+            file_id: str,
+    ) -> None:
+        with self.tracer.start_as_current_span(
+                "KonturTgBotClient.set_cache_file",
+                kind=SpanKind.CLIENT
+        ) as span:
+            try:
+                body = {
+                    "filename": filename,
+                    "file_id": file_id
+                }
+                response = await self.client.post("/file/cache", json=body)
+
+                span.set_status(Status(StatusCode.OK))
+            except Exception as e:
+                span.record_exception(e)
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                raise

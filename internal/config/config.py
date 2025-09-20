@@ -12,6 +12,9 @@ class Config:
         self.prefix = os.getenv("KONTUR_CONTENT_PREFIX", "/api/content")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
+        self.tg_bot_token: str = os.environ.get('KONTUR_TG_BOT_TOKEN')
+        self.domain: str = os.environ.get("KONTUR_DOMAIN")
+
         self.interserver_secret_key = os.getenv("KONTUR_INTERSERVER_SECRET_KEY")
 
         # PostgreSQL configuration

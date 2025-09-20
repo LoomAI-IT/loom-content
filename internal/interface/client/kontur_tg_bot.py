@@ -12,3 +12,10 @@ class IKonturTgBotClient(Protocol):
             youtube_video_reference: str,
             video_count: int
     ) -> None: pass
+
+    @abstractmethod
+    async def set_cache_file(
+            self,
+            filename: str,
+            file_id: str,
+    ) -> None: pass

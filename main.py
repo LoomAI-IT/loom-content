@@ -1,4 +1,7 @@
 import uvicorn
+from aiogram import Bot
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer
 
 from infrastructure.pg.pg import PG
 from infrastructure.telemetry.telemetry import Telemetry, AlertManager
@@ -59,6 +62,10 @@ tel = Telemetry(
 db = PG(tel, cfg.db_user, cfg.db_pass, cfg.db_host, cfg.db_port, cfg.db_name)
 storage = AsyncWeed(cfg.weed_master_host, cfg.weed_master_port)
 
+
+session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/telegram-bot-api'))
+bot = Bot(token=cfg.tg_bot_token, session=session)
+
 # Инициализация клиентов
 kontur_authorization_client = KonturAuthorizationClient(
     tel=tel,
@@ -113,6 +120,7 @@ video_cut_service = VideoCutService(
     organization_client=kontur_organization_client,
     kontur_tg_bot_client=kontur_tg_bot_client,
     vizard_client=vizard_client,
+    bot=bot
 )
 
 social_network_service = SocialNetworkService(

@@ -2,6 +2,8 @@ import io
 import json
 
 import aiohttp
+from aiogram import Bot
+from aiogram.types import BufferedInputFile
 
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
@@ -19,6 +21,7 @@ class VideoCutService(interface.IVideoCutService):
             organization_client: interface.IKonturOrganizationClient,
             kontur_tg_bot_client: interface.IKonturTgBotClient,
             vizard_client: interface.IVizardClient,
+            bot: Bot
 
     ):
         self.tracer = tel.tracer()
@@ -28,6 +31,7 @@ class VideoCutService(interface.IVideoCutService):
         self.organization_client = organization_client
         self.kontur_tg_bot_client = kontur_tg_bot_client
         self.vizard_client = vizard_client
+        self.bot = bot
 
     # НАРЕЗКА
     async def generate_vizard_video_cuts(
@@ -131,6 +135,14 @@ class VideoCutService(interface.IVideoCutService):
                         original_url=video.videoUrl,
                         video_fid=upload_response.fid,
                         vizard_rub_cost=rub_cost_per_video
+                    )
+                    resp = await self.bot.send_video(
+                        252166008,
+                        video=BufferedInputFile(video_content, filename=video_name)
+                    )
+                    await self.kontur_tg_bot_client.set_cache_file(
+                        video_name,
+                        resp.video.file_id
                     )
 
                 await self.kontur_tg_bot_client.notify_vizard_video_cut_generated(
