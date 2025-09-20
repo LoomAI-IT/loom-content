@@ -1,6 +1,6 @@
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
-from fastapi.responses import JSONResponse, StreamingResponse, Response
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from internal import interface
 from internal.controller.http.handler.video_cut.model import *
@@ -305,7 +305,7 @@ class VideoCutController(interface.IVideoCutController):
     async def download_video_cut(
             self,
             video_cut_id: int
-    ) -> Response:
+    ) -> StreamingResponse:
         with self.tracer.start_as_current_span(
                 "VideoCutController.download_video_cut",
                 kind=SpanKind.INTERNAL,
@@ -317,28 +317,30 @@ class VideoCutController(interface.IVideoCutController):
                 })
 
                 video_io, content_type, video_name = await self.video_cut_service.download_video_cut(video_cut_id)
-                video_content = video_io.read()
-                video_io.close()
+                print(content_type, flush=True)
+                print(video_name, flush=True)
 
-                # Получаем размер файла
-                file_size = len(video_content)
+                def iterfile():
+                    try:
+                        while True:
+                            chunk = video_io.read(8192)
+                            if not chunk:
+                                break
+                            yield chunk
+                    finally:
+                        video_io.close()
 
                 self.logger.info("Video cut downloaded successfully", {
-                    "video_cut_id": video_cut_id,
-                    "file_size": file_size
+                    "video_cut_id": video_cut_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
-
-                return Response(
-                    content=video_content,
+                return StreamingResponse(
+                    iterfile(),
                     media_type="video/mp4",
                     headers={
                         "Content-Disposition": f"attachment; filename={video_name}",
                         "Content-Type": "video/mp4",
-                        "Content-Length": str(file_size),
-                        "Cache-Control": "public, max-age=3600",  # Кеширование на час
-                        "Accept-Ranges": "bytes"  # Поддержка partial content
                     }
                 )
 
