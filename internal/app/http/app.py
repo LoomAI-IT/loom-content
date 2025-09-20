@@ -295,7 +295,7 @@ def include_video_cut_handlers(
 
     # Скачивание нарезки видео
     app.add_api_route(
-        prefix + "/video-cut/{video_cut_id}/download",
+        prefix + "/video-cut/{video_cut_id}/download.mp4",
         video_cut_controller.download_video_cut,
         methods=["GET"],
         tags=["VideoCut"],
