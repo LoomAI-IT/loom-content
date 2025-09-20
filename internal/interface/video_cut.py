@@ -2,7 +2,7 @@ import io
 from abc import abstractmethod
 from typing import Protocol
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.responses import StreamingResponse
 
 from internal import model
@@ -59,7 +59,7 @@ class IVideoCutController(Protocol):
     async def download_video_cut(
             self,
             video_cut_id: int
-    ) -> StreamingResponse:
+    ) -> Response:
         pass
 
 
