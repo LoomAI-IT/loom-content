@@ -39,6 +39,7 @@ class ChangeVideoCutBody(BaseModel):
 
 
 class ModerateVideoCutBody(BaseModel):
+    video_cut_id: int
     moderator_id: int
     moderation_status: str
     moderation_comment: Optional[str] = ""
