@@ -316,7 +316,7 @@ class VideoCutController(interface.IVideoCutController):
                     "video_cut_id": video_cut_id
                 })
 
-                video_io, content_type = await self.video_cut_service.download_video_cut(video_cut_id)
+                video_io, content_type, video_name = await self.video_cut_service.download_video_cut(video_cut_id)
 
                 def iterfile():
                     try:
@@ -337,7 +337,8 @@ class VideoCutController(interface.IVideoCutController):
                     iterfile(),
                     media_type=content_type or "video/mp4",
                     headers={
-                        "Content-Disposition": f"attachment; filename=video_cut_{video_cut_id}.mp4"
+                        "Content-Disposition": f"attachment; filename={video_name}",
+                        "Content-Type": "application/octet-stream",
                     }
                 )
 

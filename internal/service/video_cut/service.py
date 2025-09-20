@@ -104,11 +104,12 @@ class VideoCutService(interface.IVideoCutService):
 
                 for video in videos:
                     # Скачиваем видео по URL
-                    video_content = await self._download_video_from_url(video.videoUrl)
+                    video_content, content_type = await self._download_video_from_url(video.videoUrl)
                     video_io = io.BytesIO(video_content)
 
                     # Генерируем имя файла
-                    video_name = f"video_cut_{video.videoId}_{project_id}.mp4"
+                    extension = ".mp4"
+                    video_name = f"video_cut_{video.videoId}_{project_id}{extension}"
 
                     # Загружаем видео в Storage
                     upload_response = await self.storage.upload(video_io, video_name)
@@ -331,7 +332,7 @@ class VideoCutService(interface.IVideoCutService):
     async def download_video_cut(
             self,
             video_cut_id: int
-    ) -> tuple[io.BytesIO, str]:
+    ) -> tuple[io.BytesIO, str, str]:
         with self.tracer.start_as_current_span(
                 "VideoCutService.download_video_cut",
                 kind=SpanKind.INTERNAL,
@@ -345,39 +346,28 @@ class VideoCutService(interface.IVideoCutService):
 
                 video_cut = video_cuts[0]
 
-                if not video_cut.video_fid:
-                    # Проверяем статус проекта в Vizard
-                    project_status = await self.vizard_client.get_project_status(str(video_cut.project_id))
-
-                    if project_status.get("status") == "completed":
-                        # TODO: Получить URL готового видео и скачать его
-                        # video_url = project_status.get("video_url")
-                        # Пока возвращаем ошибку
-                        raise ValueError(f"Video cut {video_cut_id} is ready but not downloaded yet")
-                    else:
-                        raise ValueError(
-                            f"Video cut {video_cut_id} is not ready yet. Status: {project_status.get('status', 'unknown')}")
-
                 # Скачиваем из Storage
                 video_io, content_type = await self.storage.download(
                     video_cut.video_fid,
-                    video_cut.video_name or "video.mp4"
+                    video_cut.video_name
                 )
 
                 span.set_status(Status(StatusCode.OK))
-                return video_io, content_type
+                return video_io, content_type, video_cut.video_name
 
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
-    async def _download_video_from_url(self, video_url: str) -> bytes:
+    async def _download_video_from_url(self, video_url: str) -> tuple[bytes, str]:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(video_url) as response:
                     if response.status == 200:
-                        return await response.read()
+                        content_type = response.headers.get('content-type', 'video/mp4')
+                        content = await response.read()
+                        return content, content_type
                     else:
                         raise Exception(f"Failed to download video: HTTP {response.status}")
         except Exception as err:

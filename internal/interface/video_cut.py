@@ -130,7 +130,7 @@ class IVideoCutService(Protocol):
     async def download_video_cut(
             self,
             video_cut_id: int
-    ) -> tuple[io.BytesIO, str]:
+    ) -> tuple[io.BytesIO, str, str]:
         pass
 
 
