@@ -340,6 +340,7 @@ class VideoCutController(interface.IVideoCutController):
                     media_type="video/mp4",
                     headers={
                         "Content-Disposition": f"attachment; filename={video_name}",
+                        "Content-Type": "video/mp4",
                     }
                 )
 
