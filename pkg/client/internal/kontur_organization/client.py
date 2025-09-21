@@ -18,7 +18,6 @@ class KonturOrganizationClient(interface.IKonturOrganizationClient):
             port,
             prefix="/api/organization",
             use_tracing=True,
-            logger=logger,
         )
         self.tracer = tel.tracer()
         self.interserver_secret_key = interserver_secret_key
