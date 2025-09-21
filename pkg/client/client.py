@@ -364,7 +364,7 @@ class AsyncHTTPClient:
                             f"Ошибка: {e.__class__.__name__}: {str(e)}"
                         )
                     else:
-                        raise err
+                        raise e
 
                     raise
         return None

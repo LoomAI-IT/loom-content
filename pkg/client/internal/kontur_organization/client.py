@@ -12,7 +12,6 @@ class KonturOrganizationClient(interface.IKonturOrganizationClient):
             port: int,
             interserver_secret_key: str,
     ):
-        logger = tel.logger()
         self.client = AsyncHTTPClient(
             host,
             port,
