@@ -21,7 +21,7 @@ class KonturOrganizationClient(interface.IKonturOrganizationClient):
         self.tracer = tel.tracer()
         self.interserver_secret_key = interserver_secret_key
 
-    async def debit_balance(self, organization_id: int, amount_rub: int) -> None:
+    async def debit_balance(self, organization_id: int, amount_rub: str) -> None:
         with self.tracer.start_as_current_span(
                 "KonturOrganizationClient.debit_balance",
                 kind=SpanKind.CLIENT,

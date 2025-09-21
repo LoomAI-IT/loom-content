@@ -1,6 +1,7 @@
 import base64
 import io
 import uuid
+from decimal import Decimal
 
 from fastapi import UploadFile
 from opentelemetry.trace import Status, StatusCode, SpanKind
@@ -62,8 +63,7 @@ class PublicationService(interface.IPublicationService):
                     temperature=1,
                     llm_model="gpt-5"
                 )
-                usd_cost = generate_cost["total_cost"]
-                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
+                await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -113,8 +113,7 @@ class PublicationService(interface.IPublicationService):
                     llm_model="gpt-5"
                 )
 
-                usd_cost = generate_cost["total_cost"]
-                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
+                await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -200,8 +199,7 @@ class PublicationService(interface.IPublicationService):
                     image_url = f"https://{self.kontur_domain}/api/content/image/{upload_response.fid}/{image_name}"
                     images_url.append(image_url)
 
-                usd_cost = generate_cost["total_cost"]
-                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
+                await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
 
                 return images_url
 
@@ -808,9 +806,7 @@ class PublicationService(interface.IPublicationService):
                     "whisper-1",
                     "ru"
                 )
-                usd_cost = generate_cost["total_cost"]
-
-                await self.organization_client.debit_balance(organization_id, int(usd_cost * 90.0))
+                await self._debit_organization_balance(organization_id, generate_cost["total_cost"])
 
                 return transcribed_text
 
@@ -818,3 +814,9 @@ class PublicationService(interface.IPublicationService):
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
+
+    async def _debit_organization_balance(self, organization_id: int, usd_cost: float):
+        usd_cost = Decimal(str(usd_cost))
+        usd_to_rub_rate = Decimal("90.00")
+        rub_amount_str = str((usd_cost * usd_to_rub_rate).quantize(Decimal("0.01")))
+        await self.organization_client.debit_balance(organization_id, rub_amount_str)
