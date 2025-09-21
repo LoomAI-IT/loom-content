@@ -1,6 +1,6 @@
 import io
 from abc import abstractmethod
-from typing import Protocol, Sequence, Any
+from typing import Protocol, Sequence, Any, Literal
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
@@ -129,7 +129,7 @@ class IVizardClient(Protocol):
     ) -> dict: pass
 
 
-class ILLMClient(Protocol):
+class IOpenAIClient(Protocol):
     @abstractmethod
     async def generate_str(
             self,
@@ -138,7 +138,7 @@ class ILLMClient(Protocol):
             temperature: float,
             llm_model: str,
             pdf_file: bytes = None,
-    ) -> tuple[str, model.OpenAICostInfo]: pass
+    ) -> tuple[str, dict]: pass
 
     @abstractmethod
     async def generate_json(
@@ -148,35 +148,31 @@ class ILLMClient(Protocol):
             temperature: float,
             llm_model: str,
             pdf_file: bytes = None,
-    ) -> tuple[dict, model.OpenAICostInfo]: pass
+    ) -> tuple[dict, dict]: pass
 
     @abstractmethod
     async def transcribe_audio(
             self,
             audio_file: bytes,
-            filename: str = "audio.wav"
-    ) -> tuple[str, model.OpenAITranscriptionCostInfo]: pass
-
-    @abstractmethod
-    async def text_to_speech(
-            self,
-            text: str,
-            voice: str = "alloy",
-            tts_model: str = "tts-1-hd"
-    ) -> tuple[bytes, model.OpenAITTSCostInfo]: pass
+            filename: str,
+            audio_model: str,
+            language: str = None,
+            prompt: str = None,
+            response_format: Literal["json", "text", "srt", "verbose_json", "vtt"] = "verbose_json",
+            temperature: float = None,
+            timestamp_granularities: list[Literal["word", "segment"]] = None
+    ) -> tuple[str, dict]: pass
 
     @abstractmethod
     async def generate_image(
             self,
             prompt: str,
-            llm_model: str = "dall-e-3",
-            size: str = "1024x1024",
-            quality: str = "standard",
-            style: str = "vivid",
+            image_model: Literal["dall-e-3", "gpt-image-1"] = "gpt-image-1",
+            size: str = None,
+            quality: str = None,
+            style: Literal["vivid", "natural"] = None,
             n: int = 1,
-            response_format: str = "url",
-            user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+    ) -> tuple[list[str], dict]: pass
 
     @abstractmethod
     async def edit_image(
@@ -184,23 +180,10 @@ class ILLMClient(Protocol):
             image: bytes,
             prompt: str,
             mask: bytes = None,
-            llm_model: str = "dall-e-2",
-            size: str = "1024x1024",
+            image_model: Literal["gpt-image-1"] = "gpt-image-1",
+            size: str = None,
             n: int = 1,
-            response_format: str = "url",
-            user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
-
-    @abstractmethod
-    async def create_image_variation(
-            self,
-            image: bytes,
-            llm_model: str = "dall-e-2",
-            size: str = "1024x1024",
-            n: int = 1,
-            response_format: str = "url",
-            user: str = None
-    ) -> tuple[list[str], model.OpenAIImageGenerationInfo]: pass
+    ) -> tuple[list[str], dict]: pass
 
     @abstractmethod
     async def download_image_from_url(

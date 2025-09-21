@@ -30,7 +30,11 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def generate_publication_image(
             self,
-            body: GeneratePublicationImageBody,
+            category_id: int = Form(...),
+            publication_text: str = Form(...),
+            text_reference: str = Form(...),
+            prompt: str | None = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse:
         pass
 
@@ -102,6 +106,13 @@ class IPublicationController(Protocol):
             publication_id: int
     ) -> StreamingResponse:
         pass
+
+    @abstractmethod
+    async def download_other_image(
+            self,
+            image_fid: str,
+            image_name: str
+    ) -> StreamingResponse: pass
 
     # РУБРИКИ
     @abstractmethod
@@ -184,8 +195,9 @@ class IPublicationService(Protocol):
             category_id: int,
             publication_text: str,
             text_reference: str,
-            prompt: str = None
-    ) -> str: pass
+            prompt: str = None,
+            image_file: UploadFile = None
+    ) -> list[str]: pass
 
     @abstractmethod
     async def create_publication(
@@ -221,12 +233,6 @@ class IPublicationService(Protocol):
             publication_id: int,
     ) -> None:
         pass
-
-    @abstractmethod
-    async def publish_publication(
-            self,
-            publication_id: int,
-    ) -> None: pass
 
     @abstractmethod
     async def delete_publication_image(
@@ -265,8 +271,12 @@ class IPublicationService(Protocol):
     ) -> tuple[io.BytesIO, str]:
         pass
 
-
-
+    @abstractmethod
+    async def download_other_image(
+            self,
+            image_fid: str,
+            image_name: str
+    ) -> tuple[io.BytesIO, str]: pass
 
     # РУБРИКИ
     @abstractmethod

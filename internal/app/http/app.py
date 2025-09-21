@@ -133,6 +133,14 @@ def include_publication_handlers(
     )
 
     app.add_api_route(
+        prefix + "/image/{image_fid}/{image_name}",
+        publication_controller.download_other_image,
+        methods=["GET"],
+        tags=["Publication"],
+        response_class=StreamingResponse,
+    )
+
+    app.add_api_route(
         prefix + "/publication/{publication_id}",
         publication_controller.delete_publication,
         methods=["DELETE"],

@@ -9,7 +9,7 @@ from infrastructure.weedfs.weedfs import AsyncWeed
 
 
 from pkg.client.external.vizard.client import VizardClient
-from pkg.client.external.openai.client import GPTClient
+from pkg.client.external.openai.client import OpenAIClient
 
 from pkg.client.internal.kontur_authorization.client import KonturAuthorizationClient
 from pkg.client.internal.kontur_organization.client import KonturOrganizationClient
@@ -86,7 +86,7 @@ kontur_tg_bot_client = KonturTgBotClient(
     interserver_secret_key=cfg.interserver_secret_key
 )
 
-openai_client = GPTClient(
+openai_client = OpenAIClient(
     tel=tel,
     api_key=cfg.openai_api_key
 )
@@ -106,11 +106,12 @@ publication_prompt_generator = PublicationPromptGenerator()
 publication_service = PublicationService(
     tel=tel,
     repo=publication_repo,
-    llm_client=openai_client,
+    openai_client=openai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=kontur_organization_client,
     vizard_client=vizard_client,
+    kontur_domain=cfg.domain
 )
 
 video_cut_service = VideoCutService(

@@ -95,38 +95,40 @@ class PublicationController(interface.IPublicationController):
 
     async def generate_publication_image(
             self,
-            body: GeneratePublicationImageBody,
+            category_id: int = Form(...),
+            publication_text: str = Form(...),
+            text_reference: str = Form(...),
+            prompt: str | None = Form(None),
+            image_file: UploadFile = File(None),
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.generate_publication_image",
                 kind=SpanKind.INTERNAL,
                 attributes={
-                    "category_id": body.category_id
+                    "category_id": category_id
                 }
         ) as span:
             try:
                 self.logger.info("Generate publication image request", {
-                    "category_id": body.category_id
+                    "category_id": category_id
                 })
 
-                image_url = await self.publication_service.generate_publication_image(
-                    category_id=body.category_id,
-                    publication_text=body.publication_text,
-                    text_reference=body.text_reference,
-                    prompt=body.prompt
+                images_url = await self.publication_service.generate_publication_image(
+                    category_id=category_id,
+                    publication_text=publication_text,
+                    text_reference=text_reference,
+                    prompt=prompt,
+                    image_file=image_file,
                 )
 
                 self.logger.info("Publication image generated successfully", {
-                    "category_id": body.category_id
+                    "category_id": category_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Publication image generated successfully",
-                        "image_url": image_url
-                    }
+                    content=images_url
                 )
 
             except Exception as err:
@@ -457,6 +459,50 @@ class PublicationController(interface.IPublicationController):
                     media_type=content_type or "image/png",
                     headers={
                         "Content-Disposition": f"attachment; filename=publication_{publication_id}_image.png"
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def download_other_image(
+            self,
+            image_fid: str,
+            image_name: str
+    ) -> StreamingResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.download_other_image",
+                kind=SpanKind.INTERNAL
+        ) as span:
+            try:
+                self.logger.info("Download other image request", {
+                    "image_fid": image_fid
+                })
+
+                image_io, content_type = await self.publication_service.download_other_image(image_fid, image_name)
+
+                def iterfile():
+                    try:
+                        while True:
+                            chunk = image_io.read(8192)
+                            if not chunk:
+                                break
+                            yield chunk
+                    finally:
+                        image_io.close()
+
+                self.logger.info("Other image downloaded successfully", {
+                    "image_fid": image_fid
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return StreamingResponse(
+                    iterfile(),
+                    media_type=content_type or "image/png",
+                    headers={
+                        "Content-Disposition": f"attachment; filename={image_name}"
                     }
                 )
 

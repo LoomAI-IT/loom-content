@@ -1,6 +1,6 @@
+import base64
 import io
 import uuid
-from datetime import datetime
 
 from fastapi import UploadFile
 from opentelemetry.trace import Status, StatusCode, SpanKind
@@ -13,21 +13,23 @@ class PublicationService(interface.IPublicationService):
             self,
             tel: interface.ITelemetry,
             repo: interface.IPublicationRepo,
-            llm_client: interface.ILLMClient,
+            openai_client: interface.IOpenAIClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.IKonturOrganizationClient,
             vizard_client: interface.IVizardClient,
+            kontur_domain: str
 
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
-        self.llm_client = llm_client
+        self.openai_client = openai_client
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
         self.vizard_client = vizard_client
+        self.kontur_domain = kontur_domain
 
     # ПУБЛИКАЦИИ
     async def generate_publication_text(
@@ -54,12 +56,13 @@ class PublicationService(interface.IPublicationService):
                     text_reference
                 )
 
-                publication_data, cost_info = await self.llm_client.generate_json(
+                publication_data, generate_cost = await self.openai_client.generate_json(
                     history=[{"role": "user", "content": "Создай пост для социальной сети"}],
                     system_prompt=text_system_prompt,
                     temperature=1,
                     llm_model="gpt-5"
                 )
+                usd_cost = generate_cost["total_cost"]
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -102,12 +105,14 @@ class PublicationService(interface.IPublicationService):
                     )
 
                 # Генерируем новый текст
-                publication_data, text_cost = await self.llm_client.generate_json(
+                publication_data, generate_cost = await self.openai_client.generate_json(
                     history=[{"role": "user", "content": "Создай улучшенный пост для социальной сети"}],
                     system_prompt=text_system_prompt,
                     temperature=1,
                     llm_model="gpt-5"
                 )
+
+                usd_cost = generate_cost["total_cost"]
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -122,8 +127,9 @@ class PublicationService(interface.IPublicationService):
             category_id: int,
             publication_text: str,
             text_reference: str,
-            prompt: str = None
-    ) -> str:
+            prompt: str = None,
+            image_file: UploadFile = None
+    ) -> list[str]:
         with self.tracer.start_as_current_span(
                 "PublicationService.generate_publication_image_standalone",
                 kind=SpanKind.INTERNAL,
@@ -144,26 +150,40 @@ class PublicationService(interface.IPublicationService):
                         publication_text,
                         prompt
                     )
+                    image_content = await image_file.read()
+                    images, generate_cost = await self.openai_client.edit_image(
+                        image=image_content,
+                        prompt=image_system_prompt,
+                        image_model="gpt-image-1",
+                        size="1024x1536",
+                    )
                 else:
                     image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
                         category.prompt_for_image_style,
                         publication_text
                     )
 
-                # Генерируем изображение
-                image_urls, image_cost = await self.llm_client.generate_image(
-                    prompt=image_system_prompt,
-                    llm_model="dall-e-3",
-                    size="1024x1024",
-                    quality="standard",
-                    style="vivid"
-                )
+                    images, generate_cost = await self.openai_client.generate_image(
+                        prompt=image_system_prompt,
+                        image_model="gpt-image-1",
+                        size="1024x1536",
+                        quality="high",
+                    )
 
-                if not image_urls:
-                    raise ValueError("Failed to generate image")
+                images_url = []
+                for image in images:
+                    image_bytes = base64.b64decode(image)
+                    image_name = "open_ai_image.png"
 
-                span.set_status(Status(StatusCode.OK))
-                return image_urls[0]  # Возвращаем URL первого изображения
+                    upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
+
+                    image_url = f"https://{self.kontur_domain}/api/content/image/{upload_response.fid}/{image_name}"
+                    images_url.append(image_url)
+
+                usd_cost = generate_cost["total_cost"]
+
+                return images_url
+
 
             except Exception as err:
                 span.record_exception(err)
@@ -224,7 +244,7 @@ class PublicationService(interface.IPublicationService):
 
                 elif image_url:
                     # Загружаем изображение по URL (старая логика)
-                    image_content = await self.llm_client.download_image_from_url(image_url)
+                    image_content = await self.openai_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
                     image_name = f"{uuid.uuid4().hex}.png"
 
@@ -296,7 +316,7 @@ class PublicationService(interface.IPublicationService):
 
                 elif image_url:
                     # Загружаем изображение по URL
-                    image_content = await self.llm_client.download_image_from_url(image_url)
+                    image_content = await self.openai_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
                     image_name = f"{uuid.uuid4().hex}.png"
 
@@ -358,44 +378,6 @@ class PublicationService(interface.IPublicationService):
                 await self.repo.delete_publication(publication_id)
 
                 self.logger.info(f"Publication {publication_id} deleted successfully")
-                span.set_status(Status(StatusCode.OK))
-
-            except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
-                raise err
-
-    async def publish_publication(
-            self,
-            publication_id: int,
-    ) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationService.publish_publication",
-                kind=SpanKind.INTERNAL,
-                attributes={"publication_id": publication_id}
-        ) as span:
-            try:
-                # Получаем публикацию
-                publications = await self.repo.get_publication_by_id(publication_id)
-                if not publications:
-                    raise ValueError(f"Publication {publication_id} not found")
-
-                publication = publications[0]
-
-                # Проверяем статус
-                if publication.moderation_status != model.ModerationStatus.APPROVED:
-                    raise ValueError(f"Publication must be approved before publishing")
-
-                # Обновляем статус и время публикации
-                await self.repo.change_publication(
-                    publication_id=publication_id,
-                    moderation_status=model.ModerationStatus.PUBLISHED.value,
-                    publication_at=datetime.utcnow()
-                )
-
-                # TODO: Здесь нужно добавить логику отправки в соцсети
-                # Например, через VK, Instagram, YouTube клиенты
-
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
@@ -562,6 +544,33 @@ class PublicationService(interface.IPublicationService):
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
+
+    async def download_other_image(
+            self,
+            image_fid: str,
+            image_name: str
+    ) -> tuple[io.BytesIO, str]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.download_other_image",
+                kind=SpanKind.INTERNAL,
+                attributes={"image_fid": image_fid}
+        ) as span:
+            try:
+
+                # Скачиваем из Storage
+                image_io, content_type = await self.storage.download(
+                    image_fid,
+                    "open_ai_image.png"
+                )
+
+                span.set_status(Status(StatusCode.OK))
+                return image_io, content_type
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
 
     # РУБРИКИ
     async def create_category(
@@ -772,7 +781,15 @@ class PublicationService(interface.IPublicationService):
         ) as span:
             try:
                 audio_content = await audio_file.read()
-                transcribed_text, cost = await self.llm_client.transcribe_audio(audio_content, audio_file.filename)
+                transcribed_text, generate_cost = await self.openai_client.transcribe_audio(
+                    audio_content,
+                    audio_file.filename,
+                    "whisper-1",
+                    "ru"
+                )
+                usd_cost = generate_cost["total_cost"]
+
+
                 return transcribed_text
 
             except Exception as err:
