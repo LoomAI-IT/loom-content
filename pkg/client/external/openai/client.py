@@ -253,7 +253,7 @@ class OpenAIClient(interface.IOpenAIClient):
                     "model": image_model,
                     "prompt": prompt,
                     "n": n,
-                    "response_format": "b64_json"
+                    # "response_format": "b64_json"
                 }
 
                 # Настройка параметров в зависимости от модели

@@ -156,6 +156,7 @@ class PublicationService(interface.IPublicationService):
                         prompt=image_system_prompt,
                         image_model="gpt-image-1",
                         size="1024x1536",
+                        n=3
                     )
                 else:
                     image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
