@@ -393,7 +393,7 @@ class OpenAIClient(interface.IOpenAIClient):
                     "prompt": prompt,
                     "model": image_model,
                     "n": n,
-                    "response_format": "b64_json"
+                    # "response_format": "b64_json"
                 }
 
                 # Добавляем маску если есть
