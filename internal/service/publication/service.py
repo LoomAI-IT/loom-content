@@ -158,8 +158,9 @@ class PublicationService(interface.IPublicationService):
                             image=image_content,
                             prompt=image_system_prompt,
                             image_model="gpt-image-1",
-                            size="1024x1536",
-                            n=3
+                            size="1024x1024",
+                            quality="low",
+                            n=1
                         )
                     else:
                         image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
@@ -170,9 +171,9 @@ class PublicationService(interface.IPublicationService):
                         images, generate_cost = await self.openai_client.generate_image(
                             prompt=image_system_prompt,
                             image_model="gpt-image-1",
-                            size="1024x1536",
-                            quality="high",
-                            n=3,
+                            size="1024x1024",
+                            quality="low",
+                            n=1,
                         )
 
                 else:
@@ -184,9 +185,9 @@ class PublicationService(interface.IPublicationService):
                     images, generate_cost = await self.openai_client.generate_image(
                         prompt=image_system_prompt,
                         image_model="gpt-image-1",
-                        size="1024x1536",
-                        quality="high",
-                        n=3,
+                        size="1024x1024",
+                        quality="low",
+                        n=1,
                     )
 
                 images_url = []

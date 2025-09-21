@@ -337,25 +337,11 @@ class OpenAIClient(interface.IOpenAIClient):
             image: bytes,
             prompt: str,
             mask: bytes = None,
+            quality: str = None,
             image_model: Literal["gpt-image-1"] = "gpt-image-1",
             size: str = None,
             n: int = 1,
     ) -> tuple[list[str], dict]:
-        """
-        Редактирует существующее изображение на основе текстового промпта.
-        Поддерживается только для gpt-image-1.
-
-        Args:
-            image: Исходное изображение (PNG/JPEG, до 50MB)
-            prompt: Описание желаемых изменений
-            mask: Маска изображения (PNG с прозрачностью в местах редактирования)
-            image_model: Модель для редактирования (только "gpt-image-1")
-            size: Размер результата ("1024x1024", "1024x1536", "1536x1024")
-            n: Количество вариантов (1-10)
-
-        Returns:
-            Tuple[список отредактированных изображений, детали стоимости]
-        """
 
         with self.tracer.start_as_current_span(
                 "OpenAIClient.edit_image",
@@ -400,6 +386,10 @@ class OpenAIClient(interface.IOpenAIClient):
                 if mask_file:
                     params["mask"] = mask_file
 
+                if quality:
+                    if quality not in ["low", "medium", "high"]:
+                        params["quality"] = quality
+
                 # Размер
                 if size:
                     if size not in ["1024x1024", "1024x1536", "1536x1024"]:
@@ -420,7 +410,7 @@ class OpenAIClient(interface.IOpenAIClient):
                 cost_details = self._calculate_image_cost(
                     image_model=image_model,
                     operation="edit",
-                    quality="high",
+                    quality=quality,
                     size=params.get("size"),
                     count=len(images)
                 )

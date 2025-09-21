@@ -180,6 +180,7 @@ class IOpenAIClient(Protocol):
             image: bytes,
             prompt: str,
             mask: bytes = None,
+            quality: str = None,
             image_model: Literal["gpt-image-1"] = "gpt-image-1",
             size: str = None,
             n: int = 1,
