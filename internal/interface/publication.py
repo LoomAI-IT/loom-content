@@ -167,6 +167,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def transcribe_audio(
             self,
+            organization_id: int = Form(...),
             audio_file: UploadFile = File(...),
     ) -> JSONResponse:
         pass
@@ -345,6 +346,7 @@ class IPublicationService(Protocol):
     async def transcribe_audio(
             self,
             audio_file: UploadFile,
+            organization_id: int,
     ) -> str:
         pass
 

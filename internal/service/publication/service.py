@@ -63,6 +63,7 @@ class PublicationService(interface.IPublicationService):
                     llm_model="gpt-5"
                 )
                 usd_cost = generate_cost["total_cost"]
+                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -113,6 +114,7 @@ class PublicationService(interface.IPublicationService):
                 )
 
                 usd_cost = generate_cost["total_cost"]
+                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
 
                 span.set_status(Status(StatusCode.OK))
                 return publication_data
@@ -198,6 +200,7 @@ class PublicationService(interface.IPublicationService):
                     images_url.append(image_url)
 
                 usd_cost = generate_cost["total_cost"]
+                await self.organization_client.debit_balance(category.organization_id, int(usd_cost * 90.0))
 
                 return images_url
 
@@ -588,7 +591,6 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
-
     # РУБРИКИ
     async def create_category(
             self,
@@ -791,6 +793,7 @@ class PublicationService(interface.IPublicationService):
     async def transcribe_audio(
             self,
             audio_file: UploadFile,
+            organization_id: int,
     ) -> str:
         with self.tracer.start_as_current_span(
                 "PublicationService.transcribe_audio",
@@ -806,6 +809,7 @@ class PublicationService(interface.IPublicationService):
                 )
                 usd_cost = generate_cost["total_cost"]
 
+                await self.organization_client.debit_balance(organization_id, int(usd_cost * 90.0))
 
                 return transcribed_text
 

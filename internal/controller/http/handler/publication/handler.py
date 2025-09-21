@@ -861,6 +861,7 @@ class PublicationController(interface.IPublicationController):
 
     async def transcribe_audio(
             self,
+            organization_id: int = Form(...),
             audio_file: UploadFile = File(...),
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
@@ -868,7 +869,7 @@ class PublicationController(interface.IPublicationController):
                 kind=SpanKind.INTERNAL
         ) as span:
             try:
-                text = await self.publication_service.transcribe_audio(audio_file)
+                text = await self.publication_service.transcribe_audio(audio_file, organization_id)
 
                 return JSONResponse(
                     content={"text": text},
