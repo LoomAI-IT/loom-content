@@ -145,19 +145,34 @@ class PublicationService(interface.IPublicationService):
 
                 # Генерируем промпт для изображения
                 if prompt:
-                    image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
-                        category.prompt_for_image_style,
-                        publication_text,
-                        prompt
-                    )
-                    image_content = await image_file.read()
-                    images, generate_cost = await self.openai_client.edit_image(
-                        image=image_content,
-                        prompt=image_system_prompt,
-                        image_model="gpt-image-1",
-                        size="1024x1536",
-                        n=3
-                    )
+                    if image_file:
+                        image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
+                            category.prompt_for_image_style,
+                            publication_text,
+                            prompt
+                        )
+                        image_content = await image_file.read()
+                        images, generate_cost = await self.openai_client.edit_image(
+                            image=image_content,
+                            prompt=image_system_prompt,
+                            image_model="gpt-image-1",
+                            size="1024x1536",
+                            n=3
+                        )
+                    else:
+                        image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
+                            category.prompt_for_image_style,
+                            publication_text,
+                            prompt
+                        )
+                        images, generate_cost = await self.openai_client.generate_image(
+                            prompt=image_system_prompt,
+                            image_model="gpt-image-1",
+                            size="1024x1536",
+                            quality="high",
+                            n=3,
+                        )
+
                 else:
                     image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
                         category.prompt_for_image_style,
