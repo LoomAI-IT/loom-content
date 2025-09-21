@@ -169,6 +169,7 @@ class PublicationService(interface.IPublicationService):
                         image_model="gpt-image-1",
                         size="1024x1536",
                         quality="high",
+                        n=3,
                     )
 
                 images_url = []
