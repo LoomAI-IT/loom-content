@@ -192,7 +192,7 @@ class OpenAIClient(interface.IOpenAIClient):
                     api_params["timestamp_granularities"] = timestamp_granularities
 
                 # Выполняем транскрипцию
-                transcript = await self.client.audio.transcriptions.create(**api_params)
+                transcript: TranscriptionVerbose  = await self.client.audio.transcriptions.create(**api_params)
 
 
                 cost_details = self._calculate_transcription_cost(audio_model, transcript)
@@ -200,7 +200,7 @@ class OpenAIClient(interface.IOpenAIClient):
 
                 span.set_status(Status(StatusCode.OK))
 
-                return transcript, cost_details
+                return transcript.text, cost_details
 
             except Exception as err:
                 span.record_exception(err)
