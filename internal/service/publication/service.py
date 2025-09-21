@@ -160,7 +160,7 @@ class PublicationService(interface.IPublicationService):
                             image_model="gpt-image-1",
                             size="1024x1024",
                             quality="low",
-                            n=1
+                            n=2
                         )
                     else:
                         image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
@@ -173,7 +173,7 @@ class PublicationService(interface.IPublicationService):
                             image_model="gpt-image-1",
                             size="1024x1024",
                             quality="low",
-                            n=1,
+                            n=2,
                         )
 
                 else:
@@ -187,7 +187,7 @@ class PublicationService(interface.IPublicationService):
                         image_model="gpt-image-1",
                         size="1024x1024",
                         quality="low",
-                        n=1,
+                        n=2,
                     )
 
                 images_url = []
