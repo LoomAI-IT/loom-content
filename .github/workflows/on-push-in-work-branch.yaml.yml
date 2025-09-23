@@ -126,7 +126,7 @@ jobs:
                     
                     if [ "$SUCCESS" = false ]; then
                         docker logs -f kontur-content
-                        python3 script/tg_bot_alert.py "❌ Ветка kontur-tg-bot/${{ env.BRANCH_NAME }} не обновлена на сервере ${{ env.SERVER_HOST }}!
+                        python3 script/tg_bot_alert.py "❌ Ветка kontur-content/${{ env.BRANCH_NAME }} не обновлена на сервере ${{ env.SERVER_HOST }}!
                     📋 Подробности в Actions: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                     
                         exit 1
