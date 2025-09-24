@@ -6,6 +6,7 @@ from datetime import datetime
 class YouTube:
     id: int
     organization_id: int
+    autoselect: bool
 
     created_at: datetime
 
@@ -15,6 +16,7 @@ class YouTube:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                autoselect=row.autoselect,
                 created_at=row.created_at,
             )
             for row in rows
@@ -24,6 +26,7 @@ class YouTube:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "autoselect": self.autoselect,
             "created_at": self.created_at.isoformat()
         }
 
@@ -31,6 +34,7 @@ class YouTube:
 class Instagram:
     id: int
     organization_id: int
+    autoselect: bool
 
     created_at: datetime
 
@@ -40,6 +44,7 @@ class Instagram:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                autoselect=row.autoselect,
                 created_at=row.created_at,
             )
             for row in rows
@@ -49,6 +54,7 @@ class Instagram:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "autoselect": self.autoselect,
             "created_at": self.created_at.isoformat()
         }
 
@@ -56,6 +62,7 @@ class Instagram:
 class Telegram:
     id: int
     organization_id: int
+    autoselect: bool
 
     created_at: datetime
 
@@ -65,6 +72,7 @@ class Telegram:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                autoselect=row.autoselect,
                 created_at=row.created_at,
             )
             for row in rows
@@ -74,6 +82,7 @@ class Telegram:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "autoselect": self.autoselect,
             "created_at": self.created_at.isoformat()
         }
 
@@ -81,6 +90,7 @@ class Telegram:
 class Vkontakte:
     id: int
     organization_id: int
+    autoselect: bool
 
     created_at: datetime
 
@@ -90,6 +100,7 @@ class Vkontakte:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
+                autoselect=row.autoselect,
                 created_at=row.created_at,
             )
             for row in rows
@@ -99,5 +110,6 @@ class Vkontakte:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
+            "autoselect": self.autoselect,
             "created_at": self.created_at.isoformat()
         }
