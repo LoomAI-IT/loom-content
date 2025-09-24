@@ -5,9 +5,7 @@ INSERT INTO publications (
     category_id,
     creator_id,
     text_reference,
-    name,
     text,
-    tags,
     moderation_status
 )
 VALUES (
@@ -15,9 +13,7 @@ VALUES (
     :category_id,
     :creator_id,
     :text_reference,
-    :name,
     :text,
-    :tags,
     :moderation_status
 )
 RETURNING id;
@@ -29,9 +25,7 @@ SET
     moderator_id = COALESCE(:moderator_id, moderator_id),
     vk_source = COALESCE(:vk_source, vk_source),
     tg_source = COALESCE(:tg_source, tg_source),
-    name = COALESCE(:name, name),
     text = COALESCE(:text, text),
-    tags = COALESCE(:tags, tags),
     moderation_status = COALESCE(:moderation_status, moderation_status),
     moderation_comment = COALESCE(:moderation_comment, moderation_comment),
     publication_at = COALESCE(:publication_at, publication_at),

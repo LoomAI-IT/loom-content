@@ -215,9 +215,7 @@ class PublicationService(interface.IPublicationService):
             category_id: int,
             creator_id: int,
             text_reference: str,
-            name: str,
             text: str,
-            tags: list[str],
             moderation_status: str,
             image_url: str = None,
             image_file: UploadFile = None,
@@ -238,9 +236,7 @@ class PublicationService(interface.IPublicationService):
                     category_id=category_id,
                     creator_id=creator_id,
                     text_reference=text_reference,
-                    name=name,
                     text=text,
-                    tags=tags,
                     moderation_status=moderation_status
                 )
 
@@ -290,9 +286,7 @@ class PublicationService(interface.IPublicationService):
             publication_id: int,
             vk_source: bool = None,
             tg_source: bool = None,
-            name: str = None,
             text: str = None,
-            tags: list[str] = None,
             image_url: str = None,
             image_file: UploadFile = None,
     ) -> None:
@@ -348,9 +342,7 @@ class PublicationService(interface.IPublicationService):
                     publication_id=publication_id,
                     vk_source=vk_source,
                     tg_source=tg_source,
-                    name=name,
                     text=text,
-                    tags=tags,
                     image_fid=image_fid,
                     image_name=image_name,
                 )

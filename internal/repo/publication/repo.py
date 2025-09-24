@@ -21,9 +21,7 @@ class PublicationRepo(interface.IPublicationRepo):
             category_id: int,
             creator_id: int,
             text_reference: str,
-            name: str,
             text: str,
-            tags: list[str],
             moderation_status: str,
     ) -> int:
         with self.tracer.start_as_current_span(
@@ -41,9 +39,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'category_id': category_id,
                     'creator_id': creator_id,
                     'text_reference': text_reference,
-                    'name': name,
                     'text': text,
-                    'tags': tags,
                     'moderation_status': moderation_status,
                 }
 
@@ -62,9 +58,7 @@ class PublicationRepo(interface.IPublicationRepo):
             moderator_id: int = None,
             vk_source: bool = None,
             tg_source: bool = None,
-            name: str = None,
             text: str = None,
-            tags: list[str] = None,
             moderation_status: str = None,
             moderation_comment: str = None,
             publication_at: datetime = None,
@@ -84,9 +78,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'moderator_id': moderator_id,
                     'vk_source': vk_source,
                     'tg_source': tg_source,
-                    'name': name,
                     'text': text,
-                    'tags': tags,
                     'moderation_status': moderation_status if moderation_status else None,
                     'moderation_comment': moderation_comment,
                     'publication_at': publication_at,
