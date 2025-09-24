@@ -84,6 +84,7 @@ create_youtubes_table = """
 CREATE TABLE IF NOT EXISTS youtubes (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    autoselect BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -93,6 +94,7 @@ create_instagrams_table = """
 CREATE TABLE IF NOT EXISTS instagrams (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    autoselect BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -102,6 +104,7 @@ create_telegrams_table = """
 CREATE TABLE IF NOT EXISTS telegrams (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    autoselect BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -111,6 +114,7 @@ create_vkontakte_table = """
 CREATE TABLE IF NOT EXISTS vkontakte (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    autoselect BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
