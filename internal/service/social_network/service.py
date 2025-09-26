@@ -9,10 +9,12 @@ class SocialNetworkService(interface.ISocialNetworkService):
             self,
             tel: interface.ITelemetry,
             repo: interface.ISocialNetworkRepo,
+            telegram_client: interface.ITelegramClient,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
+        self.telegram_client = telegram_client
 
     # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     async def create_youtube(
@@ -49,6 +51,27 @@ class SocialNetworkService(interface.ISocialNetworkService):
 
                 span.set_status(Status(StatusCode.OK))
                 return instagram_id
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def check_telegram_channel_permission(
+            self,
+            tg_channel_username: str,
+    ) -> bool:
+        with self.tracer.start_as_current_span(
+                "SocialNetworkService.check_telegram_channel_permission",
+                kind=SpanKind.INTERNAL,
+                attributes={"channel": tg_channel_username}
+        ) as span:
+            try:
+                # Проверяем доступ к каналу
+                has_permission = await self.telegram_client.check_permission(tg_channel_username)
+
+                span.set_status(Status(StatusCode.OK))
+                return has_permission
 
             except Exception as err:
                 span.record_exception(err)
