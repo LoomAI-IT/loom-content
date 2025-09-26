@@ -2,7 +2,7 @@ from aiogram import Bot
 from aiogram.types import (
     Message, BufferedInputFile,
 )
-from sulguk import SULGUK_PARSE_MODE
+from sulguk import SULGUK_PARSE_MODE, AiogramSulgukMiddleware
 
 from internal import interface
 
@@ -13,6 +13,7 @@ class TelegramClient(interface.ITelegramClient):
             bot_token: str,
     ):
         self.bot = Bot(token=bot_token)
+        self.bot.session.middleware(AiogramSulgukMiddleware())
 
     async def send_text_message(
             self,
