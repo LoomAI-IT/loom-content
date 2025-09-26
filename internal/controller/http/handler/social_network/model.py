@@ -9,8 +9,8 @@ class CreateTgBody(BaseModel):
 
 class UpdateTgBody(BaseModel):
     organization_id: int
-    tg_channel_username: str = None
-    autoselect: bool = None
+    tg_channel_username: str | None = None
+    autoselect: bool | None = None
 
 
 class CreateSocialNetworkBody(BaseModel):
