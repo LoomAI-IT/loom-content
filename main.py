@@ -6,7 +6,7 @@ from aiogram.client.telegram import TelegramAPIServer
 from infrastructure.pg.pg import PG
 from infrastructure.telemetry.telemetry import Telemetry, AlertManager
 from infrastructure.weedfs.weedfs import AsyncWeed
-
+from pkg.client.external.telegram.client import TelegramClient
 
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
@@ -94,6 +94,8 @@ vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
 )
 
+telegram_client = TelegramClient(cfg.tg_bot_token)
+
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
@@ -106,11 +108,13 @@ publication_prompt_generator = PublicationPromptGenerator()
 publication_service = PublicationService(
     tel=tel,
     repo=publication_repo,
+    social_network_repo=social_network_repo,
     openai_client=openai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=kontur_organization_client,
     vizard_client=vizard_client,
+    telegram_client=telegram_client,
     kontur_domain=cfg.domain
 )
 

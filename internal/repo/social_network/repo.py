@@ -57,7 +57,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
 
     async def create_telegram(
             self,
-            organization_id: int
+            organization_id: int,
+            channel_username: str,
     ) -> int:
         with self.tracer.start_as_current_span(
                 "SocialNetworkRepo.create_telegram",
@@ -65,7 +66,10 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                args = {'organization_id': organization_id}
+                args = {
+                    'organization_id': organization_id,
+                    'channel_username': channel_username,
+                }
                 telegram_id = await self.db.insert(create_telegram, args)
 
                 span.set_status(Status(StatusCode.OK))

@@ -21,10 +21,12 @@ RETURNING id;
 
 create_telegram = """
 INSERT INTO telegrams (
-    organization_id
+    organization_id,
+    channel_username
 )
 VALUES (
-    :organization_id
+    :organization_id,
+    :channel_username
 )
 RETURNING id;
 """

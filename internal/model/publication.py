@@ -9,7 +9,6 @@ class ModerationStatus(Enum):
     MODERATION = "moderation"
     REJECTED = "rejected"
     APPROVED = "approved"
-    PUBLISHED = "published"
 
 
 @dataclass

@@ -3,6 +3,7 @@ import io
 from abc import abstractmethod
 from typing import Protocol, Dict, List
 
+from aiogram.types import Message
 from fastapi.responses import JSONResponse
 
 from internal import model
@@ -64,7 +65,8 @@ class ISocialNetworkService(Protocol):
     @abstractmethod
     async def create_telegram(
             self,
-            organization_id: int
+            organization_id: int,
+            channel_username: str,
     ) -> int:
         pass
 
@@ -103,7 +105,8 @@ class ISocialNetworkRepo(Protocol):
     @abstractmethod
     async def create_telegram(
             self,
-            organization_id: int
+            organization_id: int,
+            channel_username: str,
     ) -> int:
         pass
 
@@ -183,6 +186,25 @@ class IYouTubeClient(Protocol):
 
     @abstractmethod
     async def get_video_info(self, access_token: str, video_id: str) -> dict: pass
+
+
+class ITelegramClient(Protocol):
+    @abstractmethod
+    async def send_text_message(
+            self,
+            channel_id: str | int,
+            text: str,
+            parse_mode: str = None,
+    ) -> Message: pass
+
+    @abstractmethod
+    async def send_photo(
+            self,
+            channel_id: str | int,
+            photo: bytes,
+            caption: str = None,
+            parse_mode: str = None,
+    ) -> Message: pass
 
 
 class IVkClient(Protocol):
