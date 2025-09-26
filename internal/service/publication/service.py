@@ -834,11 +834,9 @@ class PublicationService(interface.IPublicationService):
                 telegram_account.tg_channel_username,
                 photo=photo_io.read(),
                 caption=publication.text,
-                parse_mode="HTML"
             )
         else:
             await self.telegram_client.send_text_message(
                 telegram_account.tg_channel_username,
                 text=publication.text,
-                parse_mode="HTML"
             )
