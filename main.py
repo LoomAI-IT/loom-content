@@ -2,6 +2,7 @@ import uvicorn
 from aiogram import Bot
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
+from sulguk import AiogramSulgukMiddleware
 
 from infrastructure.pg.pg import PG
 from infrastructure.telemetry.telemetry import Telemetry, AlertManager
@@ -65,6 +66,7 @@ storage = AsyncWeed(cfg.weed_master_host, cfg.weed_master_port)
 
 session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/telegram-bot-api'))
 bot = Bot(token=cfg.tg_bot_token, session=session)
+bot.session.middleware(AiogramSulgukMiddleware())
 
 # Инициализация клиентов
 kontur_authorization_client = KonturAuthorizationClient(
