@@ -827,9 +827,9 @@ class PublicationService(interface.IPublicationService):
         telegram_account = (await self.social_network_repo.get_telegrams_by_organization(
             publication.organization_id
         ))[0]
-        photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
 
         if publication.image_fid:
+            photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
             await self.telegram_client.send_photo(
                 telegram_account.channel_username,
                 photo=photo_io.read(),
