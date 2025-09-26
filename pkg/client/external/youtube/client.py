@@ -406,6 +406,7 @@ class YouTubeClient(interface.IYouTubeClient):
 
 # Пример использования
 if __name__ == "__main__":
+    # Test
     # Конфигурация
     CLIENT_ID = "1098153452849-qqk2jtb4e6094gik2poaopavr5ognvgm.apps.googleusercontent.com"
     CLIENT_SECRET = "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"
