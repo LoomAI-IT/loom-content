@@ -108,6 +108,7 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 telegram_id = await self.social_network_service.create_telegram(
                     organization_id=body.organization_id,
                     tg_channel_username=body.tg_channel_username,
+                    autoselect=body.autoselect,
                 )
 
                 self.logger.info("Telegram created successfully", {

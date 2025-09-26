@@ -79,6 +79,7 @@ class ISocialNetworkService(Protocol):
             self,
             organization_id: int,
             tg_channel_username: str,
+            autoselect: bool,
     ) -> int:
         pass
 
@@ -133,6 +134,7 @@ class ISocialNetworkRepo(Protocol):
             self,
             organization_id: int,
             tg_channel_username: str,
+            autoselect: bool
     ) -> int:
         pass
 

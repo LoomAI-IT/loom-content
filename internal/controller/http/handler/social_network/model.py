@@ -5,6 +5,7 @@ from pydantic import BaseModel
 class CreateTgBody(BaseModel):
     organization_id: int
     tg_channel_username: str
+    autoselect: bool
 
 class UpdateTgBody(BaseModel):
     organization_id: int

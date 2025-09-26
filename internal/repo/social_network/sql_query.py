@@ -22,11 +22,13 @@ RETURNING id;
 create_telegram = """
 INSERT INTO telegrams (
     organization_id,
-    tg_channel_username
+    tg_channel_username,
+    autoselect
 )
 VALUES (
     :organization_id,
-    :tg_channel_username
+    :tg_channel_username,
+    :autoselect
 )
 RETURNING id;
 """

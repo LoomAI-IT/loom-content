@@ -59,6 +59,7 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
             self,
             organization_id: int,
             tg_channel_username: str,
+            autoselect: bool,
     ) -> int:
         with self.tracer.start_as_current_span(
                 "SocialNetworkRepo.create_telegram",
@@ -69,6 +70,7 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 args = {
                     'organization_id': organization_id,
                     'tg_channel_username': tg_channel_username,
+                    'autoselect': autoselect,
                 }
                 telegram_id = await self.db.insert(create_telegram, args)
 
