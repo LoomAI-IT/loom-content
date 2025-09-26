@@ -22,13 +22,28 @@ RETURNING id;
 create_telegram = """
 INSERT INTO telegrams (
     organization_id,
-    channel_username
+    tg_channel_username,
+    autoselect
 )
 VALUES (
     :organization_id,
-    :channel_username
+    :tg_channel_username,
+    :autoselect
 )
 RETURNING id;
+"""
+
+update_telegram = """
+UPDATE telegrams
+SET 
+    tg_channel_username = COALESCE(:tg_channel_username, tg_channel_username),
+    autoselect = COALESCE(:autoselect, autoselect)
+WHERE organization_id = :organization_id;
+"""
+
+delete_telegram = """
+DELETE FROM telegrams
+WHERE organization_id = :organization_id;
 """
 
 create_vkontakte = """

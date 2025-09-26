@@ -93,7 +93,7 @@ class SocialNetworkController(interface.ISocialNetworkController):
 
     async def create_telegram(
             self,
-            body: CreateSocialNetworkBody,
+            body: CreateTgBody,
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "SocialNetworkController.create_telegram",
@@ -107,7 +107,8 @@ class SocialNetworkController(interface.ISocialNetworkController):
 
                 telegram_id = await self.social_network_service.create_telegram(
                     organization_id=body.organization_id,
-                    channel_username=body.channel_username,
+                    tg_channel_username=body.tg_channel_username,
+                    autoselect=body.autoselect,
                 )
 
                 self.logger.info("Telegram created successfully", {
@@ -121,6 +122,83 @@ class SocialNetworkController(interface.ISocialNetworkController):
                     content={
                         "message": "Telegram created successfully",
                         "telegram_id": telegram_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def update_telegram(
+            self,
+            body: UpdateTgBody,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "SocialNetworkController.update_telegram",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "organization_id": body.organization_id,
+                }
+        ) as span:
+            try:
+                self.logger.info("Update Telegram request", {
+                    "organization_id": body.organization_id,
+                })
+
+                await self.social_network_service.update_telegram(
+                    organization_id=body.organization_id,
+                    tg_channel_username=body.tg_channel_username,
+                    autoselect=body.autoselect
+                )
+
+                self.logger.info("Telegram updated successfully", {
+                    "organization_id": body.organization_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Telegram updated successfully",
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def delete_telegram(
+            self,
+            organization_id: int,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "SocialNetworkController.delete_telegram",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "organization_id": organization_id,
+                }
+        ) as span:
+            try:
+                self.logger.info("Delete Telegram request", {
+                    "organization_id": organization_id,
+                })
+
+                await self.social_network_service.delete_telegram(
+                    organization_id=organization_id,
+                )
+
+                self.logger.info("Telegram deleted successfully", {
+
+                    "organization_id": organization_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Telegram deleted successfully",
                     }
                 )
 

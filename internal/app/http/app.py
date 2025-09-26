@@ -342,6 +342,20 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
+    app.add_api_route(
+        prefix + "/social-network/telegram",
+        social_network_controller.update_telegram,
+        methods=["PUT"],
+        tags=["SocialNetwork"]
+    )
+
+    app.add_api_route(
+        prefix + "/social-network/telegram/{organization_id}",
+        social_network_controller.delete_telegram,
+        methods=["DELETE"],
+        tags=["SocialNetwork"]
+    )
+
     # Создание VKontakte
     app.add_api_route(
         prefix + "/social-network/vkontakte",
@@ -376,12 +390,12 @@ def create_table_handler(db: interface.IDB):
 
     return create_table
 
+
 def heath_check_handler():
     async def heath_check():
         return "ok"
 
     return heath_check
-
 
 
 def drop_table_handler(db: interface.IDB):

@@ -831,14 +831,14 @@ class PublicationService(interface.IPublicationService):
         if publication.image_fid:
             photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
             await self.telegram_client.send_photo(
-                telegram_account.channel_username,
+                telegram_account.tg_channel_username,
                 photo=photo_io.read(),
                 caption=publication.text,
                 parse_mode="HTML"
             )
         else:
             await self.telegram_client.send_text_message(
-                telegram_account.channel_username,
+                telegram_account.tg_channel_username,
                 text=publication.text,
                 parse_mode="HTML"
             )

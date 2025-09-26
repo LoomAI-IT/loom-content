@@ -21,7 +21,7 @@ class TelegramClient(interface.ITelegramClient):
     ) -> Message:
         try:
             message = await self.bot.send_message(
-                chat_id=channel_id,
+                chat_id="@"+channel_id,
                 text=text,
                 parse_mode=parse_mode,
             )
@@ -42,7 +42,7 @@ class TelegramClient(interface.ITelegramClient):
             photo_input = BufferedInputFile(photo, "file")
 
             message = await self.bot.send_photo(
-                chat_id=channel_id,
+                chat_id="@"+channel_id,
                 photo=photo_input,
                 caption=caption,
                 parse_mode=parse_mode,
