@@ -29,9 +29,21 @@ class ISocialNetworkController(Protocol):
     @abstractmethod
     async def create_telegram(
             self,
-            body: CreateSocialNetworkBody,
+            body: CreateTgBody,
     ) -> JSONResponse:
         pass
+
+    @abstractmethod
+    async def update_telegram(
+            self,
+            body: UpdateTgBody
+    ) -> JSONResponse: pass
+
+    @abstractmethod
+    async def delete_telegram(
+            self,
+            organization_id: int,
+    ) -> JSONResponse: pass
 
     @abstractmethod
     async def create_vkontakte(
@@ -66,9 +78,23 @@ class ISocialNetworkService(Protocol):
     async def create_telegram(
             self,
             organization_id: int,
-            channel_username: str,
+            tg_channel_username: str,
     ) -> int:
         pass
+
+    @abstractmethod
+    async def update_telegram(
+            self,
+            organization_id: int,
+            tg_channel_username: str = None,
+            autoselect: bool = None
+    ): pass
+
+    @abstractmethod
+    async def delete_telegram(
+            self,
+            organization_id: int,
+    ): pass
 
     @abstractmethod
     async def create_vkontakte(
@@ -106,9 +132,23 @@ class ISocialNetworkRepo(Protocol):
     async def create_telegram(
             self,
             organization_id: int,
-            channel_username: str,
+            tg_channel_username: str,
     ) -> int:
         pass
+
+    @abstractmethod
+    async def update_telegram(
+            self,
+            organization_id: int,
+            tg_channel_username: str = None,
+            autoselect: bool = None,
+    ): pass
+
+    @abstractmethod
+    async def delete_telegram(
+            self,
+            organization_id: int,
+    ): pass
 
     @abstractmethod
     async def create_vkontakte(

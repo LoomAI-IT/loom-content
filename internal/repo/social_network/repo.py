@@ -58,7 +58,7 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
     async def create_telegram(
             self,
             organization_id: int,
-            channel_username: str,
+            tg_channel_username: str,
     ) -> int:
         with self.tracer.start_as_current_span(
                 "SocialNetworkRepo.create_telegram",
@@ -68,12 +68,58 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
             try:
                 args = {
                     'organization_id': organization_id,
-                    'channel_username': channel_username,
+                    'tg_channel_username': tg_channel_username,
                 }
                 telegram_id = await self.db.insert(create_telegram, args)
 
                 span.set_status(Status(StatusCode.OK))
                 return telegram_id
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def update_telegram(
+            self,
+            organization_id: int,
+            tg_channel_username: str = None,
+            autoselect: bool = None,
+    ):
+        with self.tracer.start_as_current_span(
+                "SocialNetworkRepo.update_telegram",
+                kind=SpanKind.INTERNAL,
+                attributes={"organization_id": organization_id}
+        ) as span:
+            try:
+                args = {
+                    'organization_id': organization_id,
+                    'tg_channel_username': tg_channel_username,
+                    'autoselect': autoselect,
+                }
+                await self.db.update(update_telegram, args)
+
+                span.set_status(Status(StatusCode.OK))
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def delete_telegram(
+            self,
+            organization_id: int,
+    ):
+        with self.tracer.start_as_current_span(
+                "SocialNetworkRepo.delete_telegram",
+                kind=SpanKind.INTERNAL,
+                attributes={"organization_id": organization_id}
+        ) as span:
+            try:
+                args = {
+                    'organization_id': organization_id,
+                }
+                await self.db.delete(delete_telegram, args)
+
+                span.set_status(Status(StatusCode.OK))
             except Exception as err:
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
