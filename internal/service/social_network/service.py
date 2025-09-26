@@ -57,7 +57,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
 
     async def create_telegram(
             self,
-            organization_id: int
+            organization_id: int,
+            channel_username: str
     ) -> int:
         with self.tracer.start_as_current_span(
                 "SocialNetworkService.create_telegram",
@@ -65,7 +66,7 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                telegram_id = await self.repo.create_telegram(organization_id=organization_id)
+                telegram_id = await self.repo.create_telegram(organization_id, channel_username)
 
                 span.set_status(Status(StatusCode.OK))
                 return telegram_id

@@ -14,22 +14,26 @@ class PublicationService(interface.IPublicationService):
             self,
             tel: interface.ITelemetry,
             repo: interface.IPublicationRepo,
+            social_network_repo: interface.ISocialNetworkRepo,
             openai_client: interface.IOpenAIClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.IKonturOrganizationClient,
             vizard_client: interface.IVizardClient,
+            telegram_client: interface.ITelegramClient,
             kontur_domain: str
 
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
+        self.social_network_repo = social_network_repo
         self.openai_client = openai_client
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
         self.vizard_client = vizard_client
+        self.telegram_client = telegram_client
         self.kontur_domain = kontur_domain
 
     # ПУБЛИКАЦИИ
@@ -479,6 +483,12 @@ class PublicationService(interface.IPublicationService):
                     moderation_comment=moderation_comment
                 )
 
+                if moderation_status == model.ModerationStatus.APPROVED.value:
+                    publication = (await self.repo.get_publication_by_id(publication_id))[0]
+
+                    if publication.tg_source:
+                        await self._publish_to_telegram(publication)
+
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
@@ -812,3 +822,23 @@ class PublicationService(interface.IPublicationService):
         usd_to_rub_rate = Decimal("90.00")
         rub_amount_str = str((usd_cost * usd_to_rub_rate).quantize(Decimal("0.01")))
         await self.organization_client.debit_balance(organization_id, rub_amount_str)
+
+    async def _publish_to_telegram(self, publication: model.Publication):
+        telegram_account = (await self.social_network_repo.get_telegrams_by_organization(
+            publication.organization_id
+        ))[0]
+        photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
+
+        if publication.image_fid:
+            await self.telegram_client.send_photo(
+                telegram_account.channel_username,
+                photo=photo_io.read(),
+                caption=publication.text,
+                parse_mode="HTML"
+            )
+        else:
+            await self.telegram_client.send_text_message(
+                telegram_account.channel_username,
+                text=publication.text,
+                parse_mode="HTML"
+            )

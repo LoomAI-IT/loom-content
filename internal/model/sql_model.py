@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS telegrams (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
     autoselect BOOLEAN DEFAULT TRUE,
+    channel_username TEXT NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

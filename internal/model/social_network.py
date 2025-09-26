@@ -63,6 +63,7 @@ class Telegram:
     id: int
     organization_id: int
     autoselect: bool
+    channel_username: str
 
     created_at: datetime
 
@@ -73,6 +74,7 @@ class Telegram:
                 id=row.id,
                 organization_id=row.organization_id,
                 autoselect=row.autoselect,
+                channel_username=row.channel_username,
                 created_at=row.created_at,
             )
             for row in rows
@@ -83,6 +85,7 @@ class Telegram:
             "id": self.id,
             "organization_id": self.organization_id,
             "autoselect": self.autoselect,
+            "channel_username": self.channel_username,
             "created_at": self.created_at.isoformat()
         }
 
