@@ -131,6 +131,7 @@ video_cut_service = VideoCutService(
 social_network_service = SocialNetworkService(
     tel=tel,
     repo=social_network_repo,
+    telegram_client=telegram_client,
 )
 
 # Инициализация контроллеров

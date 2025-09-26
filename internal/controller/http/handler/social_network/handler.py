@@ -91,6 +91,42 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def check_telegram_channel_permission(
+            self,
+            tg_channel_username: str,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "SocialNetworkController.check_telegram_channel_permission",
+                kind=SpanKind.INTERNAL,
+                attributes={"channel": tg_channel_username}
+        ) as span:
+            try:
+                self.logger.info("Check Telegram channel permission request", {
+                    "channel": tg_channel_username
+                })
+
+                has_permission = await self.social_network_service.check_telegram_channel_permission(
+                    tg_channel_username=tg_channel_username
+                )
+
+                self.logger.info("Telegram channel permission check completed", {
+                    "channel": tg_channel_username,
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Telegram channel permission check completed",
+                        "has_permission": has_permission,
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def create_telegram(
             self,
             body: CreateTgBody,

@@ -27,6 +27,12 @@ class ISocialNetworkController(Protocol):
         pass
 
     @abstractmethod
+    async def check_telegram_channel_permission(
+            self,
+            tg_channel_username: str,
+    ) -> JSONResponse: pass
+
+    @abstractmethod
     async def create_telegram(
             self,
             body: CreateTgBody,
@@ -73,6 +79,12 @@ class ISocialNetworkService(Protocol):
             organization_id: int
     ) -> int:
         pass
+
+    @abstractmethod
+    async def check_telegram_channel_permission(
+            self,
+            tg_channel_username: str,
+    ) -> bool: pass
 
     @abstractmethod
     async def create_telegram(
@@ -245,6 +257,12 @@ class ITelegramClient(Protocol):
             photo: bytes,
             caption: str = None,
     ) -> Message: pass
+
+    @abstractmethod
+    async def check_permission(
+            self,
+            channel_id: str | int,
+    ) -> bool: pass
 
 
 class IVkClient(Protocol):

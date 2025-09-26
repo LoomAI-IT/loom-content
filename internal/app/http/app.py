@@ -343,6 +343,13 @@ def include_social_network_handlers(
     )
 
     app.add_api_route(
+        prefix + "/social-network/telegram/check-permission/{tg_channel_username}",
+        social_network_controller.check_telegram_channel_permission,
+        methods=["GET"],
+        tags=["SocialNetwork"]
+    )
+
+    app.add_api_route(
         prefix + "/social-network/telegram",
         social_network_controller.update_telegram,
         methods=["PUT"],
