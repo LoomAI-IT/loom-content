@@ -108,11 +108,13 @@ publication_prompt_generator = PublicationPromptGenerator()
 publication_service = PublicationService(
     tel=tel,
     repo=publication_repo,
+    social_network_repo=social_network_repo,
     openai_client=openai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=kontur_organization_client,
     vizard_client=vizard_client,
+    telegram_client=telegram_client,
     kontur_domain=cfg.domain
 )
 
