@@ -236,7 +236,6 @@ class ITelegramClient(Protocol):
             self,
             channel_id: str | int,
             text: str,
-            parse_mode: str = None,
     ) -> Message: pass
 
     @abstractmethod
@@ -245,7 +244,6 @@ class ITelegramClient(Protocol):
             channel_id: str | int,
             photo: bytes,
             caption: str = None,
-            parse_mode: str = None,
     ) -> Message: pass
 
 

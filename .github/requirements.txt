@@ -9,7 +9,7 @@ python-multipart
 pypdf
 pdf2image
 pillow
-tiktoken
+sulguk
 
 hiredis==3.2.1
 redis==6.2.0
