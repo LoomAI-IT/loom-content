@@ -246,7 +246,7 @@ class IPublicationService(Protocol):
             moderator_id: int,
             moderation_status: str,
             moderation_comment: str = ""
-    ) -> None:
+    ) -> dict:
         pass
 
     @abstractmethod

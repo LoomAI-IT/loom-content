@@ -331,7 +331,7 @@ class PublicationController(interface.IPublicationController):
                     "moderation_status": body.moderation_status
                 })
 
-                await self.publication_service.moderate_publication(
+                post_links = await self.publication_service.moderate_publication(
                     publication_id=body.publication_id,
                     moderator_id=body.moderator_id,
                     moderation_status=body.moderation_status,
@@ -346,11 +346,7 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Publication moderated successfully",
-                        "publication_id": body.publication_id,
-                        "moderation_status": body.moderation_status
-                    }
+                    content=post_links
                 )
 
             except Exception as err:

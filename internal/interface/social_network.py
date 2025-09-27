@@ -3,7 +3,6 @@ import io
 from abc import abstractmethod
 from typing import Protocol, Dict, List
 
-from aiogram.types import Message
 from fastapi.responses import JSONResponse
 
 from internal import model
@@ -248,7 +247,7 @@ class ITelegramClient(Protocol):
             self,
             channel_id: str | int,
             text: str,
-    ) -> Message: pass
+    ) -> str: pass
 
     @abstractmethod
     async def send_photo(
@@ -256,7 +255,7 @@ class ITelegramClient(Protocol):
             channel_id: str | int,
             photo: bytes,
             caption: str = None,
-    ) -> Message: pass
+    ) -> str: pass
 
     @abstractmethod
     async def check_permission(

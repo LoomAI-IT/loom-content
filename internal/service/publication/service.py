@@ -465,7 +465,7 @@ class PublicationService(interface.IPublicationService):
             moderator_id: int,
             moderation_status: str,
             moderation_comment: str = ""
-    ) -> None:
+    ) -> dict:
         with self.tracer.start_as_current_span(
                 "PublicationService.moderate_publication",
                 kind=SpanKind.INTERNAL,
@@ -482,14 +482,16 @@ class PublicationService(interface.IPublicationService):
                     moderation_status=moderation_status,
                     moderation_comment=moderation_comment
                 )
-
+                post_links = {}
                 if moderation_status == model.ModerationStatus.APPROVED.value:
                     publication = (await self.repo.get_publication_by_id(publication_id))[0]
 
                     if publication.tg_source:
-                        await self._publish_to_telegram(publication)
+                        tg_post_link = await self._publish_to_telegram(publication)
+                        post_links["telegram"] = tg_post_link
 
                 span.set_status(Status(StatusCode.OK))
+                return post_links
 
             except Exception as err:
                 span.record_exception(err)
@@ -823,20 +825,21 @@ class PublicationService(interface.IPublicationService):
         rub_amount_str = str((usd_cost * usd_to_rub_rate).quantize(Decimal("0.01")))
         await self.organization_client.debit_balance(organization_id, rub_amount_str)
 
-    async def _publish_to_telegram(self, publication: model.Publication):
+    async def _publish_to_telegram(self, publication: model.Publication) -> str:
         telegram_account = (await self.social_network_repo.get_telegrams_by_organization(
             publication.organization_id
         ))[0]
 
         if publication.image_fid:
             photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
-            await self.telegram_client.send_photo(
+            tg_post_link = await self.telegram_client.send_photo(
                 telegram_account.tg_channel_username,
                 photo=photo_io.read(),
                 caption=publication.text,
             )
         else:
-            await self.telegram_client.send_text_message(
+            tg_post_link = await self.telegram_client.send_text_message(
                 telegram_account.tg_channel_username,
                 text=publication.text,
             )
+        return tg_post_link

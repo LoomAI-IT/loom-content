@@ -1,7 +1,5 @@
 from aiogram import Bot
-from aiogram.types import (
-    Message, BufferedInputFile,
-)
+from aiogram.types import BufferedInputFile
 from sulguk import SULGUK_PARSE_MODE, AiogramSulgukMiddleware
 
 from internal import interface
@@ -20,15 +18,15 @@ class TelegramClient(interface.ITelegramClient):
             channel_id: str | int,
             text: str,
             parse_mode: str = None,
-    ) -> Message:
+    ) -> str:
         try:
             message = await self.bot.send_message(
                 chat_id="@"+channel_id,
                 text=text,
                 parse_mode=SULGUK_PARSE_MODE,
             )
-
-            return message
+            post_link = self._create_post_link(str(channel_id), message.message_id)
+            return post_link
 
         except Exception as e:
             raise
@@ -39,7 +37,7 @@ class TelegramClient(interface.ITelegramClient):
             photo: bytes,
             caption: str = None,
             parse_mode: str = None,
-    ) -> Message:
+    ) -> str:
         try:
             photo_input = BufferedInputFile(photo, "file")
 
@@ -49,8 +47,8 @@ class TelegramClient(interface.ITelegramClient):
                 caption=caption,
                 parse_mode=SULGUK_PARSE_MODE,
             )
-
-            return message
+            post_link = self._create_post_link(str(channel_id), message.message_id)
+            return post_link
 
         except Exception as e:
             raise
@@ -84,3 +82,7 @@ class TelegramClient(interface.ITelegramClient):
 
         except Exception as e:
             return False
+
+    def _create_post_link(self, channel_username: str, message_id: int) -> str:
+        clean_username = channel_username.lstrip('@')
+        return f"https://t.me/{clean_username}/{message_id}"
