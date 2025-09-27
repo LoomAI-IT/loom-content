@@ -5,7 +5,7 @@ from internal import interface
 from pkg.client.client import AsyncHTTPClient
 
 
-class KonturTgBotClient(interface.IKonturTgBotClient):
+class LoomTgBotClient(interface.ILoomTgBotClient):
     def __init__(
             self,
             tel: interface.ITelemetry,
@@ -32,7 +32,7 @@ class KonturTgBotClient(interface.IKonturTgBotClient):
             video_count: int,
     ) -> None:
         with self.tracer.start_as_current_span(
-                "KonturTgBotClient.notify_vizard_video_cut_generated",
+                "LoomTgBotClient.notify_vizard_video_cut_generated",
                 kind=SpanKind.CLIENT
         ) as span:
             try:
@@ -56,7 +56,7 @@ class KonturTgBotClient(interface.IKonturTgBotClient):
             file_id: str,
     ) -> None:
         with self.tracer.start_as_current_span(
-                "KonturTgBotClient.set_cache_file",
+                "LoomTgBotClient.set_cache_file",
                 kind=SpanKind.CLIENT
         ) as span:
             try:

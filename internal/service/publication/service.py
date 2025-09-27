@@ -18,10 +18,10 @@ class PublicationService(interface.IPublicationService):
             openai_client: interface.IOpenAIClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
-            organization_client: interface.IKonturOrganizationClient,
+            organization_client: interface.ILoomOrganizationClient,
             vizard_client: interface.IVizardClient,
             telegram_client: interface.ITelegramClient,
-            kontur_domain: str
+            loom_domain: str
 
     ):
         self.tracer = tel.tracer()
@@ -34,7 +34,7 @@ class PublicationService(interface.IPublicationService):
         self.organization_client = organization_client
         self.vizard_client = vizard_client
         self.telegram_client = telegram_client
-        self.kontur_domain = kontur_domain
+        self.loom_domain = loom_domain
 
     # ПУБЛИКАЦИИ
     async def generate_publication_text(
@@ -200,7 +200,7 @@ class PublicationService(interface.IPublicationService):
 
                     upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
 
-                    image_url = f"https://{self.kontur_domain}/api/content/image/{upload_response.fid}/{image_name}"
+                    image_url = f"https://{self.loom_domain}/api/content/image/{upload_response.fid}/{image_name}"
                     images_url.append(image_url)
 
                 await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])

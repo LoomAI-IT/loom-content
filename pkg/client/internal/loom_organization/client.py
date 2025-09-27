@@ -4,7 +4,7 @@ from internal import interface
 from pkg.client.client import AsyncHTTPClient
 
 
-class KonturOrganizationClient(interface.IKonturOrganizationClient):
+class LoomOrganizationClient(interface.ILoomOrganizationClient):
     def __init__(
             self,
             tel: interface.ITelemetry,
@@ -23,7 +23,7 @@ class KonturOrganizationClient(interface.IKonturOrganizationClient):
 
     async def debit_balance(self, organization_id: int, amount_rub: str) -> None:
         with self.tracer.start_as_current_span(
-                "KonturOrganizationClient.debit_balance",
+                "LoomOrganizationClient.debit_balance",
                 kind=SpanKind.CLIENT,
                 attributes={
                     "organization_id": organization_id,

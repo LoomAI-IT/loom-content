@@ -11,9 +11,9 @@ from pkg.client.external.telegram.client import TelegramClient
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
 
-from pkg.client.internal.kontur_authorization.client import KonturAuthorizationClient
-from pkg.client.internal.kontur_organization.client import KonturOrganizationClient
-from pkg.client.internal.kontur_tg_bot.client import KonturTgBotClient
+from pkg.client.internal.loom_authorization.client import LoomAuthorizationClient
+from pkg.client.internal.loom_organization.client import LoomOrganizationClient
+from pkg.client.internal.loom_tg_bot.client import LoomTgBotClient
 
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
@@ -67,22 +67,22 @@ session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/
 bot = Bot(token=cfg.tg_bot_token, session=session)
 
 # Инициализация клиентов
-kontur_authorization_client = KonturAuthorizationClient(
+loom_authorization_client = LoomAuthorizationClient(
     tel=tel,
-    host=cfg.kontur_authorization_host,
-    port=cfg.kontur_authorization_port,
+    host=cfg.loom_authorization_host,
+    port=cfg.loom_authorization_port,
 )
 
-kontur_organization_client = KonturOrganizationClient(
+loom_organization_client = LoomOrganizationClient(
     tel=tel,
-    host=cfg.kontur_organization_host,
-    port=cfg.kontur_organization_port,
+    host=cfg.loom_organization_host,
+    port=cfg.loom_organization_port,
     interserver_secret_key=cfg.interserver_secret_key
 )
-kontur_tg_bot_client = KonturTgBotClient(
+loom_tg_bot_client = LoomTgBotClient(
     tel=tel,
-    host=cfg.kontur_tg_bot_host,
-    port=cfg.kontur_tg_bot_port,
+    host=cfg.loom_tg_bot_host,
+    port=cfg.loom_tg_bot_port,
     interserver_secret_key=cfg.interserver_secret_key
 )
 
@@ -112,18 +112,18 @@ publication_service = PublicationService(
     openai_client=openai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
-    organization_client=kontur_organization_client,
+    organization_client=loom_organization_client,
     vizard_client=vizard_client,
     telegram_client=telegram_client,
-    kontur_domain=cfg.domain
+    loom_domain=cfg.domain
 )
 
 video_cut_service = VideoCutService(
     tel=tel,
     repo=video_cut_repo,
     storage=storage,
-    organization_client=kontur_organization_client,
-    kontur_tg_bot_client=kontur_tg_bot_client,
+    organization_client=loom_organization_client,
+    loom_tg_bot_client=loom_tg_bot_client,
     vizard_client=vizard_client,
     bot=bot
 )
@@ -140,7 +140,7 @@ video_cut_controller = VideoCutController(tel, video_cut_service)
 social_network_controller = SocialNetworkController(tel, social_network_service)
 
 # Инициализация middleware
-http_middleware = HttpMiddleware(tel, cfg.prefix, kontur_authorization_client)
+http_middleware = HttpMiddleware(tel, cfg.prefix, loom_authorization_client)
 
 if __name__ == "__main__":
     app = NewHTTP(

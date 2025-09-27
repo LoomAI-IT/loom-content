@@ -4,7 +4,7 @@ from typing import Protocol
 from internal import model
 
 
-class IKonturTgBotClient(Protocol):
+class ILoomTgBotClient(Protocol):
     @abstractmethod
     async def notify_vizard_video_cut_generated(
             self,
