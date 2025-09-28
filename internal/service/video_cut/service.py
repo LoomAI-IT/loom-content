@@ -137,7 +137,7 @@ class VideoCutService(interface.IVideoCutService):
                         vizard_rub_cost=rub_cost_per_video
                     )
                     resp = await self.bot.send_video(
-                        921461427,
+                        7529376518,
                         video=BufferedInputFile(video_content, filename=video_name)
                     )
                     await self.loom_tg_bot_client.set_cache_file(
