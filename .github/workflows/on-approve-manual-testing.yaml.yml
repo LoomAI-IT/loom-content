@@ -3,7 +3,7 @@ name: Deploy tag to production server
 on:
     workflow_dispatch:
         inputs:
-            release_version:
+            release_tag:
                 description: 'Tag to deploy (e.g., v1.0.0)'
                 required: true
                 type: string
@@ -19,11 +19,12 @@ jobs:
     deploy-to-production:
         runs-on: self-hosted
 
+
         steps:
             -   name: Validate inputs
                 run: |
-                    if [[ ! "${{ github.event.inputs.release_version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
-                      echo "❌ Неверный формат тега: ${{ github.event.inputs.release_version }}"
+                    if [[ ! "${{ github.event.inputs.release_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+                      echo "❌ Неверный формат тега: ${{ github.event.inputs.release_tag }}"
                       echo "   Ожидается формат: v1.0.0"
                       exit 1
                     fi
@@ -34,10 +35,10 @@ jobs:
                       exit 1
                     fi
                     
-                    echo "RELEASE_VERSION=${{ github.event.inputs.release_version }}" >> $GITHUB_ENV
+                    echo "RELEASE_VERSION=${{ github.event.inputs.release_tag }}" >> $GITHUB_ENV
                     echo "RELEASE_ID=${{ github.event.inputs.release_id }}" >> $GITHUB_ENV
                     echo "✅ Входные параметры валидны"
-                    echo "✅ Тег: ${{ github.event.inputs.release_version }}"
+                    echo "✅ Тег: ${{ github.event.inputs.release_tag }}"
                     echo "✅ Release ID: ${{ github.event.inputs.release_id }}"
 
             -   name: Load server configuration
@@ -174,9 +175,12 @@ jobs:
                     export $(cat env/.env.app env/.env.db env/.env.monitoring | xargs)
                     
                     log_message "🔨 Начинаем сборку контейнера для тега ${{ env.RELEASE_VERSION }} на ПРОДАКШН..."
-                    
-                    log_message "🔧 Собираем и запускаем новый контейнер..."
+
                     docker compose -f ./docker-compose/app.yaml up -d --build ${{ env.SERVICE_NAME }} 2>&1 | tee -a "$LOG_FILE"
+                    
+                    # Показываем информацию о созданных образах
+                    log_message "📋 Созданные образы:"
+                    docker images | grep ${{ env.SERVICE_NAME }} | tee -a "$LOG_FILE"
                     
                     check_health() {
                         # Если есть HTTP endpoint
@@ -246,6 +250,10 @@ jobs:
                       }' \
                       "${{ env.LOOM_RELEASE_TG_BOT_API_URL }}/release"
                     echo "✅ Статус обновлен на 'production_failed'"
+                    echo "📊 Сервер: ${{ env.SERVER_HOST }}"
+                    echo "🏷️ Версия: ${{ env.RELEASE_VERSION }}"
+                    echo "🔗 Release ID: ${{ env.RELEASE_ID }}"
+                    echo "📁 Лог продакшн деплоя: /var/log/deployments/production/${{ env.SERVICE_NAME }}/${{ env.RELEASE_VERSION }}-prod.log"
 
             -   name: Update status to production success
                 if: success()
@@ -267,4 +275,4 @@ jobs:
                     echo "🏷️ Версия: ${{ env.RELEASE_VERSION }}"
                     echo "✅ Статус: Успешно развернуто на продакшн"
                     echo "🔗 Release ID: ${{ env.RELEASE_ID }}"
-                    echo "📁 Лог продакшн деплоя: /var/log/deployments/production/${{ env.RELEASE_VERSION }}-prod.log"
+                    echo "📁 Лог продакшн деплоя: /var/log/deployments/production/${{ env.SERVICE_NAME }}/${{ env.RELEASE_VERSION }}-prod.log"

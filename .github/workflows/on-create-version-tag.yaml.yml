@@ -33,6 +33,7 @@ jobs:
                     source /root/.env.servers
                     set +a
 
+
                     # Проверяем наличие API конфигурации
                     if [ -z "$LOOM_RELEASE_TG_BOT_API_URL" ] || [ -z "$LOOM_INTERSERVER_SECRET_KEY" ]; then
                       echo "❌ API конфигурация не найдена в .env.servers!"
@@ -70,7 +71,7 @@ jobs:
                           -H "Content-Type: application/json" \
                           -d '{
                             "service_name": "${{ env.SERVICE_NAME }}",
-                            "release_version": "${{ env.TAG_NAME }}",
+                            "release_tag": "${{ env.TAG_NAME }}",
                             "status": "initiated",
                             "initiated_by": "${{ github.actor }}",
                             "github_run_id": "${{ github.run_id }}",
