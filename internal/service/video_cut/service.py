@@ -100,7 +100,11 @@ class VideoCutService(interface.IVideoCutService):
                 }
         ) as span:
             try:
-                vizard_project = (await self.repo.get_video_cuts_by_project_id(project_id))[0]
+                vizard_project = await self.repo.get_video_cuts_by_project_id(project_id)
+                if not vizard_project:
+                    return
+
+                vizard_project = vizard_project[0]
 
                 rub_cost_per_credit = 10
                 total_rub_cost = credit_usage * rub_cost_per_credit
