@@ -164,7 +164,7 @@ create_organization_tables_queries = [
     create_vkontakte_table,
 ]
 
-drop_organization_tables_queries = [
+drop_queries = [
     drop_autopostings_table,
     drop_publications_table,
     drop_video_cuts_table,

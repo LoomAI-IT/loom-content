@@ -39,6 +39,7 @@ class CreateCategoryBody(BaseModel):
 
 
 class UpdateCategoryBody(BaseModel):
+    category_id: int
     name: Optional[str] | None = None
     prompt_for_image_style: Optional[str] | None = None
     prompt_for_text_style: Optional[str] | None = None
