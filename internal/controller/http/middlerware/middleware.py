@@ -73,12 +73,6 @@ class HttpMiddleware(interface.IHttpMiddleware):
                         root_span.set_status(Status(StatusCode.ERROR, str(err)))
                         root_span.set_attribute(common.ERROR_KEY, True)
                         raise err
-                    elif status_code >= 400:
-                        err = Exception("Client error")
-                        root_span.record_exception(err)
-                        root_span.set_status(Status(StatusCode.ERROR, str(err)))
-                        root_span.set_attribute(common.ERROR_KEY, True)
-                        raise err
                     else:
                         root_span.set_status(Status(StatusCode.OK))
 
@@ -255,17 +249,23 @@ class HttpMiddleware(interface.IHttpMiddleware):
                             status_code=200,
                         )
                     else:
-                        authorization_data = await self.loom_authorization_client.check_authorization(access_token)
+                        access_token = request.cookies.get("Access-Token")
+                        if not access_token:
+                            authorization_data = model.AuthorizationData(
+                                account_id=0,
+                                two_fa_status=False,
+                                role="guest",
+                                message="guest",
+                                status_code=200
+                            )
+                        else:
+                            authorization_data = await self.loom_authorization_client.check_authorization(access_token)
 
-                    request.state.authorization_data = authorization_data
+                        request.state.authorization_data = authorization_data
 
-                    if authorization_data.status_code == common.StatusCode.CodeErrAccessTokenExpired:
-                        self.logger.warning("Токен истек")
-                        return JSONResponse(status_code=401, content={"error": "access token expired"})
-
-                    elif authorization_data.status_code == common.StatusCode.CodeErrAccessTokenInvalid:
-                        self.logger.warning("Токен не валиден")
-                        return JSONResponse(status_code=403, content={"error": "access token invalid"})
+                        if authorization_data.status_code == 403:
+                            self.logger.warning(authorization_data.message)
+                            return JSONResponse(status_code=403, content={"error": authorization_data.message})
 
                     response = await call_next(request)
 
