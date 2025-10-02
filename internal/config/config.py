@@ -13,6 +13,7 @@ class Config:
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
         self.tg_bot_token: str = os.environ.get('LOOM_TG_BOT_TOKEN')
+        self.tg_session_string: str = os.environ.get('LOOM_TG_SESSION_STRING')
         self.domain: str = os.environ.get("LOOM_DOMAIN")
 
         self.interserver_secret_key = os.getenv("LOOM_INTERSERVER_SECRET_KEY")

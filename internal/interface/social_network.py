@@ -263,6 +263,13 @@ class ITelegramClient(Protocol):
             channel_id: str | int,
     ) -> bool: pass
 
+    @abstractmethod
+    async def get_channel_posts(
+            self,
+            channel_id: str,
+            limit: int = None
+    ) -> list[dict]: pass
+
 
 class IVkClient(Protocol):
     @abstractmethod
