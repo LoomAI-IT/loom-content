@@ -130,6 +130,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def update_category(
             self,
+            category_id: int,
             body: UpdateCategoryBody
     ) -> JSONResponse:
         pass

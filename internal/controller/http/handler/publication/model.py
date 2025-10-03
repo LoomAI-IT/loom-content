@@ -70,7 +70,6 @@ class CreateCategoryBody(BaseModel):
 
 
 class UpdateCategoryBody(BaseModel):
-    category_id: int
     name: Optional[str] = None
     prompt_for_image_style: Optional[str] = None
 

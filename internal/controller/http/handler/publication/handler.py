@@ -649,20 +649,21 @@ class PublicationController(interface.IPublicationController):
 
     async def update_category(
             self,
+            category_id: int,
             body: UpdateCategoryBody
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.update_category",
                 kind=SpanKind.INTERNAL,
-                attributes={"category_id": body.category_id}
+                attributes={"category_id": category_id}
         ) as span:
             try:
                 self.logger.info("Update category request", {
-                    "category_id": body.category_id
+                    "category_id": category_id
                 })
 
                 await self.publication_service.update_category(
-                    category_id=body.category_id,
+                    category_id=category_id,
                     name=body.name,
                     prompt_for_image_style=body.prompt_for_image_style,
                     goal=body.goal,
@@ -685,7 +686,7 @@ class PublicationController(interface.IPublicationController):
                 )
 
                 self.logger.info("Category updated successfully", {
-                    "category_id": body.category_id
+                    "category_id": category_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
@@ -693,7 +694,7 @@ class PublicationController(interface.IPublicationController):
                     status_code=200,
                     content={
                         "message": "Category updated successfully",
-                        "category_id": body.category_id
+                        "category_id": category_id
                     }
                 )
 
