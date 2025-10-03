@@ -48,7 +48,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 {"\n".join(str(i+1) + ') ' + str(sample) for i, sample in enumerate(category.good_samples))}
 - Дополнительная информация:
 {"\n".join(str(i+1) + ') ' + info for i, info in enumerate(category.additional_info))}
-- Длина текста: от {category.len_min} до {category.len_max} (можно отходить в сторону пользы)
+- Длина текста: от {category.len_min} до {category.len_max} символов
 - Хэштеги: от {category.n_hashtags_min} до {category.n_hashtags_max} (в крайних случаях можешь выходить за максимальные значения)
 - CTA: {category.cta_type} (если уместно и не противоречит правилам предостережения)
 
@@ -121,7 +121,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 {"\n".join(str(i+1) + ') ' + str(sample) for i, sample in enumerate(category.good_samples))}
 - Дополнительная информация:
 {"\n".join(str(i+1) + ') ' + info for i, info in enumerate(category.additional_info))}
-- Длина текста: от {category.len_min} до {category.len_max} (можно отходить в сторону пользы)
+- Длина текста: от {category.len_min} до {category.len_max} символов
 - Хэштеги: от {category.n_hashtags_min} до {category.n_hashtags_max} (в крайних случаях можешь выходить за максимальные значения)
 - CTA: {category.cta_type} (если уместно и не противоречит правилам предостережения)
 
