@@ -522,7 +522,7 @@ class IPublicationPromptGenerator(Protocol):
     async def get_generate_publication_text_system_prompt(
             self,
             category: model.Category,
-            publication_text_reference: str
+            organization: model.Organization,
     ) -> str:
         pass
 
@@ -530,8 +530,8 @@ class IPublicationPromptGenerator(Protocol):
     async def get_regenerate_publication_text_system_prompt(
             self,
             category: model.Category,
+            organization: model.Organization,
             publication_text: str,
-            changes: str
     ) -> str:
         pass
 

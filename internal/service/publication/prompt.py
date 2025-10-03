@@ -4,81 +4,67 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     async def get_generate_publication_text_system_prompt(
             self,
             category: model.Category,
-            publication_text_reference: str
+            organization: model.Organization,
     ) -> str:
-        return f"""Ты - эксперт по созданию контента для социальных сетей. Твоя задача - создать вовлекающий пост на основе предоставленной информации.
+        return f"""Ты — редактор соцсетей организации {organization.name}.
+Пиши как живой SMM-редактор: естественно, логично, без клише и следов ИИ.
+Используй микро-конкретику из профиля организации и данных рубрики.
 
-ЦЕЛЬ КОНТЕНТА:
-{category.goal}
+ТВОЯ ЗАДАЧА:
+Учитывая всю информацию составь текст для публикации на основе запроса пользователя
 
-СТРУКТУРА КОНТЕНТА:
-Основная структура: {', '.join(category.structure_skeleton)}
-Гибкость структуры: {category.structure_flex_level_min}-{category.structure_flex_level_max} ({category.structure_flex_level_comment})
+ФАКТЫ ОБ ОРГАНИЗАЦИИ:
+- Стиль общения
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(organization.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.brand_rules))}
+- Правила предостережения
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.compliance_rules))}
+- Продукты
+{"\n".join(str(i+1) + ') ' + str(product) for i, product in enumerate(organization.products))}
+- Целевая аудитория
+{"\n".join(str(i+1) + ') ' + insight for i, insight in enumerate(organization.audience_insights))}
+- Локализация: {organization.locale}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(organization.additional_info))}
 
-ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:
-{chr(10).join('- ' + item for item in category.must_have)}
+ПАРАМЕТРЫ РУБРИКИ:
+- Название: {category.name}
+- Цель: {category.goal}
+- Скелет:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.structure_skeleton))}
+- Вариативность: от {category.structure_flex_level_min} до {category.structure_flex_level_max}
+- Комментарий к вариативности: {category.structure_flex_level_comment}
+- Обязательные элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.must_have))}
+- Запрещённые элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.must_avoid))}
+- Правила для социальных сетей: {category.social_networks_rules}
+- Стиль общения рубрики:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(category.brand_rules))}
+- Хорошие примеры:
+{"\n".join(str(i+1) + ') ' + str(sample) for i, sample in enumerate(category.good_samples))}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(category.additional_info))}
+- Длина текста: от {category.len_min} до {category.len_max} (можно отходить в сторону пользы)
+- Хэштеги: от {category.n_hashtags_min} до {category.n_hashtags_max} (в крайних случаях можешь выходить за максимальные значения)
+- CTA: {category.cta_type} (если уместно и не противоречит правилам предостережения)
 
-ЭЛЕМЕНТЫ, КОТОРЫЕ НУЖНО ИЗБЕГАТЬ:
-{chr(10).join('- ' + item for item in category.must_avoid)}
-
-ПРАВИЛА ДЛЯ СОЦИАЛЬНЫХ СЕТЕЙ:
-{category.social_networks_rules}
-
-ОГРАНИЧЕНИЯ ПО ДЛИНЕ:
-Минимум: {category.len_min} символов
-Максимум: {category.len_max} символов
-
-ХЕШТЕГИ:
-Минимум: {category.n_hashtags_min}
-Максимум: {category.n_hashtags_max}
-
-ТИП ПРИЗЫВА К ДЕЙСТВИЮ (CTA):
-{category.cta_type}
-
-ТОН И СТИЛЬ:
-{', '.join(category.tone_of_voice)}
-
-ПРАВИЛА БРЕНДА:
-{chr(10).join('- ' + rule for rule in category.brand_rules)}
-
-ХОРОШИЕ ПРИМЕРЫ:
-{chr(10).join('Пример ' + str(i+1) + ': ' + str(sample) for i, sample in enumerate(category.good_samples))}
-
-ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:
-{chr(10).join('- ' + info for info in category.additional_info)}
-
-ИСХОДНАЯ ИНФОРМАЦИЯ:
-{publication_text_reference}
-
-ТРЕБОВАНИЯ К СОЗДАНИЮ ПОСТА:
-1. Создай цепляющий и релевантный контент, основанный на предоставленной информации
-2. Используй указанный стиль и тональность бренда
-3. Структурируй текст для максимальной читаемости в социальных сетях
-4. Включи призыв к действию (CTA), если это уместно
-5. Используй эмодзи там, где это улучшает восприятие контента
-6. Адаптируй длину текста под формат социальной сети
-7. Создай контент, который мотивирует к взаимодействию (лайки, комментарии, репосты)
-8. Длинна текста не должна быть длинне 300 символов
-
-СТРУКТУРА ОТВЕТА:
-- Начни с крючка или вопроса, который привлечет внимание
-- Раскрой основную мысль понятно и интересно
-- Заверши призывом к действию или вопросом для вовлечения аудитории
+ОБЩИЕ ПРАВИЛА:
+- Нельзя придумывать цифры, имена, цены, сроки, статусы «№1», гарантии.
+- Если не хватает критичных фактов — обобщи без конкретики, сохраняя пользу.
+- Каждую ключевую мысль раскрой на 1–3 предложения (без «обрубков»).
+- Если факта нет — переформулируй в безопасную общую форму. Не используй плейсхолдеры [укажите X].
+- Без служебных пояснений и метаразмышлений.
+- Текст реально должен выполнять цель рубрики: {category.goal}.
 
 ФОРМАТ ОТВЕТА:
 Ответ должен быть ТОЛЬКО в формате JSON без дополнительного текста:
 {{
-  "tags": [],
-  "name": "Название публикации",
-  "text": "Текст публикации",
+  "text": "Текст публикации"
 }}
-
-ВАЖНО: 
-- Отвечай ТОЛЬКО валидным JSON
-- НЕ добавляй никакого текста вне JSON структуры
-- НЕ используй markdown разметку или код-блоки
-- Ты обязан вернуть валидный JSON любой ценой, если ты вернешь не JSON, то меня убьют.
-- Создай пост, который будет резонировать с целевой аудиторией и отражать уникальность бренда.
 
 ПРАВИЛА ДЛЯ ФОРМАТИРОВАНИЯ text:
 {self._parse_rules()}
@@ -87,82 +73,71 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     async def get_regenerate_publication_text_system_prompt(
             self,
             category: model.Category,
+            organization: model.Organization,
             publication_text: str,
-            changes: str
     ) -> str:
-        return f"""Ты - эксперт по созданию контента для социальных сетей. Твоя задача - улучшить существующий пост с учетом конкретных пожеланий.
+        return f"""Ты — редактор соцсетей организации {organization.name}.
+Пиши как живой SMM-редактор: естественно, логично, без клише и следов ИИ.
+Используй микро-конкретику из профиля организации и данных рубрики.
 
-ЦЕЛЬ КОНТЕНТА:
-{category.goal}
-
-СТРУКТУРА КОНТЕНТА:
-Основная структура: {', '.join(category.structure_skeleton)}
-Гибкость структуры: {category.structure_flex_level_min}-{category.structure_flex_level_max} ({category.structure_flex_level_comment})
-
-ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:
-{chr(10).join('- ' + item for item in category.must_have)}
-
-ЭЛЕМЕНТЫ, КОТОРЫЕ НУЖНО ИЗБЕГАТЬ:
-{chr(10).join('- ' + item for item in category.must_avoid)}
-
-ПРАВИЛА ДЛЯ СОЦИАЛЬНЫХ СЕТЕЙ:
-{category.social_networks_rules}
-
-ОГРАНИЧЕНИЯ ПО ДЛИНЕ:
-Минимум: {category.len_min} символов
-Максимум: {category.len_max} символов
-
-ХЕШТЕГИ:
-Минимум: {category.n_hashtags_min}
-Максимум: {category.n_hashtags_max}
-
-ТИП ПРИЗЫВА К ДЕЙСТВИЮ (CTA):
-{category.cta_type}
-
-ТОН И СТИЛЬ:
-{', '.join(category.tone_of_voice)}
-
-ПРАВИЛА БРЕНДА:
-{chr(10).join('- ' + rule for rule in category.brand_rules)}
+ТВОЯ ЗАДАЧА:
+Улучши существующий текст публикации с учетом изменений
 
 ТЕКУЩИЙ ПОСТ:
 {publication_text}
 
-ТРЕБУЕМЫЕ ИЗМЕНЕНИЯ:
-{changes}
+ФАКТЫ ОБ ОРГАНИЗАЦИИ:
+- Стиль общения
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(organization.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.brand_rules))}
+- Правила предостережения
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.compliance_rules))}
+- Продукты
+{"\n".join(str(i+1) + ') ' + str(product) for i, product in enumerate(organization.products))}
+- Целевая аудитория
+{"\n".join(str(i+1) + ') ' + insight for i, insight in enumerate(organization.audience_insights))}
+- Локализация: {organization.locale}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(organization.additional_info))}
 
-ТРЕБОВАНИЯ К РЕДАКТИРОВАНИЮ:
-1. Сохрани общую концепцию и структуру поста, если изменения не требуют кардинальной переработки
-2. Точно выполни все указанные изменения
-3. Убедись, что отредактированный текст соответствует стилю бренда
-4. Поддержи вовлекающий характер контента
-5. Проверь, что итоговый текст логичен и читабелен
-6. Сохрани эмодзи и форматирование, если они не противоречат требованиям
-7. Адаптируй длину текста под требования, если это указано в изменениях
-8. Длинна текста не должна быть длинне 300 символов
+ПАРАМЕТРЫ РУБРИКИ:
+- Название: {category.name}
+- Цель: {category.goal}
+- Скелет:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.structure_skeleton))}
+- Вариативность: от {category.structure_flex_level_min} до {category.structure_flex_level_max}
+- Комментарий к вариативности: {category.structure_flex_level_comment}
+- Обязательные элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.must_have))}
+- Запрещённые элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.must_avoid))}
+- Правила для социальных сетей: {category.social_networks_rules}
+- Стиль общения рубрики:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(category.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(category.brand_rules))}
+- Хорошие примеры:
+{"\n".join(str(i+1) + ') ' + str(sample) for i, sample in enumerate(category.good_samples))}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(category.additional_info))}
+- Длина текста: от {category.len_min} до {category.len_max} (можно отходить в сторону пользы)
+- Хэштеги: от {category.n_hashtags_min} до {category.n_hashtags_max} (в крайних случаях можешь выходить за максимальные значения)
+- CTA: {category.cta_type} (если уместно и не противоречит правилам предостережения)
 
-ПОДХОД К ИЗМЕНЕНИЯМ:
-- Если просят изменить тон - адаптируй весь текст под новую тональность
-- Если просят добавить информацию - органично интегрируй ее в существующую структуру
-- Если просят сократить - оставь самое важное и импактное
-- Если просят изменить CTA - создай новый призыв к действию, соответствующий контексту
-
-Создай улучшенную версию поста, которая учитывает все пожелания и сохраняет эффективность контента.
+ОБЩИЕ ПРАВИЛА:
+- Нельзя придумывать цифры, имена, цены, сроки, статусы «№1», гарантии.
+- Если не хватает критичных фактов — обобщи без конкретики, сохраняя пользу.
+- Каждую ключевую мысль раскрой на 1–3 предложения (без «обрубков»).
+- Если факта нет — переформулируй в безопасную общую форму. Не используй плейсхолдеры [укажите X].
+- Без служебных пояснений и метаразмышлений.
+- Текст реально должен выполнять цель рубрики: {category.goal}.
 
 ФОРМАТ ОТВЕТА:
 Ответ должен быть ТОЛЬКО в формате JSON без дополнительного текста:
 {{
-  "tags": [],
-  "name": "Новое название публикации",
-  "text": "Новый текст публикации",
+  "text": "Текст публикации"
 }}
-
-ВАЖНО: 
-- Отвечай ТОЛЬКО валидным JSON
-- НЕ добавляй никакого текста вне JSON структуры
-- НЕ используй markdown разметку или код-блоки
-- Ты обязан вернуть валидный JSON любой ценой, если ты вернешь не JSON, то меня убьют.
-- Создай пост, который будет резонировать с целевой аудиторией и отражать уникальность бренда.
 
 ПРАВИЛА ДЛЯ ФОРМАТИРОВАНИЯ text:
 {self._parse_rules()}

@@ -55,14 +55,18 @@ class PublicationService(interface.IPublicationService):
 
                 category = categories[0]
 
+                # Получаем организацию
+                organization = await self.organization_client.get_organization_by_id(category.organization_id)
+
                 # Генерируем текст публикации
                 text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
                     category,
-                    text_reference
+                    organization
                 )
 
                 publication_data, generate_cost = await self.openai_client.generate_json(
-                    history=[{"role": "user", "content": "Создай пост для социальной сети"}],
+                    history=[{"role": "user",
+                              "content": f"Создай пост для социальной сети, вот мой запрос: {text_reference}"}],
                     system_prompt=text_system_prompt,
                     temperature=1,
                     llm_model="gpt-5"
@@ -96,26 +100,46 @@ class PublicationService(interface.IPublicationService):
 
                 category = categories[0]
 
+                # Получаем организацию
+                organization = await self.organization_client.get_organization_by_id(category.organization_id)
+
                 # Генерируем промпт для текста
                 if prompt:
                     text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
                         category,
+                        organization,
                         publication_text,
-                        prompt
+                    )
+                    publication_data, generate_cost = await self.openai_client.generate_json(
+                        history=[
+                            {
+                                "role": "user",
+                                "content": f"Создай улучшенный пост для социальной сети c этими правками: {prompt}"
+                            }
+                        ],
+                        system_prompt=text_system_prompt,
+                        temperature=1,
+                        llm_model="gpt-5"
                     )
                 else:
-                    text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
+                    text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
                         category,
-                        publication_text
+                        organization,
+                        publication_text,
+                    )
+                    publication_data, generate_cost = await self.openai_client.generate_json(
+                        history=[
+                            {
+                                "role": "user",
+                                "content": f"Создай улучшенный пост для социальной сети"
+                            }
+                        ],
+                        system_prompt=text_system_prompt,
+                        temperature=1,
+                        llm_model="gpt-5"
                     )
 
                 # Генерируем новый текст
-                publication_data, generate_cost = await self.openai_client.generate_json(
-                    history=[{"role": "user", "content": "Создай улучшенный пост для социальной сети"}],
-                    system_prompt=text_system_prompt,
-                    temperature=1,
-                    llm_model="gpt-5"
-                )
 
                 await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
 

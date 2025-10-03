@@ -1,6 +1,6 @@
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
-from internal import interface
+from internal import interface, model
 from pkg.client.client import AsyncHTTPClient
 
 
@@ -44,3 +44,21 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise
 
+    async def get_organization_by_id(self, organization_id: int) -> model.Organization:
+        with self.tracer.start_as_current_span(
+                "OrganizationClient.get_organization_by_id",
+                kind=SpanKind.CLIENT,
+                attributes={
+                    "organization_id": organization_id
+                }
+        ) as span:
+            try:
+                response = await self.client.get(f"/{organization_id}")
+                json_response = response.json()
+
+                span.set_status(Status(StatusCode.OK))
+                return model.Organization(**json_response)
+            except Exception as e:
+                span.record_exception(e)
+                span.set_status(Status(StatusCode.ERROR, str(e)))
+                raise
