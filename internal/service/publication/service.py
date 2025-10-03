@@ -57,7 +57,7 @@ class PublicationService(interface.IPublicationService):
 
                 # Генерируем текст публикации
                 text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
-                    category.prompt_for_text_style,
+                    category,
                     text_reference
                 )
 
@@ -99,13 +99,13 @@ class PublicationService(interface.IPublicationService):
                 # Генерируем промпт для текста
                 if prompt:
                     text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
-                        category.prompt_for_text_style,
+                        category,
                         publication_text,
                         prompt
                     )
                 else:
                     text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
-                        category.prompt_for_text_style,
+                        category,
                         publication_text
                     )
 
@@ -600,7 +600,23 @@ class PublicationService(interface.IPublicationService):
             organization_id: int,
             name: str,
             prompt_for_image_style: str,
-            prompt_for_text_style: str
+            goal: str,
+            structure_skeleton: list[str],
+            structure_flex_level_min: int,
+            structure_flex_level_max: int,
+            structure_flex_level_comment: str,
+            must_have: list[str],
+            must_avoid: list[str],
+            social_networks_rules: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            good_samples: list[dict],
+            additional_info: list[str]
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_category",
@@ -612,7 +628,23 @@ class PublicationService(interface.IPublicationService):
                     organization_id=organization_id,
                     name=name,
                     prompt_for_image_style=prompt_for_image_style,
-                    prompt_for_text_style=prompt_for_text_style
+                    goal=goal,
+                    structure_skeleton=structure_skeleton,
+                    structure_flex_level_min=structure_flex_level_min,
+                    structure_flex_level_max=structure_flex_level_max,
+                    structure_flex_level_comment=structure_flex_level_comment,
+                    must_have=must_have,
+                    must_avoid=must_avoid,
+                    social_networks_rules=social_networks_rules,
+                    len_min=len_min,
+                    len_max=len_max,
+                    n_hashtags_min=n_hashtags_min,
+                    n_hashtags_max=n_hashtags_max,
+                    cta_type=cta_type,
+                    tone_of_voice=tone_of_voice,
+                    brand_rules=brand_rules,
+                    good_samples=good_samples,
+                    additional_info=additional_info
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -662,9 +694,25 @@ class PublicationService(interface.IPublicationService):
     async def update_category(
             self,
             category_id: int,
-            prompt_for_image_style: str = None,
             name: str = None,
-            prompt_for_text_style: str = None
+            prompt_for_image_style: str = None,
+            goal: str = None,
+            structure_skeleton: list[str] = None,
+            structure_flex_level_min: int = None,
+            structure_flex_level_max: int = None,
+            structure_flex_level_comment: str = None,
+            must_have: list[str] = None,
+            must_avoid: list[str] = None,
+            social_networks_rules: str = None,
+            len_min: int = None,
+            len_max: int = None,
+            n_hashtags_min: int = None,
+            n_hashtags_max: int = None,
+            cta_type: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            good_samples: list[dict] = None,
+            additional_info: list[str] = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationService.update_category",
@@ -676,7 +724,23 @@ class PublicationService(interface.IPublicationService):
                     category_id=category_id,
                     name=name,
                     prompt_for_image_style=prompt_for_image_style,
-                    prompt_for_text_style=prompt_for_text_style
+                    goal=goal,
+                    structure_skeleton=structure_skeleton,
+                    structure_flex_level_min=structure_flex_level_min,
+                    structure_flex_level_max=structure_flex_level_max,
+                    structure_flex_level_comment=structure_flex_level_comment,
+                    must_have=must_have,
+                    must_avoid=must_avoid,
+                    social_networks_rules=social_networks_rules,
+                    len_min=len_min,
+                    len_max=len_max,
+                    n_hashtags_min=n_hashtags_min,
+                    n_hashtags_max=n_hashtags_max,
+                    cta_type=cta_type,
+                    tone_of_voice=tone_of_voice,
+                    brand_rules=brand_rules,
+                    good_samples=good_samples,
+                    additional_info=additional_info
                 )
 
                 span.set_status(Status(StatusCode.OK))

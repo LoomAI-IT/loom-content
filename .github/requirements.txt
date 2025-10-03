@@ -10,6 +10,8 @@ pypdf
 pdf2image
 pillow
 sulguk
+segno
+telethon
 
 hiredis==3.2.1
 redis==6.2.0

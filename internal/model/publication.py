@@ -1,6 +1,5 @@
 from datetime import datetime
 from dataclasses import dataclass
-from typing import List, Optional
 from enum import Enum
 
 
@@ -18,19 +17,68 @@ class Category:
 
     name: str
     prompt_for_image_style: str
-    prompt_for_text_style: str
+
+    goal: str
+
+    # Структура контента
+    structure_skeleton: list[str]
+    structure_flex_level_min: int
+    structure_flex_level_max: int
+    structure_flex_level_comment: str
+
+    # Требования к контенту
+    must_have: list[str]
+    must_avoid: list[str]
+
+    # Правила для соцсетей
+    social_networks_rules: str
+
+    # Ограничения по длине
+    len_min: int
+    len_max: int
+
+    # Ограничения по хештегам
+    n_hashtags_min: int
+    n_hashtags_max: int
+
+    # Стиль и тон
+    cta_type: str
+    tone_of_voice: list[str]
+
+    # Бренд и примеры
+    brand_rules: list[str]
+    good_samples: list[dict]
+
+    # Дополнительная информация
+    additional_info: list[str]
 
     created_at: datetime
 
     @classmethod
-    def serialize(cls, rows) -> List['Category']:
+    def serialize(cls, rows) -> list['Category']:
         return [
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
                 name=row.name,
                 prompt_for_image_style=row.prompt_for_image_style,
-                prompt_for_text_style=row.prompt_for_text_style,
+                goal=row.goal,
+                structure_skeleton=row.structure_skeleton,
+                structure_flex_level_min=row.structure_flex_level_min,
+                structure_flex_level_max=row.structure_flex_level_max,
+                structure_flex_level_comment=row.structure_flex_level_comment,
+                must_have=row.must_have,
+                must_avoid=row.must_avoid,
+                social_networks_rules=row.social_networks_rules,
+                len_min=row.len_min,
+                len_max=row.len_max,
+                n_hashtags_min=row.n_hashtags_min,
+                n_hashtags_max=row.n_hashtags_max,
+                cta_type=row.cta_type,
+                tone_of_voice=row.tone_of_voice,
+                brand_rules=row.brand_rules,
+                good_samples=row.good_samples,
+                additional_info=row.additional_info,
                 created_at=row.created_at
             )
             for row in rows
@@ -42,10 +90,25 @@ class Category:
             "organization_id": self.organization_id,
             "name": self.name,
             "prompt_for_image_style": self.prompt_for_image_style,
-            "prompt_for_text_style": self.prompt_for_text_style,
+            "goal": self.goal,
+            "structure_skeleton": self.structure_skeleton,
+            "structure_flex_level_min": self.structure_flex_level_min,
+            "structure_flex_level_max": self.structure_flex_level_max,
+            "structure_flex_level_comment": self.structure_flex_level_comment,
+            "must_have": self.must_have,
+            "must_avoid": self.must_avoid,
+            "social_networks_rules": self.social_networks_rules,
+            "len_min": self.len_min,
+            "len_max": self.len_max,
+            "n_hashtags_min": self.n_hashtags_min,
+            "n_hashtags_max": self.n_hashtags_max,
+            "cta_type": self.cta_type,
+            "tone_of_voice": self.tone_of_voice,
+            "brand_rules": self.brand_rules,
+            "good_samples": self.good_samples,
+            "additional_info": self.additional_info,
             "created_at": self.created_at.isoformat()
         }
-
 
 @dataclass
 class Publication:
@@ -72,7 +135,7 @@ class Publication:
     created_at: datetime
 
     @classmethod
-    def serialize(cls, rows) -> List['Publication']:
+    def serialize(cls, rows) -> list['Publication']:
         return [
             cls(
                 id=row.id,
@@ -129,7 +192,7 @@ class Autoposting:
     created_at: datetime
 
     @classmethod
-    def serialize(cls, rows) -> List['Autoposting']:
+    def serialize(cls, rows) -> list['Autoposting']:
         return [
             cls(
                 id=row.id,

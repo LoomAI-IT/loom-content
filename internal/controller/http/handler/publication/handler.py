@@ -1,5 +1,3 @@
-import json
-
 from fastapi import Form, UploadFile, File
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
@@ -554,7 +552,23 @@ class PublicationController(interface.IPublicationController):
                     organization_id=body.organization_id,
                     name=body.name,
                     prompt_for_image_style=body.prompt_for_image_style,
-                    prompt_for_text_style=body.prompt_for_text_style
+                    goal=body.goal,
+                    structure_skeleton=body.structure_skeleton,
+                    structure_flex_level_min=body.structure_flex_level_min,
+                    structure_flex_level_max=body.structure_flex_level_max,
+                    structure_flex_level_comment=body.structure_flex_level_comment,
+                    must_have=body.must_have,
+                    must_avoid=body.must_avoid,
+                    social_networks_rules=body.social_networks_rules,
+                    len_min=body.len_min,
+                    len_max=body.len_max,
+                    n_hashtags_min=body.n_hashtags_min,
+                    n_hashtags_max=body.n_hashtags_max,
+                    cta_type=body.cta_type,
+                    tone_of_voice=body.tone_of_voice,
+                    brand_rules=body.brand_rules,
+                    good_samples=body.good_samples,
+                    additional_info=body.additional_info
                 )
 
                 self.logger.info("Category created successfully", {
@@ -651,7 +665,23 @@ class PublicationController(interface.IPublicationController):
                     category_id=body.category_id,
                     name=body.name,
                     prompt_for_image_style=body.prompt_for_image_style,
-                    prompt_for_text_style=body.prompt_for_text_style
+                    goal=body.goal,
+                    structure_skeleton=body.structure_skeleton,
+                    structure_flex_level_min=body.structure_flex_level_min,
+                    structure_flex_level_max=body.structure_flex_level_max,
+                    structure_flex_level_comment=body.structure_flex_level_comment,
+                    must_have=body.must_have,
+                    must_avoid=body.must_avoid,
+                    social_networks_rules=body.social_networks_rules,
+                    len_min=body.len_min,
+                    len_max=body.len_max,
+                    n_hashtags_min=body.n_hashtags_min,
+                    n_hashtags_max=body.n_hashtags_max,
+                    cta_type=body.cta_type,
+                    tone_of_voice=body.tone_of_voice,
+                    brand_rules=body.brand_rules,
+                    good_samples=body.good_samples,
+                    additional_info=body.additional_info
                 )
 
                 self.logger.info("Category updated successfully", {

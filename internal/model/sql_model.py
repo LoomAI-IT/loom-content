@@ -5,7 +5,40 @@ CREATE TABLE IF NOT EXISTS categories (
     
     name TEXT NOT NULL,
     prompt_for_image_style TEXT NOT NULL,
-    prompt_for_text_style TEXT NOT NULL,
+
+    goal TEXT NOT NULL,
+    
+    -- Структура контента
+    structure_skeleton TEXT[] NOT NULL,
+    structure_flex_level_min INTEGER NOT NULL,
+    structure_flex_level_max INTEGER NOT NULL,
+    structure_flex_level_comment TEXT NOT NULL,
+    
+    -- Требования к контенту
+    must_have TEXT[] NOT NULL,
+    must_avoid TEXT[] NOT NULL,
+    
+    -- Правила для соцсетей
+    social_networks_rules TEXT NOT NULL,
+    
+    -- Ограничения по длине
+    len_min INTEGER NOT NULL,
+    len_max INTEGER NOT NULL,
+    
+    -- Ограничения по хештегам
+    n_hashtags_min INTEGER NOT NULL,
+    n_hashtags_max INTEGER NOT NULL,
+    
+    -- Стиль и тон
+    cta_type TEXT NOT NULL,
+    tone_of_voice TEXT[] DEFAULT '{}',
+    
+    -- Бренд и примеры
+    brand_rules TEXT[] DEFAULT '{}',
+    good_samples JSONB[] NOT NULL,
+    
+    -- Дополнительная информация
+    additional_info TEXT[] NOT NULL,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

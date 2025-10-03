@@ -1,5 +1,6 @@
 import io
 from abc import abstractmethod
+from datetime import datetime
 from typing import Protocol
 
 from fastapi import UploadFile, Form, File
@@ -278,7 +279,23 @@ class IPublicationService(Protocol):
             organization_id: int,
             name: str,
             prompt_for_image_style: str,
-            prompt_for_text_style: str
+            goal: str,
+            structure_skeleton: list[str],
+            structure_flex_level_min: int,
+            structure_flex_level_max: int,
+            structure_flex_level_comment: str,
+            must_have: list[str],
+            must_avoid: list[str],
+            social_networks_rules: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            good_samples: list[dict],
+            additional_info: list[str]
     ) -> int:
         pass
 
@@ -296,7 +313,23 @@ class IPublicationService(Protocol):
             category_id: int,
             name: str = None,
             prompt_for_image_style: str = None,
-            prompt_for_text_style: str = None
+            goal: str = None,
+            structure_skeleton: list[str] = None,
+            structure_flex_level_min: int = None,
+            structure_flex_level_max: int = None,
+            structure_flex_level_comment: str = None,
+            must_have: list[str] = None,
+            must_avoid: list[str] = None,
+            social_networks_rules: str = None,
+            len_min: int = None,
+            len_max: int = None,
+            n_hashtags_min: int = None,
+            n_hashtags_max: int = None,
+            cta_type: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            good_samples: list[dict] = None,
+            additional_info: list[str] = None
     ) -> None:
         pass
 
@@ -396,7 +429,23 @@ class IPublicationRepo(Protocol):
             organization_id: int,
             name: str,
             prompt_for_image_style: str,
-            prompt_for_text_style: str
+            goal: str,
+            structure_skeleton: list[str],
+            structure_flex_level_min: int,
+            structure_flex_level_max: int,
+            structure_flex_level_comment: str,
+            must_have: list[str],
+            must_avoid: list[str],
+            social_networks_rules: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            good_samples: list[dict],
+            additional_info: list[str]
     ) -> int:
         pass
 
@@ -406,7 +455,23 @@ class IPublicationRepo(Protocol):
             category_id: int,
             name: str = None,
             prompt_for_image_style: str = None,
-            prompt_for_text_style: str = None
+            goal: str = None,
+            structure_skeleton: list[str] = None,
+            structure_flex_level_min: int = None,
+            structure_flex_level_max: int = None,
+            structure_flex_level_comment: str = None,
+            must_have: list[str] = None,
+            must_avoid: list[str] = None,
+            social_networks_rules: str = None,
+            len_min: int = None,
+            len_max: int = None,
+            n_hashtags_min: int = None,
+            n_hashtags_max: int = None,
+            cta_type: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            good_samples: list[dict] = None,
+            additional_info: list[str] = None
     ) -> None:
         pass
 
@@ -456,7 +521,7 @@ class IPublicationPromptGenerator(Protocol):
     @abstractmethod
     async def get_generate_publication_text_system_prompt(
             self,
-            prompt_for_text_style: str,
+            category: model.Category,
             publication_text_reference: str
     ) -> str:
         pass
@@ -464,7 +529,7 @@ class IPublicationPromptGenerator(Protocol):
     @abstractmethod
     async def get_regenerate_publication_text_system_prompt(
             self,
-            prompt_for_text_style: str,
+            category: model.Category,
             publication_text: str,
             changes: str
     ) -> str:

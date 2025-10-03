@@ -1,15 +1,51 @@
-from internal import interface
+from internal import interface, model
 
 class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     async def get_generate_publication_text_system_prompt(
             self,
-            prompt_for_text_style: str,
+            category: model.Category,
             publication_text_reference: str
     ) -> str:
         return f"""Ты - эксперт по созданию контента для социальных сетей. Твоя задача - создать вовлекающий пост на основе предоставленной информации.
 
-СТИЛЬ И ТОНАЛЬНОСТЬ:
-{prompt_for_text_style}
+ЦЕЛЬ КОНТЕНТА:
+{category.goal}
+
+СТРУКТУРА КОНТЕНТА:
+Основная структура: {', '.join(category.structure_skeleton)}
+Гибкость структуры: {category.structure_flex_level_min}-{category.structure_flex_level_max} ({category.structure_flex_level_comment})
+
+ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:
+{chr(10).join('- ' + item for item in category.must_have)}
+
+ЭЛЕМЕНТЫ, КОТОРЫЕ НУЖНО ИЗБЕГАТЬ:
+{chr(10).join('- ' + item for item in category.must_avoid)}
+
+ПРАВИЛА ДЛЯ СОЦИАЛЬНЫХ СЕТЕЙ:
+{category.social_networks_rules}
+
+ОГРАНИЧЕНИЯ ПО ДЛИНЕ:
+Минимум: {category.len_min} символов
+Максимум: {category.len_max} символов
+
+ХЕШТЕГИ:
+Минимум: {category.n_hashtags_min}
+Максимум: {category.n_hashtags_max}
+
+ТИП ПРИЗЫВА К ДЕЙСТВИЮ (CTA):
+{category.cta_type}
+
+ТОН И СТИЛЬ:
+{', '.join(category.tone_of_voice)}
+
+ПРАВИЛА БРЕНДА:
+{chr(10).join('- ' + rule for rule in category.brand_rules)}
+
+ХОРОШИЕ ПРИМЕРЫ:
+{chr(10).join('Пример ' + str(i+1) + ': ' + str(sample) for i, sample in enumerate(category.good_samples))}
+
+ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:
+{chr(10).join('- ' + info for info in category.additional_info)}
 
 ИСХОДНАЯ ИНФОРМАЦИЯ:
 {publication_text_reference}
@@ -50,14 +86,44 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     async def get_regenerate_publication_text_system_prompt(
             self,
-            prompt_for_text_style: str,
+            category: model.Category,
             publication_text: str,
             changes: str
     ) -> str:
         return f"""Ты - эксперт по созданию контента для социальных сетей. Твоя задача - улучшить существующий пост с учетом конкретных пожеланий.
 
-СТИЛЬ И ТОНАЛЬНОСТЬ:
-{prompt_for_text_style}
+ЦЕЛЬ КОНТЕНТА:
+{category.goal}
+
+СТРУКТУРА КОНТЕНТА:
+Основная структура: {', '.join(category.structure_skeleton)}
+Гибкость структуры: {category.structure_flex_level_min}-{category.structure_flex_level_max} ({category.structure_flex_level_comment})
+
+ОБЯЗАТЕЛЬНЫЕ ЭЛЕМЕНТЫ:
+{chr(10).join('- ' + item for item in category.must_have)}
+
+ЭЛЕМЕНТЫ, КОТОРЫЕ НУЖНО ИЗБЕГАТЬ:
+{chr(10).join('- ' + item for item in category.must_avoid)}
+
+ПРАВИЛА ДЛЯ СОЦИАЛЬНЫХ СЕТЕЙ:
+{category.social_networks_rules}
+
+ОГРАНИЧЕНИЯ ПО ДЛИНЕ:
+Минимум: {category.len_min} символов
+Максимум: {category.len_max} символов
+
+ХЕШТЕГИ:
+Минимум: {category.n_hashtags_min}
+Максимум: {category.n_hashtags_max}
+
+ТИП ПРИЗЫВА К ДЕЙСТВИЮ (CTA):
+{category.cta_type}
+
+ТОН И СТИЛЬ:
+{', '.join(category.tone_of_voice)}
+
+ПРАВИЛА БРЕНДА:
+{chr(10).join('- ' + rule for rule in category.brand_rules)}
 
 ТЕКУЩИЙ ПОСТ:
 {publication_text}

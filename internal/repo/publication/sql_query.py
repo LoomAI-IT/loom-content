@@ -62,23 +62,71 @@ INSERT INTO categories (
     organization_id,
     name,
     prompt_for_image_style,
-    prompt_for_text_style
+    goal,
+    structure_skeleton,
+    structure_flex_level_min,
+    structure_flex_level_max,
+    structure_flex_level_comment,
+    must_have,
+    must_avoid,
+    social_networks_rules,
+    len_min,
+    len_max,
+    n_hashtags_min,
+    n_hashtags_max,
+    cta_type,
+    tone_of_voice,
+    brand_rules,
+    good_samples,
+    additional_info
 )
 VALUES (
     :organization_id,
     :name,
     :prompt_for_image_style,
-    :prompt_for_text_style
+    :goal,
+    :structure_skeleton,
+    :structure_flex_level_min,
+    :structure_flex_level_max,
+    :structure_flex_level_comment,
+    :must_have,
+    :must_avoid,
+    :social_networks_rules,
+    :len_min,
+    :len_max,
+    :n_hashtags_min,
+    :n_hashtags_max,
+    :cta_type,
+    :tone_of_voice,
+    :brand_rules,
+    :good_samples,
+    :additional_info
 )
 RETURNING id;
 """
 
 update_category = """
 UPDATE categories
-SET 
+SET
     name = COALESCE(:name, name),
     prompt_for_image_style = COALESCE(:prompt_for_image_style, prompt_for_image_style),
-    prompt_for_text_style = COALESCE(:prompt_for_text_style, prompt_for_text_style)
+    goal = COALESCE(:goal, goal),
+    structure_skeleton = COALESCE(:structure_skeleton, structure_skeleton),
+    structure_flex_level_min = COALESCE(:structure_flex_level_min, structure_flex_level_min),
+    structure_flex_level_max = COALESCE(:structure_flex_level_max, structure_flex_level_max),
+    structure_flex_level_comment = COALESCE(:structure_flex_level_comment, structure_flex_level_comment),
+    must_have = COALESCE(:must_have, must_have),
+    must_avoid = COALESCE(:must_avoid, must_avoid),
+    social_networks_rules = COALESCE(:social_networks_rules, social_networks_rules),
+    len_min = COALESCE(:len_min, len_min),
+    len_max = COALESCE(:len_max, len_max),
+    n_hashtags_min = COALESCE(:n_hashtags_min, n_hashtags_min),
+    n_hashtags_max = COALESCE(:n_hashtags_max, n_hashtags_max),
+    cta_type = COALESCE(:cta_type, cta_type),
+    tone_of_voice = COALESCE(:tone_of_voice, tone_of_voice),
+    brand_rules = COALESCE(:brand_rules, brand_rules),
+    good_samples = COALESCE(:good_samples, good_samples),
+    additional_info = COALESCE(:additional_info, additional_info)
 WHERE id = :category_id;
 """
 
