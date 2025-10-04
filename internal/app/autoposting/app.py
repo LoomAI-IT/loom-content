@@ -108,6 +108,8 @@ class Autoposting:
             for channel_username in autoposting.tg_channels:
                 channel_suitable_posts = await self._process_channel(autoposting, channel_username)
                 suitable_posts.extend(channel_suitable_posts)
+                if len(channel_suitable_posts) == 1:
+                    break
 
             self.logger.info(
                 f"🎯 Итого найдено {len(suitable_posts)} подходящих постов для автопостинга {autoposting.id}"
@@ -232,8 +234,8 @@ class Autoposting:
                         "date": post_date,
                     })
                     self.logger.info(f"✅ Пост из @{channel_username} прошел фильтр! Причина: {reason}")
-                    if len(suitable_posts) == 3:
-                        return suitable_posts
+                    if len(suitable_posts) == 1:
+                        break
                 else:
                     await self._mark_post_as_viewed(autoposting.id, channel_username, post_link)
                     self.logger.info(f"❌ Пост из @{channel_username} не прошел фильтр. Причина: {reason}")
