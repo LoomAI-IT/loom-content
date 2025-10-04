@@ -1231,7 +1231,6 @@ class PublicationService(interface.IPublicationService):
                 )
 
                 images_url = []
-                print(len(images), flush=True)
                 for image in images:
                     image_bytes = base64.b64decode(image)
                     image_name = "autoposting_image.png"
