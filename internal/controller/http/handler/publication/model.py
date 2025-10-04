@@ -198,7 +198,6 @@ class CreateAutopostingBody(BaseModel):
 
 
 class UpdateAutopostingBody(BaseModel):
-    autoposting_id: int
     autoposting_category_id: int = None
     period_in_hours: int = None
     filter_prompt: str = None
