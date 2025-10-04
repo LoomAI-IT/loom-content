@@ -1,3 +1,5 @@
+import argparse
+import asyncio
 import uvicorn
 from aiogram import Bot
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -14,6 +16,7 @@ from pkg.client.external.openai.client import OpenAIClient
 from pkg.client.internal.loom_authorization.client import LoomAuthorizationClient
 from pkg.client.internal.loom_organization.client import LoomOrganizationClient
 from pkg.client.internal.loom_tg_bot.client import LoomTgBotClient
+from pkg.client.internal.loom_employee.client import LoomEmployeeClient
 
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
@@ -30,10 +33,21 @@ from internal.repo.video_cut.repo import VideoCutRepo
 from internal.repo.social_network.repo import SocialNetworkRepo
 
 from internal.app.http.app import NewHTTP
+from internal.app.autoposting.app import Autoposting
 
 from internal.config.config import Config
 
+parser = argparse.ArgumentParser(description="Loom Content Service")
+parser.add_argument(
+    "mode",
+    choices=["http", "autoposting"],
+    help="Режим запуска: http - HTTP сервер, autoposting - автопостинг"
+)
+
+args = parser.parse_args()
+
 cfg = Config()
+cfg.service_name = cfg.service_name if args.mode == "http" else cfg.service_name + "-autoposting"
 
 alert_manager = AlertManager(
     cfg.alert_tg_bot_token,
@@ -62,7 +76,6 @@ tel = Telemetry(
 db = PG(tel, cfg.db_user, cfg.db_pass, cfg.db_host, cfg.db_port, cfg.db_name)
 storage = AsyncWeed(cfg.weed_master_host, cfg.weed_master_port)
 
-
 session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/telegram-bot-api'))
 bot = Bot(token=cfg.tg_bot_token, session=session)
 
@@ -71,6 +84,12 @@ loom_authorization_client = LoomAuthorizationClient(
     tel=tel,
     host=cfg.loom_authorization_host,
     port=cfg.loom_authorization_port,
+)
+
+loom_employee_client = LoomEmployeeClient(
+    tel=tel,
+    host=cfg.loom_employee_host,
+    port=cfg.loom_employee_port,
 )
 
 loom_organization_client = LoomOrganizationClient(
@@ -94,7 +113,12 @@ vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
 )
 
-telegram_client = LTelegramClient(cfg.tg_bot_token, cfg.tg_session_string)
+telegram_client = LTelegramClient(
+    cfg.tg_bot_token,
+    cfg.tg_session_string,
+    cfg.tg_api_id,
+    cfg.tg_api_hash,
+)
 
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
@@ -142,13 +166,28 @@ social_network_controller = SocialNetworkController(tel, social_network_service)
 # Инициализация middleware
 http_middleware = HttpMiddleware(tel, cfg.prefix, loom_authorization_client)
 
+autoposting = Autoposting(
+    tel=tel,
+    publication_service=publication_service,
+    telegram_client=telegram_client,
+    openai_client=openai_client,
+    prompt_generator=publication_prompt_generator,
+    loom_employee_client=loom_employee_client
+)
+
 if __name__ == "__main__":
-    app = NewHTTP(
-        db=db,
-        publication_controller=publication_controller,
-        video_cut_controller=video_cut_controller,
-        social_network_controller=social_network_controller,
-        http_middleware=http_middleware,
-        prefix=cfg.prefix,
-    )
-    uvicorn.run(app, host="0.0.0.0", port=int(cfg.http_port), access_log=False)
+    if args.mode == "http":
+        app = NewHTTP(
+            db=db,
+            publication_controller=publication_controller,
+            video_cut_controller=video_cut_controller,
+            social_network_controller=social_network_controller,
+            http_middleware=http_middleware,
+            prefix=cfg.prefix,
+        )
+        uvicorn.run(app, host="0.0.0.0", port=int(cfg.http_port), access_log=False)
+
+    elif args.mode == "autoposting":
+        asyncio.run(
+            autoposting.run()
+        )

@@ -525,7 +525,8 @@ class PublicationRepo(interface.IPublicationRepo):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_autoposting",
@@ -542,6 +543,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'filter_prompt': filter_prompt,
                     'tg_channels': tg_channels,
                     'required_moderation': required_moderation,
+                    'need_image': need_image,
                 }
 
                 autoposting_id = await self.db.insert(create_autoposting, args)
@@ -562,6 +564,7 @@ class PublicationRepo(interface.IPublicationRepo):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         with self.tracer.start_as_current_span(
@@ -580,6 +583,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'enabled': enabled,
                     'tg_channels': tg_channels,
                     'required_moderation': required_moderation,
+                    'need_image': need_image,
                     'last_active': last_active,
                 }
 
@@ -611,6 +615,22 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.get_all_autopostings",
+                kind=SpanKind.INTERNAL,
+        ) as span:
+            try:
+                rows = await self.db.select(get_all_autopostings, {})
+                autopostings = model.Autoposting.serialize(rows) if rows else []
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def delete_autoposting(self, autoposting_id: int) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.delete_autoposting",
@@ -633,20 +653,23 @@ class PublicationRepo(interface.IPublicationRepo):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_viewed_telegram_post",
                 kind=SpanKind.INTERNAL,
                 attributes={
                     "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username
+                    "tg_channel_username": tg_channel_username,
+                    "link": link
                 }
         ) as span:
             try:
                 args = {
                     'autoposting_id': autoposting_id,
-                    'tg_channel_username': tg_channel_username
+                    'tg_channel_username': tg_channel_username,
+                    'link': link
                 }
 
                 viewed_post_id = await self.db.insert(create_viewed_telegram_post, args)

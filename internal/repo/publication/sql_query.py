@@ -239,7 +239,8 @@ INSERT INTO autopostings (
     filter_prompt,
     tg_channels,
     enabled,
-    required_moderation
+    required_moderation,
+    need_image
 )
 VALUES (
     :organization_id,
@@ -248,7 +249,8 @@ VALUES (
     :filter_prompt,
     :tg_channels,
     FALSE,
-    :required_moderation
+    :required_moderation,
+    :need_image
 )
 RETURNING id;
 """
@@ -262,6 +264,7 @@ SET
     enabled = COALESCE(:enabled, enabled),
     tg_channels = COALESCE(:tg_channels, tg_channels),
     required_moderation = COALESCE(:required_moderation, required_moderation),
+    need_image = COALESCE(:need_image, need_image),
     last_active = COALESCE(:last_active, last_active)
 WHERE id = :autoposting_id;
 """
@@ -269,6 +272,11 @@ WHERE id = :autoposting_id;
 get_autoposting_by_organization = """
 SELECT * FROM autopostings
 WHERE organization_id = :organization_id
+ORDER BY created_at DESC;
+"""
+
+get_all_autopostings = """
+SELECT * FROM autopostings
 ORDER BY created_at DESC;
 """
 
@@ -281,11 +289,13 @@ WHERE id = :autoposting_id;
 create_viewed_telegram_post = """
 INSERT INTO viewed_telegram_posts (
     autoposting_id,
-    tg_channel_username
+    tg_channel_username,
+    link
 )
 VALUES (
     :autoposting_id,
-    :tg_channel_username
+    :tg_channel_username,
+    :link
 )
 RETURNING id;
 """

@@ -433,12 +433,17 @@ class IPublicationService(Protocol):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         pass
 
     @abstractmethod
     async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
+        pass
+
+    @abstractmethod
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
         pass
 
     @abstractmethod
@@ -451,6 +456,7 @@ class IPublicationService(Protocol):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         pass
@@ -463,7 +469,8 @@ class IPublicationService(Protocol):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         pass
 
@@ -481,6 +488,22 @@ class IPublicationService(Protocol):
             audio_file: UploadFile,
             organization_id: int,
     ) -> str:
+        pass
+
+    @abstractmethod
+    async def generate_autoposting_publication_text(
+            self,
+            autoposting_category_id: int,
+            source_post_text: str
+    ) -> dict:
+        pass
+
+    @abstractmethod
+    async def generate_autoposting_publication_image(
+            self,
+            autoposting_category_id: int,
+            publication_text: str
+    ) -> list[str]:
         pass
 
 
@@ -664,7 +687,8 @@ class IPublicationRepo(Protocol):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         pass
 
@@ -678,12 +702,17 @@ class IPublicationRepo(Protocol):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         pass
 
     @abstractmethod
     async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
+        pass
+
+    @abstractmethod
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
         pass
 
     @abstractmethod
@@ -694,7 +723,8 @@ class IPublicationRepo(Protocol):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         pass
 
@@ -739,5 +769,30 @@ class IPublicationPromptGenerator(Protocol):
             prompt_for_image_style: str,
             publication_text: str,
             changes: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_filter_post_system_prompt(
+            self,
+            filter_prompt: str,
+            post_text: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_generate_autoposting_text_system_prompt(
+            self,
+            autoposting_category: model.AutopostingCategory,
+            organization: model.Organization,
+            source_post_text: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_generate_autoposting_image_system_prompt(
+            self,
+            prompt_for_image_style: str,
+            publication_text: str
     ) -> str:
         pass

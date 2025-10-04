@@ -1,6 +1,7 @@
 import base64
 import io
 import uuid
+from datetime import datetime
 from decimal import Decimal
 
 from fastapi import UploadFile
@@ -954,7 +955,8 @@ class PublicationService(interface.IPublicationService):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_autoposting",
@@ -968,7 +970,8 @@ class PublicationService(interface.IPublicationService):
                     period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
                     tg_channels=tg_channels,
-                    required_moderation=required_moderation
+                    required_moderation=required_moderation,
+                    need_image=need_image
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -996,6 +999,22 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.get_all_autopostings",
+                kind=SpanKind.INTERNAL,
+        ) as span:
+            try:
+                autopostings = await self.repo.get_all_autopostings()
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def update_autoposting(
             self,
             autoposting_id: int,
@@ -1005,6 +1024,7 @@ class PublicationService(interface.IPublicationService):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         with self.tracer.start_as_current_span(
@@ -1021,6 +1041,7 @@ class PublicationService(interface.IPublicationService):
                     enabled=enabled,
                     tg_channels=tg_channels,
                     required_moderation=required_moderation,
+                    need_image=need_image,
                     last_active=last_active
                 )
 
@@ -1051,20 +1072,23 @@ class PublicationService(interface.IPublicationService):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_viewed_telegram_post",
                 kind=SpanKind.INTERNAL,
                 attributes={
                     "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username
+                    "tg_channel_username": tg_channel_username,
+                    "link": link
                 }
         ) as span:
             try:
                 viewed_post_id = await self.repo.create_viewed_telegram_post(
                     autoposting_id=autoposting_id,
-                    tg_channel_username=tg_channel_username
+                    tg_channel_username=tg_channel_username,
+                    link=link
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -1122,6 +1146,104 @@ class PublicationService(interface.IPublicationService):
                 await self._debit_organization_balance(organization_id, generate_cost["total_cost"])
 
                 return transcribed_text
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def generate_autoposting_publication_text(
+            self,
+            autoposting_category_id: int,
+            source_post_text: str
+    ) -> dict:
+        with self.tracer.start_as_current_span(
+                "PublicationService.generate_autoposting_publication_text",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                # Получаем категорию автопостинга
+                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
+                if not categories:
+                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
+
+                autoposting_category = categories[0]
+
+                # Получаем организацию
+                organization = await self.organization_client.get_organization_by_id(autoposting_category.organization_id)
+
+                # Генерируем промпт для автопостинга
+                text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
+                    autoposting_category,
+                    organization,
+                    source_post_text
+                )
+
+                # Генерируем текст публикации
+                publication_data, generate_cost = await self.openai_client.generate_json(
+                    history=[{"role": "user", "content": "Создай пост для социальной сети на основе исходного поста"}],
+                    system_prompt=text_system_prompt,
+                    temperature=1,
+                    llm_model="gpt-5"
+                )
+                await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
+
+                span.set_status(Status(StatusCode.OK))
+                return publication_data
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def generate_autoposting_publication_image(
+            self,
+            autoposting_category_id: int,
+            publication_text: str
+    ) -> list[str]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.generate_autoposting_publication_image",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                # Получаем категорию автопостинга
+                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
+                if not categories:
+                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
+
+                autoposting_category = categories[0]
+
+                # Генерируем промпт для изображения
+                image_system_prompt = await self.prompt_generator.get_generate_autoposting_image_system_prompt(
+                    autoposting_category.prompt_for_image_style,
+                    publication_text
+                )
+
+                # Генерируем изображение
+                images, generate_cost = await self.openai_client.generate_image(
+                    prompt=image_system_prompt,
+                    image_model="gpt-image-1",
+                    size="1024x1024",
+                    quality="low",
+                    n=1,
+                )
+
+                images_url = []
+                for image in images:
+                    image_bytes = base64.b64decode(image)
+                    image_name = "autoposting_image.png"
+
+                    upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
+
+                    image_url = f"https://{self.loom_domain}/api/content/image/{upload_response.fid}/{image_name}"
+                    images_url.append(image_url)
+
+                await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
+
+                span.set_status(Status(StatusCode.OK))
+                return images_url
 
             except Exception as err:
                 span.record_exception(err)

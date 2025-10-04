@@ -927,7 +927,8 @@ class PublicationController(interface.IPublicationController):
                     period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
                     tg_channels=body.tg_channels or [],
-                    required_moderation=body.required_moderation
+                    required_moderation=body.required_moderation,
+                    need_image=body.need_image
                 )
 
                 self.logger.info("Autoposting created successfully", {
@@ -1003,7 +1004,8 @@ class PublicationController(interface.IPublicationController):
                     filter_prompt=body.filter_prompt,
                     enabled=body.enabled,
                     tg_channels=body.tg_channels,
-                    required_moderation=body.required_moderation
+                    required_moderation=body.required_moderation,
+                    need_image=body.need_image
                 )
 
                 self.logger.info("Autoposting updated successfully", {

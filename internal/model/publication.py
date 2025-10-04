@@ -291,6 +291,7 @@ class Autoposting:
     filter_prompt: str
     tg_channels: list[str]
     required_moderation: bool
+    need_image: bool
 
     last_active: datetime
     created_at: datetime
@@ -307,6 +308,7 @@ class Autoposting:
                 filter_prompt=row.filter_prompt,
                 tg_channels=row.tg_channels,
                 required_moderation=row.required_moderation,
+                need_image=row.need_image,
                 last_active=row.last_active,
                 created_at=row.created_at
             )
@@ -323,6 +325,7 @@ class Autoposting:
             "filter_prompt": self.filter_prompt,
             "tg_channels": self.tg_channels,
             "required_moderation": self.required_moderation,
+            "need_image": self.need_image,
             "last_active": self.last_active.isoformat() if self.last_active else None,
             "created_at": self.created_at.isoformat()
         }
@@ -334,6 +337,7 @@ class ViewedTelegramPost:
     autoposting_id: int
 
     tg_channel_username: str
+    link: str
 
     created_at: datetime
 
@@ -344,6 +348,7 @@ class ViewedTelegramPost:
                 id=row.id,
                 autoposting_id=row.autoposting_id,
                 tg_channel_username=row.tg_channel_username,
+                link=row.link,
                 created_at=row.created_at
             )
             for row in rows
@@ -354,5 +359,6 @@ class ViewedTelegramPost:
             "id": self.id,
             "autoposting_id": self.autoposting_id,
             "tg_channel_username": self.tg_channel_username,
+            "link": self.link,
             "created_at": self.created_at.isoformat()
         }

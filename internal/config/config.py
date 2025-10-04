@@ -13,6 +13,8 @@ class Config:
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
         self.tg_bot_token: str = os.environ.get('LOOM_TG_BOT_TOKEN')
+        self.tg_api_id: int = int(os.environ.get('LOOM_TG_API_ID'))
+        self.tg_api_hash: str = os.environ.get('LOOM_TG_API_HASH')
         self.tg_session_string: str = os.environ.get('LOOM_TG_SESSION_STRING')
         self.domain: str = os.environ.get("LOOM_DOMAIN")
 
@@ -49,6 +51,9 @@ class Config:
         # Loom Authorization service
         self.loom_authorization_host = os.getenv("LOOM_AUTHORIZATION_CONTAINER_NAME", "localhost")
         self.loom_authorization_port = os.getenv("LOOM_AUTHORIZATION_PORT", "8001")
+
+        self.loom_employee_host = os.getenv("LOOM_EMPLOYEE_CONTAINER_NAME", "localhost")
+        self.loom_employee_port = os.getenv("LOOM_EMPLOYEE_PORT", "8001")
 
         # Loom Organization service
         self.loom_organization_host = os.getenv("LOOM_ORGANIZATION_CONTAINER_NAME", "localhost")

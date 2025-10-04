@@ -195,6 +195,7 @@ class CreateAutopostingBody(BaseModel):
     filter_prompt: str
     tg_channels: list[str]= None
     required_moderation: bool = False
+    need_image: bool
 
 
 class UpdateAutopostingBody(BaseModel):
@@ -204,3 +205,4 @@ class UpdateAutopostingBody(BaseModel):
     enabled: bool = None
     tg_channels: list[str] = None
     required_moderation: bool = None
+    need_image: bool = None
