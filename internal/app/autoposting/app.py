@@ -231,6 +231,8 @@ class Autoposting:
                         "date": post_date,
                     })
                     self.logger.info(f"✅ Пост из @{channel_username} прошел фильтр! Причина: {reason}")
+                    if len(suitable_posts) == 3:
+                        return suitable_posts
                 else:
                     await self._mark_post_as_viewed(autoposting.id, channel_username, post_link)
                     self.logger.info(f"❌ Пост из @{channel_username} не прошел фильтр. Причина: {reason}")
