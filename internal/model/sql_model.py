@@ -103,12 +103,70 @@ create_autopostings_table = """
 CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    autoposting_categories_id INTEGER NOT NULL,
     
-    enabled bool DEFAULT FALSE,
+    period_in_hours INTEGER NOT NULL,    
+    enabled BOOLEAN DEFAULT FALSE,
     filter_prompt TEXT NOT NULL,
-    rewrite_prompt TEXT NOT NULL,
     tg_channels TEXT[] DEFAULT '{}',
 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+create_viewed_telegram_posts_table = """
+CREATE TABLE IF NOT EXISTS viewed_telegram_posts (
+    id SERIAL PRIMARY KEY,
+    autoposting_id INTEGER NOT NULL,
+    
+    tg_channel_username TEXT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+create_autoposting_categories_table = """
+CREATE TABLE IF NOT EXISTS autoposting_categories (
+    id SERIAL PRIMARY KEY,
+    organization_id INTEGER NOT NULL,
+    
+    name TEXT NOT NULL,
+    prompt_for_image_style TEXT NOT NULL,
+
+    goal TEXT NOT NULL,
+    
+    -- Структура контента
+    structure_skeleton TEXT[] NOT NULL,
+    structure_flex_level_min INTEGER NOT NULL,
+    structure_flex_level_max INTEGER NOT NULL,
+    structure_flex_level_comment TEXT NOT NULL,
+    
+    -- Требования к контенту
+    must_have TEXT[] NOT NULL,
+    must_avoid TEXT[] NOT NULL,
+    
+    -- Правила для соцсетей
+    social_networks_rules TEXT NOT NULL,
+    
+    -- Ограничения по длине
+    len_min INTEGER NOT NULL,
+    len_max INTEGER NOT NULL,
+    
+    -- Ограничения по хештегам
+    n_hashtags_min INTEGER NOT NULL,
+    n_hashtags_max INTEGER NOT NULL,
+    
+    -- Стиль и тон
+    cta_type TEXT NOT NULL,
+    tone_of_voice TEXT[] DEFAULT '{}',
+    
+    -- Бренд и примеры
+    brand_rules TEXT[] DEFAULT '{}',
+    good_samples JSONB[] NOT NULL,
+    
+    -- Дополнительная информация
+    additional_info TEXT[] NOT NULL,
+    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
