@@ -69,6 +69,7 @@ storage = AsyncWeed(cfg.weed_master_host, cfg.weed_master_port)
 session = AiohttpSession(api=TelegramAPIServer.from_base(f'https://{cfg.domain}/telegram-bot-api'))
 bot = Bot(token=cfg.tg_bot_token, session=session)
 
+
 # Инициализация клиентов
 loom_authorization_client = LoomAuthorizationClient(
     tel=tel,
