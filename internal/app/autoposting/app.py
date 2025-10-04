@@ -85,10 +85,17 @@ async def Autoposting(
 
                             # 4. Фильтруем посты за период автопостинга
                             period_start = now - timedelta(hours=autoposting.period_in_hours)
-                            recent_posts = [
-                                post for post in posts
-                                if post['date'] >= period_start
-                            ]
+                            recent_posts = []
+                            for post in posts:
+                                post_date = post['date']
+                                # Приводим обе даты к naive формату для сравнения
+                                if post_date.tzinfo is not None:
+                                    post_date_naive = post_date.replace(tzinfo=None)
+                                else:
+                                    post_date_naive = post_date
+
+                                if post_date_naive >= period_start:
+                                    recent_posts.append(post)
 
                             logger.info(f"🕒 Найдено {len(recent_posts)} постов за последние {autoposting.period_in_hours} часов в @{channel_username}")
 
