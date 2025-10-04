@@ -433,7 +433,8 @@ class IPublicationService(Protocol):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         pass
 
@@ -455,6 +456,7 @@ class IPublicationService(Protocol):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         pass
@@ -685,7 +687,8 @@ class IPublicationRepo(Protocol):
             period_in_hours: int,
             filter_prompt: str,
             tg_channels: list[str],
-            required_moderation: bool
+            required_moderation: bool,
+            need_image: bool
     ) -> int:
         pass
 
@@ -699,6 +702,7 @@ class IPublicationRepo(Protocol):
             enabled: bool = None,
             tg_channels: list[str] = None,
             required_moderation: bool = None,
+            need_image: bool = None,
             last_active: datetime = None
     ) -> None:
         pass

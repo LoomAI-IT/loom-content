@@ -291,10 +291,13 @@ class Autoposting:
             self.logger.info(f"📝 Сгенерированный текст: {publication_data['text'][:100]}...")
 
             # Генерируем изображение для публикации
-            images_url = await self.publication_service.generate_autoposting_publication_image(
-                autoposting_category_id=autoposting.autoposting_category_id,
-                publication_text=publication_data['text']
-            )
+            image_url = None
+            if autoposting.need_image:
+                images_url = await self.publication_service.generate_autoposting_publication_image(
+                    autoposting_category_id=autoposting.autoposting_category_id,
+                    publication_text=publication_data['text']
+                )
+                image_url = images_url[0]
 
             employees = await self.loom_employee_client.get_employees_by_organization(autoposting.organization_id)
 
@@ -307,7 +310,7 @@ class Autoposting:
                 text_reference=selected_post['text'],
                 text=publication_data['text'],
                 moderation_status="moderation",
-                image_url=images_url[0]
+                image_url=image_url
             )
 
             await self.publication_service.change_publication(

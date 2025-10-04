@@ -239,7 +239,8 @@ INSERT INTO autopostings (
     filter_prompt,
     tg_channels,
     enabled,
-    required_moderation
+    required_moderation,
+    need_image
 )
 VALUES (
     :organization_id,
@@ -248,7 +249,8 @@ VALUES (
     :filter_prompt,
     :tg_channels,
     FALSE,
-    :required_moderation
+    :required_moderation,
+    :need_image
 )
 RETURNING id;
 """
@@ -262,6 +264,7 @@ SET
     enabled = COALESCE(:enabled, enabled),
     tg_channels = COALESCE(:tg_channels, tg_channels),
     required_moderation = COALESCE(:required_moderation, required_moderation),
+    need_image = COALESCE(:need_image, need_image),
     last_active = COALESCE(:last_active, last_active)
 WHERE id = :autoposting_id;
 """
