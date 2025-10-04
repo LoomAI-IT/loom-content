@@ -622,3 +622,60 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.record_exception(err)
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
+
+    # ПРОСМОТРЕННЫЕ TELEGRAM ПОСТЫ
+    async def create_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> int:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.create_viewed_telegram_post",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "autoposting_id": autoposting_id,
+                    "tg_channel_username": tg_channel_username
+                }
+        ) as span:
+            try:
+                args = {
+                    'autoposting_id': autoposting_id,
+                    'tg_channel_username': tg_channel_username
+                }
+
+                viewed_post_id = await self.db.insert(create_viewed_telegram_post, args)
+
+                span.set_status(Status(StatusCode.OK))
+                return viewed_post_id
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def get_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> list[model.ViewedTelegramPost]:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.get_viewed_telegram_post",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "autoposting_id": autoposting_id,
+                    "tg_channel_username": tg_channel_username
+                }
+        ) as span:
+            try:
+                args = {
+                    'autoposting_id': autoposting_id,
+                    'tg_channel_username': tg_channel_username
+                }
+                rows = await self.db.select(get_viewed_telegram_post, args)
+                viewed_posts = model.ViewedTelegramPost.serialize(rows) if rows else []
+
+                span.set_status(Status(StatusCode.OK))
+                return viewed_posts
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err

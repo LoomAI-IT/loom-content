@@ -456,6 +456,22 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
+    async def create_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def get_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> model.ViewedTelegramPost | None:
+        pass
+
+    @abstractmethod
     async def transcribe_audio(
             self,
             audio_file: UploadFile,
@@ -665,6 +681,22 @@ class IPublicationRepo(Protocol):
 
     @abstractmethod
     async def delete_autoposting(self, autoposting_id: int) -> None:
+        pass
+
+    @abstractmethod
+    async def create_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def get_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> list[model.ViewedTelegramPost]:
         pass
 
 

@@ -1041,6 +1041,61 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    # ПРОСМОТРЕННЫЕ TELEGRAM ПОСТЫ
+    async def create_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> int:
+        with self.tracer.start_as_current_span(
+                "PublicationService.create_viewed_telegram_post",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "autoposting_id": autoposting_id,
+                    "tg_channel_username": tg_channel_username
+                }
+        ) as span:
+            try:
+                viewed_post_id = await self.repo.create_viewed_telegram_post(
+                    autoposting_id=autoposting_id,
+                    tg_channel_username=tg_channel_username
+                )
+
+                span.set_status(Status(StatusCode.OK))
+                return viewed_post_id
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def get_viewed_telegram_post(
+            self,
+            autoposting_id: int,
+            tg_channel_username: str
+    ) -> model.ViewedTelegramPost | None:
+        with self.tracer.start_as_current_span(
+                "PublicationService.get_viewed_telegram_post",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "autoposting_id": autoposting_id,
+                    "tg_channel_username": tg_channel_username
+                }
+        ) as span:
+            try:
+                viewed_posts = await self.repo.get_viewed_telegram_post(
+                    autoposting_id=autoposting_id,
+                    tg_channel_username=tg_channel_username
+                )
+
+                span.set_status(Status(StatusCode.OK))
+                return viewed_posts[0] if viewed_posts else None
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def transcribe_audio(
             self,
             audio_file: UploadFile,

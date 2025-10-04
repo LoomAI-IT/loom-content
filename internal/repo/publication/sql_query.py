@@ -272,3 +272,22 @@ delete_autoposting = """
 DELETE FROM autopostings
 WHERE id = :autoposting_id;
 """
+
+# ПРОСМОТРЕННЫЕ TELEGRAM ПОСТЫ
+create_viewed_telegram_post = """
+INSERT INTO viewed_telegram_posts (
+    autoposting_id,
+    tg_channel_username
+)
+VALUES (
+    :autoposting_id,
+    :tg_channel_username
+)
+RETURNING id;
+"""
+
+get_viewed_telegram_post = """
+SELECT * FROM viewed_telegram_posts
+WHERE autoposting_id = :autoposting_id
+  AND tg_channel_username = :tg_channel_username;
+"""
