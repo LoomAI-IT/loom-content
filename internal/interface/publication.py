@@ -450,7 +450,8 @@ class IPublicationService(Protocol):
             filter_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None,
-            required_moderation: bool = None
+            required_moderation: bool = None,
+            last_active: datetime = None
     ) -> None:
         pass
 
@@ -676,7 +677,8 @@ class IPublicationRepo(Protocol):
             filter_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None,
-            required_moderation: bool = None
+            required_moderation: bool = None,
+            last_active: datetime = None
     ) -> None:
         pass
 

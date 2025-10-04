@@ -261,7 +261,8 @@ SET
     filter_prompt = COALESCE(:filter_prompt, filter_prompt),
     enabled = COALESCE(:enabled, enabled),
     tg_channels = COALESCE(:tg_channels, tg_channels),
-    required_moderation = COALESCE(:required_moderation, required_moderation)
+    required_moderation = COALESCE(:required_moderation, required_moderation),
+    last_active = COALESCE(:last_active, last_active)
 WHERE id = :autoposting_id;
 """
 

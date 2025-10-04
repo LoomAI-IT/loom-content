@@ -561,7 +561,8 @@ class PublicationRepo(interface.IPublicationRepo):
             filter_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None,
-            required_moderation: bool = None
+            required_moderation: bool = None,
+            last_active: datetime = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.update_autoposting",
@@ -579,6 +580,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'enabled': enabled,
                     'tg_channels': tg_channels,
                     'required_moderation': required_moderation,
+                    'last_active': last_active,
                 }
 
                 await self.db.update(update_autoposting, args)

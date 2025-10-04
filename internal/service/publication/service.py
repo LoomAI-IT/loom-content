@@ -1004,7 +1004,8 @@ class PublicationService(interface.IPublicationService):
             filter_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None,
-            required_moderation: bool = None
+            required_moderation: bool = None,
+            last_active: datetime = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationService.update_autoposting",
@@ -1019,7 +1020,8 @@ class PublicationService(interface.IPublicationService):
                     filter_prompt=filter_prompt,
                     enabled=enabled,
                     tg_channels=tg_channels,
-                    required_moderation=required_moderation
+                    required_moderation=required_moderation,
+                    last_active=last_active
                 )
 
                 span.set_status(Status(StatusCode.OK))
