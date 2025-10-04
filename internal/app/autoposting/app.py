@@ -226,7 +226,7 @@ class Autoposting:
                 if is_suitable:
                     suitable_posts.append({
                         "text": post_text,
-                        "channel": channel_username,
+                        "channel_username": channel_username,
                         "link": post.get("link", ""),
                         "date": post_date,
                     })
@@ -278,6 +278,7 @@ class Autoposting:
 
         selected_post = random.choice(suitable_posts)
         self.logger.info(f"🎲 Выбран случайный пост {selected_post['link']} для генерации публикации")
+        await self._mark_post_as_viewed(autoposting.id, selected_post['channel_username'], selected_post['link'])
 
         try:
             # Генерируем текст публикации
@@ -288,7 +289,6 @@ class Autoposting:
             self.logger.info(
                 f"✅ Текст публикации успешно сгенерирован для автопостинга {autoposting.id}"
             )
-            self.logger.info(f"📝 Сгенерированный текст: {publication_data['text'][:100]}...")
 
             # Генерируем изображение для публикации
             image_url = None
