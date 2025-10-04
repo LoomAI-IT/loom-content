@@ -290,6 +290,7 @@ class Autoposting:
     enabled: bool
     filter_prompt: str
     tg_channels: list[str]
+    required_moderation: bool
 
     created_at: datetime
 
@@ -304,6 +305,7 @@ class Autoposting:
                 enabled=row.enabled,
                 filter_prompt=row.filter_prompt,
                 tg_channels=row.tg_channels,
+                required_moderation=row.required_moderation,
                 created_at=row.created_at
             )
             for row in rows
@@ -318,6 +320,7 @@ class Autoposting:
             "enabled": self.enabled,
             "filter_prompt": self.filter_prompt,
             "tg_channels": self.tg_channels,
+            "required_moderation": self.required_moderation,
             "created_at": self.created_at.isoformat()
         }
 

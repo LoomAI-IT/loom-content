@@ -431,7 +431,8 @@ class IPublicationService(Protocol):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = False
     ) -> int:
         pass
 
@@ -447,7 +448,8 @@ class IPublicationService(Protocol):
             period_in_hours: int = None,
             filter_prompt: str = None,
             enabled: bool = None,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = None
     ) -> None:
         pass
 
@@ -659,7 +661,8 @@ class IPublicationRepo(Protocol):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = False
     ) -> int:
         pass
 
@@ -671,7 +674,8 @@ class IPublicationRepo(Protocol):
             period_in_hours: int = None,
             filter_prompt: str = None,
             enabled: bool = None,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = None
     ) -> None:
         pass
 

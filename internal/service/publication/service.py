@@ -953,7 +953,8 @@ class PublicationService(interface.IPublicationService):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = False
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_autoposting",
@@ -966,7 +967,8 @@ class PublicationService(interface.IPublicationService):
                     autoposting_category_id=autoposting_category_id,
                     period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
-                    tg_channels=tg_channels or []
+                    tg_channels=tg_channels or [],
+                    required_moderation=required_moderation
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -1001,7 +1003,8 @@ class PublicationService(interface.IPublicationService):
             period_in_hours: int = None,
             filter_prompt: str = None,
             enabled: bool = None,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationService.update_autoposting",
@@ -1015,7 +1018,8 @@ class PublicationService(interface.IPublicationService):
                     period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
                     enabled=enabled,
-                    tg_channels=tg_channels
+                    tg_channels=tg_channels,
+                    required_moderation=required_moderation
                 )
 
                 span.set_status(Status(StatusCode.OK))

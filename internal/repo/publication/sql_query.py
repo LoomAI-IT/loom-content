@@ -238,7 +238,8 @@ INSERT INTO autopostings (
     period_in_hours,
     filter_prompt,
     tg_channels,
-    enabled
+    enabled,
+    required_moderation
 )
 VALUES (
     :organization_id,
@@ -246,7 +247,8 @@ VALUES (
     :period_in_hours,
     :filter_prompt,
     :tg_channels,
-    FALSE
+    FALSE,
+    :required_moderation
 )
 RETURNING id;
 """
@@ -258,7 +260,8 @@ SET
     period_in_hours = COALESCE(:period_in_hours, period_in_hours),
     filter_prompt = COALESCE(:filter_prompt, filter_prompt),
     enabled = COALESCE(:enabled, enabled),
-    tg_channels = COALESCE(:tg_channels, tg_channels)
+    tg_channels = COALESCE(:tg_channels, tg_channels),
+    required_moderation = COALESCE(:required_moderation, required_moderation)
 WHERE id = :autoposting_id;
 """
 

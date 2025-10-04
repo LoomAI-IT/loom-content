@@ -195,6 +195,7 @@ class CreateAutopostingBody(BaseModel):
     period_in_hours: int
     filter_prompt: str
     tg_channels: Optional[List[str]] | None = None
+    required_moderation: Optional[bool] = False
 
 
 class UpdateAutopostingBody(BaseModel):
@@ -204,3 +205,4 @@ class UpdateAutopostingBody(BaseModel):
     filter_prompt: Optional[str] | None = None
     enabled: Optional[bool] | None = None
     tg_channels: Optional[List[str]] | None = None
+    required_moderation: Optional[bool] | None = None

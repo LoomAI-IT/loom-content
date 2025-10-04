@@ -104,11 +104,12 @@ CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
     autoposting_category_id INTEGER NOT NULL,
-    
-    period_in_hours INTEGER NOT NULL,    
+
+    period_in_hours INTEGER NOT NULL,
     enabled BOOLEAN DEFAULT FALSE,
     filter_prompt TEXT NOT NULL,
     tg_channels TEXT[] DEFAULT '{}',
+    required_moderation BOOLEAN DEFAULT FALSE,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

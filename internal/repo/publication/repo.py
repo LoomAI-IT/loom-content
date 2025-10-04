@@ -524,7 +524,8 @@ class PublicationRepo(interface.IPublicationRepo):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = False
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_autoposting",
@@ -540,6 +541,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'period_in_hours': period_in_hours,
                     'filter_prompt': filter_prompt,
                     'tg_channels': tg_channels or [],
+                    'required_moderation': required_moderation,
                 }
 
                 autoposting_id = await self.db.insert(create_autoposting, args)
@@ -558,7 +560,8 @@ class PublicationRepo(interface.IPublicationRepo):
             period_in_hours: int = None,
             filter_prompt: str = None,
             enabled: bool = None,
-            tg_channels: list[str] = None
+            tg_channels: list[str] = None,
+            required_moderation: bool = None
     ) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.update_autoposting",
@@ -575,6 +578,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'filter_prompt': filter_prompt,
                     'enabled': enabled,
                     'tg_channels': tg_channels,
+                    'required_moderation': required_moderation,
                 }
 
                 await self.db.update(update_autoposting, args)
