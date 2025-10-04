@@ -217,7 +217,7 @@ SET
     brand_rules = COALESCE(:brand_rules, brand_rules),
     good_samples = COALESCE(:good_samples, good_samples),
     additional_info = COALESCE(:additional_info, additional_info)
-WHERE id = :category_id;
+WHERE id = :autoposting_category_id;
 """
 
 get_autoposting_category_by_id = """

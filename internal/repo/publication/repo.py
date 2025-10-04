@@ -411,7 +411,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'cta_type': cta_type,
                     'tone_of_voice': tone_of_voice,
                     'brand_rules': brand_rules,
-                    'good_samples': good_samples,
+                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
                     'additional_info': additional_info
                 }
 
@@ -472,7 +472,7 @@ class PublicationRepo(interface.IPublicationRepo):
                     'cta_type': cta_type,
                     'tone_of_voice': tone_of_voice,
                     'brand_rules': brand_rules,
-                    'good_samples': good_samples,
+                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
                     'additional_info': additional_info
                 }
 

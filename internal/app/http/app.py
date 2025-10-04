@@ -189,6 +189,40 @@ def include_publication_handlers(
         tags=["Category"]
     )
 
+    # РУБРИКИ ДЛЯ АВТОПОСТИНГА
+
+    # Создание рубрики для автопостинга
+    app.add_api_route(
+        prefix + "/publication/autoposting-category",
+        publication_controller.create_autoposting_category,
+        methods=["POST"],
+        tags=["AutopostingCategory"]
+    )
+
+    # Получение рубрики для автопостинга по ID
+    app.add_api_route(
+        prefix + "/publication/autoposting-category/{autoposting_category_id}",
+        publication_controller.get_autoposting_category_by_id,
+        methods=["GET"],
+        tags=["AutopostingCategory"]
+    )
+
+    # Обновление рубрики для автопостинга
+    app.add_api_route(
+        prefix + "/publication/autoposting-category/{autoposting_category_id}",
+        publication_controller.update_autoposting_category,
+        methods=["PUT"],
+        tags=["AutopostingCategory"]
+    )
+
+    # Удаление рубрики для автопостинга
+    app.add_api_route(
+        prefix + "/publication/autoposting-category/{autoposting_category_id}",
+        publication_controller.delete_autoposting_category,
+        methods=["DELETE"],
+        tags=["AutopostingCategory"]
+    )
+
     # АВТОПОСТИНГ
 
     # Создание автопостинга
