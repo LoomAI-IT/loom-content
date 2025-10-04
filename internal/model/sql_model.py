@@ -245,6 +245,14 @@ drop_vkontakte_table = """
 DROP TABLE IF EXISTS vkontakte CASCADE;
 """
 
+drop_viewed_telegram_posts_table = """
+DROP TABLE IF EXISTS viewed_telegram_posts CASCADE;
+"""
+
+drop_autoposting_categories_table = """
+DROP TABLE IF EXISTS autoposting_categories CASCADE;
+"""
+
 create_organization_tables_queries = [
     create_categories_table,
     create_video_cuts_table,
@@ -254,6 +262,8 @@ create_organization_tables_queries = [
     create_instagrams_table,
     create_telegrams_table,
     create_vkontakte_table,
+    create_viewed_telegram_posts_table,
+    create_autoposting_categories_table
 ]
 
 drop_queries = [
@@ -265,4 +275,6 @@ drop_queries = [
     drop_instagrams_table,
     drop_telegrams_table,
     drop_vkontakte_table,
+    drop_viewed_telegram_posts_table,
+    drop_autoposting_categories_table
 ]
