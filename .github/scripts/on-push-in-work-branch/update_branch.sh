@@ -86,6 +86,12 @@ log_command() {
     return $exit_code
 }
 
+log_to_both() {
+    local message="$@"
+    echo "$message"
+    echo "$message" >> "$LOG_FILE"
+}
+
 # ============================================
 # Обновление Git репозитория
 # ============================================
@@ -478,22 +484,22 @@ wait_for_health() {
 
     send_failure_notification
     log ERROR "Проверка не пройдена после $max_attempts попыток"
-    {
-        echo ""
-        echo "=== HEALTH CHECK FAILED ==="
-        echo "Failed after $max_attempts attempts"
-        echo "Time: $(date '+%Y-%m-%d %H:%M:%S')"
-        echo ""
-        echo "=== FINAL CONTAINER STATE ==="
-        docker ps --filter "name=$SERVICE_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-        echo ""
-        echo "=== CONTAINER LOGS (last 100 lines) ==="
-        docker logs --tail 100 $SERVICE_NAME 2>&1
-        echo ""
-        echo "=== DOCKER EVENTS (last 50) ==="
-        docker events --since 5m --filter "container=$SERVICE_NAME" 2>&1 | tail -50 || echo "No events"
-        echo ""
-    } >> "$LOG_FILE"
+
+    log_to_both ""
+    log_to_both "=== HEALTH CHECK FAILED ==="
+    log_to_both "Failed after $max_attempts attempts"
+    log_to_both "Time: $(date '+%Y-%m-%d %H:%M:%S')"
+    log_to_both ""
+    log_to_both "=== FINAL CONTAINER STATE ==="
+    docker ps --filter "name=$SERVICE_NAME" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>&1 | tee -a "$LOG_FILE"
+    log_to_both ""
+    log_to_both "=== CONTAINER LOGS (last 100 lines) ==="
+    docker logs --tail 100 $SERVICE_NAME 2>&1 | tee -a "$LOG_FILE"
+    log_to_both ""
+    log_to_both "=== DOCKER EVENTS (last 50) ==="
+    docker events --since 5m --filter "container=$SERVICE_NAME" 2>&1 | tail -50 | tee -a "$LOG_FILE" || echo "No events" | tee -a "$LOG_FILE"
+    log_to_both ""
+
     exit 1
 }
 
@@ -550,11 +556,29 @@ main() {
 }
 
 main
+
+# Возвращаем код ошибки если что-то пошло не так
+exit $?
 EOFMAIN
 
-    if [ $? -ne 0 ]; then
+    local ssh_exit_code=$?
+
+    if [ $ssh_exit_code -ne 0 ]; then
         echo ""
-        echo "❌ Обновление завершилось с ошибкой"
+        echo "❌ Обновление завершилось с ошибкой (код: $ssh_exit_code)"
+        echo ""
+        echo "─────────────────────────────────────────"
+        echo "Последние 100 строк логов контейнера:"
+        echo "─────────────────────────────────────────"
+
+        sshpass -p "$DEV_PASSWORD" ssh -o StrictHostKeyChecking=no root@$DEV_HOST -p 22 \
+            "docker logs --tail 100 $SERVICE_NAME 2>&1 || echo 'Не удалось получить логи контейнера'"
+
+        echo ""
+        echo "─────────────────────────────────────────"
+        echo "Полный лог на сервере:"
+        echo "/var/log/deployments/dev/$SERVICE_NAME/$BRANCH_NAME.log"
+        echo "─────────────────────────────────────────"
         exit 1
     fi
 
