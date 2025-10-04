@@ -427,7 +427,6 @@ send_failure_notification() {
 
 🔍 Подробности:
 $action_url"
-
     send_telegram_notification "$message"
     echo ""
 }
