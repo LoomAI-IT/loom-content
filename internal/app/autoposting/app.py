@@ -69,12 +69,6 @@ class Autoposting:
             else:
                 not_ready_count += 1
 
-        self.logger.info(
-            f"📊 Статистика фильтрации: всего={len(all_autopostings)}, "
-            f"активных={len(active_autopostings)}, отключенных={disabled_count}, "
-            f"не готовых={not_ready_count}"
-        )
-
         return active_autopostings
 
     def _should_process_autoposting(self, autoposting: model.Autoposting, now: datetime) -> bool:
@@ -350,10 +344,11 @@ class Autoposting:
         self.logger.info(f"✅ Автопостинг {autoposting_id} успешно обработан, last_active обновлен")
 
     async def _sleep_until_next_iteration(self):
-        self.logger.info("😴 Переход в режим ожидания на 30 минут...")
+        self.logger.info("😴 Переход в режим ожидания на 1 минуту...")
         await asyncio.sleep(1 * 60)
 
     async def _handle_critical_error(self, err: Exception):
-        self.logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА в главном цикле автопостинга: {str(err)}")
-        self.logger.error("🔄 Повторная попытка через 5 минут...")
+        self.logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА в главном цикле автопостинга: {str(err)}", {
+            "traceback": traceback.format_exc(),
+        })
         await asyncio.sleep(1 * 60)
