@@ -227,13 +227,13 @@ class Autoposting:
                 )
 
                 if is_suitable:
+                    self.logger.info(f"✅ Пост из @{channel_username} прошел фильтр! Причина: {reason}")
                     suitable_posts.append({
                         "text": post_text,
                         "channel_username": channel_username,
                         "link": post.get("link", ""),
                         "date": post_date,
                     })
-                    self.logger.info(f"✅ Пост из @{channel_username} прошел фильтр! Причина: {reason}")
                     if len(suitable_posts) == 1:
                         break
                 else:
@@ -247,6 +247,7 @@ class Autoposting:
         self.logger.info(
             f"📈 Итоги обработки @{channel_username}: обработано={processed_count}, "
             f"пустых={empty_posts_count}, уже просмотрено={already_viewed_count}"
+            f"отобрано={len(suitable_posts)}"
         )
 
         return suitable_posts
