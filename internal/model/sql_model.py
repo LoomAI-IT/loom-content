@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS autopostings (
     filter_prompt TEXT NOT NULL,
     tg_channels TEXT[] DEFAULT '{}',
     required_moderation BOOLEAN DEFAULT FALSE,
+    need_image BOOLEAN DEFAULT FALSE,
 
     last_active TIMESTAMP DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
