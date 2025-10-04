@@ -1068,20 +1068,23 @@ class PublicationService(interface.IPublicationService):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_viewed_telegram_post",
                 kind=SpanKind.INTERNAL,
                 attributes={
                     "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username
+                    "tg_channel_username": tg_channel_username,
+                    "link": link
                 }
         ) as span:
             try:
                 viewed_post_id = await self.repo.create_viewed_telegram_post(
                     autoposting_id=autoposting_id,
-                    tg_channel_username=tg_channel_username
+                    tg_channel_username=tg_channel_username,
+                    link=link
                 )
 
                 span.set_status(Status(StatusCode.OK))

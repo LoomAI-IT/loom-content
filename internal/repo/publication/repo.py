@@ -649,20 +649,23 @@ class PublicationRepo(interface.IPublicationRepo):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.create_viewed_telegram_post",
                 kind=SpanKind.INTERNAL,
                 attributes={
                     "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username
+                    "tg_channel_username": tg_channel_username,
+                    "link": link
                 }
         ) as span:
             try:
                 args = {
                     'autoposting_id': autoposting_id,
-                    'tg_channel_username': tg_channel_username
+                    'tg_channel_username': tg_channel_username,
+                    'link': link
                 }
 
                 viewed_post_id = await self.db.insert(create_viewed_telegram_post, args)

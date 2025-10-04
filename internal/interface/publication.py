@@ -467,7 +467,8 @@ class IPublicationService(Protocol):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         pass
 
@@ -702,7 +703,8 @@ class IPublicationRepo(Protocol):
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
-            tg_channel_username: str
+            tg_channel_username: str,
+            link: str
     ) -> int:
         pass
 

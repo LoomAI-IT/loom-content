@@ -286,11 +286,13 @@ WHERE id = :autoposting_id;
 create_viewed_telegram_post = """
 INSERT INTO viewed_telegram_posts (
     autoposting_id,
-    tg_channel_username
+    tg_channel_username,
+    link
 )
 VALUES (
     :autoposting_id,
-    :tg_channel_username
+    :tg_channel_username,
+    :link
 )
 RETURNING id;
 """

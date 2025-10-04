@@ -334,6 +334,7 @@ class ViewedTelegramPost:
     autoposting_id: int
 
     tg_channel_username: str
+    link: str
 
     created_at: datetime
 
@@ -344,6 +345,7 @@ class ViewedTelegramPost:
                 id=row.id,
                 autoposting_id=row.autoposting_id,
                 tg_channel_username=row.tg_channel_username,
+                link=row.link,
                 created_at=row.created_at
             )
             for row in rows
@@ -354,5 +356,6 @@ class ViewedTelegramPost:
             "id": self.id,
             "autoposting_id": self.autoposting_id,
             "tg_channel_username": self.tg_channel_username,
+            "link": self.link,
             "created_at": self.created_at.isoformat()
         }

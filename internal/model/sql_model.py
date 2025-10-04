@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS viewed_telegram_posts (
     autoposting_id INTEGER NOT NULL,
     
     tg_channel_username TEXT NOT NULL,
+    link TEXT NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -36,7 +36,17 @@ from internal.app.autoposting.app import Autoposting
 
 from internal.config.config import Config
 
+parser = argparse.ArgumentParser(description="Loom Content Service")
+parser.add_argument(
+    "mode",
+    choices=["http", "autoposting"],
+    help="Режим запуска: http - HTTP сервер, autoposting - автопостинг"
+)
+
+args = parser.parse_args()
+
 cfg = Config()
+cfg.service_name = cfg.service_name if args.mode == "http" else cfg.service_name+"-autoposting"
 
 alert_manager = AlertManager(
     cfg.alert_tg_bot_token,
@@ -150,15 +160,6 @@ social_network_controller = SocialNetworkController(tel, social_network_service)
 http_middleware = HttpMiddleware(tel, cfg.prefix, loom_authorization_client)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Loom Content Service")
-    parser.add_argument(
-        "mode",
-        choices=["http", "autoposting"],
-        help="Режим запуска: http - HTTP сервер, autoposting - автопостинг"
-    )
-
-    args = parser.parse_args()
-
     if args.mode == "http":
         app = NewHTTP(
             db=db,

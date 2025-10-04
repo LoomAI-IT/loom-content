@@ -248,7 +248,8 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 ФОРМАТ ОТВЕТА:
 Ответ должен быть ТОЛЬКО в формате JSON без дополнительного текста:
 {{
-  "is_suitable": true или false
+  "is_suitable": true или false,
+  "reason": причина,
 }}
 
 Где:
