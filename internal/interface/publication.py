@@ -178,6 +178,7 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def update_autoposting(
             self,
+            autoposting_id: int,
             body: UpdateAutopostingBody
     ) -> JSONResponse:
         pass

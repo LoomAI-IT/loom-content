@@ -983,20 +983,21 @@ class PublicationController(interface.IPublicationController):
 
     async def update_autoposting(
             self,
+            autoposting_id: int,
             body: UpdateAutopostingBody
     ) -> JSONResponse:
         with self.tracer.start_as_current_span(
                 "PublicationController.update_autoposting",
                 kind=SpanKind.INTERNAL,
-                attributes={"autoposting_id": body.autoposting_id}
+                attributes={"autoposting_id": autoposting_id}
         ) as span:
             try:
                 self.logger.info("Update autoposting request", {
-                    "autoposting_id": body.autoposting_id
+                    "autoposting_id": autoposting_id
                 })
 
                 await self.publication_service.update_autoposting(
-                    autoposting_id=body.autoposting_id,
+                    autoposting_id=autoposting_id,
                     autoposting_category_id=body.autoposting_category_id,
                     period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
@@ -1006,7 +1007,7 @@ class PublicationController(interface.IPublicationController):
                 )
 
                 self.logger.info("Autoposting updated successfully", {
-                    "autoposting_id": body.autoposting_id
+                    "autoposting_id": autoposting_id
                 })
 
                 span.set_status(Status(StatusCode.OK))
@@ -1014,7 +1015,7 @@ class PublicationController(interface.IPublicationController):
                     status_code=200,
                     content={
                         "message": "Autoposting updated successfully",
-                        "autoposting_id": body.autoposting_id
+                        "autoposting_id": autoposting_id
                     }
                 )
 
