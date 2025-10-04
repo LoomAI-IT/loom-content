@@ -157,7 +157,7 @@ class Autoposting:
 
     def _filter_posts_by_time(self, posts: list[dict], period_hours: int) -> list[dict]:
         now = datetime.now()
-        period_start = now - timedelta(hours=period_hours)
+        period_start = now - timedelta(hours=period_hours*3)
         recent_posts = []
 
         for post in posts:
