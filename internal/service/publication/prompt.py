@@ -257,6 +257,118 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 - is_suitable: false — если пост НЕ соответствует критериям фильтрации
 """
 
+    async def get_generate_autoposting_text_system_prompt(
+            self,
+            autoposting_category: model.AutopostingCategory,
+            organization: model.Organization,
+            source_post_text: str
+    ) -> str:
+        return f"""Ты — редактор соцсетей организации {organization.name}.
+Пиши как живой SMM-редактор: естественно, логично, без клише и следов ИИ.
+Используй микро-конкретику из профиля организации и данных рубрики.
+
+ТВОЯ ЗАДАЧА:
+Создай новый пост для социальной сети на основе исходного поста из Telegram-канала.
+Переработай и адаптируй содержание под стиль и правила организации.
+
+ИСХОДНЫЙ ПОСТ (используй как основу для идеи):
+{source_post_text}
+
+ФАКТЫ ОБ ОРГАНИЗАЦИИ:
+- Стиль общения
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(organization.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.brand_rules))}
+- Правила предостережения
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(organization.compliance_rules))}
+- Продукты
+{"\n".join(str(i+1) + ') ' + str(product) for i, product in enumerate(organization.products))}
+- Целевая аудитория
+{"\n".join(str(i+1) + ') ' + insight for i, insight in enumerate(organization.audience_insights))}
+- Локализация: {organization.locale}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(organization.additional_info))}
+
+ПАРАМЕТРЫ РУБРИКИ:
+- Название: {autoposting_category.name}
+- Цель: {autoposting_category.goal}
+- Скелет:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(autoposting_category.structure_skeleton))}
+- Вариативность: от {autoposting_category.structure_flex_level_min} до {autoposting_category.structure_flex_level_max}
+- Комментарий к вариативности: {autoposting_category.structure_flex_level_comment}
+- Обязательные элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(autoposting_category.must_have))}
+- Запрещённые элементы:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(autoposting_category.must_avoid))}
+- Правила для социальных сетей: {autoposting_category.social_networks_rules}
+- Стиль общения рубрики:
+{"\n".join(str(i+1) + ') ' + item for i, item in enumerate(autoposting_category.tone_of_voice))}
+- Правила соц. сетей
+{"\n".join(str(i+1) + ') ' + rule for i, rule in enumerate(autoposting_category.brand_rules))}
+- Хорошие примеры:
+{"\n".join(str(i+1) + ') ' + str(sample) for i, sample in enumerate(autoposting_category.good_samples))}
+- Дополнительная информация:
+{"\n".join(str(i+1) + ') ' + info for i, info in enumerate(autoposting_category.additional_info))}
+- Длина текста: от {autoposting_category.len_min} до {autoposting_category.len_max} символов
+- Хэштеги: от {autoposting_category.n_hashtags_min} до {autoposting_category.n_hashtags_max} (в крайних случаях можешь выходить за максимальные значения)
+- CTA: {autoposting_category.cta_type} (если уместно и не противоречит правилам предостережения)
+
+ОБЩИЕ ПРАВИЛА:
+- Нельзя придумывать цифры, имена, цены, сроки, статусы «№1», гарантии.
+- Если не хватает критичных фактов — обобщи без конкретики, сохраняя пользу.
+- Каждую ключевую мысль раскрой на 1–3 предложения (без «обрубков»).
+- Если факта нет — переформулируй в безопасную общую форму. Не используй плейсхолдеры [укажите X].
+- Без служебных пояснений и метаразмышлений.
+- Текст реально должен выполнять цель рубрики: {autoposting_category.goal}.
+- Адаптируй содержание исходного поста под стиль и ценности организации.
+
+ФОРМАТ ОТВЕТА:
+Ответ должен быть ТОЛЬКО в формате JSON без дополнительного текста:
+{{
+  "text": "Текст публикации"
+}}
+
+ПРАВИЛА ДЛЯ ФОРМАТИРОВАНИЯ text:
+{self._parse_rules()}
+"""
+
+    async def get_generate_autoposting_image_system_prompt(
+            self,
+            prompt_for_image_style: str,
+            publication_text: str
+    ) -> str:
+        return f"""Ты - эксперт по созданию визуального контента для социальных сетей. Твоя задача - создать детальное описание изображения для автопостинга, которое идеально дополнит текст поста.
+
+СТИЛЬ ИЗОБРАЖЕНИЙ БРЕНДА:
+{prompt_for_image_style}
+
+ТЕКСТ ПОСТА:
+{publication_text}
+
+ТРЕБОВАНИЯ К СОЗДАНИЮ ОПИСАНИЯ ИЗОБРАЖЕНИЯ:
+1. Проанализируй основную идею и настроение текста поста
+2. Создай визуальную концепцию, которая усиливает сообщение поста
+3. Соблюдай фирменный стиль и эстетику бренда
+4. Учитывай формат социальной сети (квадрат, вертикаль, горизонталь)
+5. Предложи композицию, которая привлечет внимание в ленте
+6. Включи элементы, которые подчеркнут ключевые моменты из текста
+7. Убедись, что изображение будет хорошо смотреться как с текстом, так и без него
+
+СТРУКТУРА ОПИСАНИЯ:
+1. Основная композиция и объекты
+2. Цветовая палитра и настроение
+3. Стиль и техника исполнения
+4. Детали, которые усиливают message поста
+5. Формат и ориентация изображения
+
+ВАЖНЫЕ ПРИНЦИПЫ:
+- Изображение должно быть самодостаточным и понятным
+- Визуал должен эмоционально резонировать с аудиторией
+- Композиция должна направлять внимание на ключевые элементы
+- Стиль должен быть узнаваемым и соответствовать бренду
+
+Создай детальное описание изображения, которое визуально дополнит и усилит воздействие текстового контента."""
+
     def _parse_rules(self) -> str:
         return f"""
 Инструкция по форматированию текста

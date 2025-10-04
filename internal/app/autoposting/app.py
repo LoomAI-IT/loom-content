@@ -1,4 +1,5 @@
 import asyncio
+import random
 from datetime import datetime, timedelta
 
 from internal import interface, model
@@ -110,6 +111,9 @@ class Autoposting:
             self.logger.info(
                 f"🎯 Итого найдено {len(suitable_posts)} подходящих постов для автопостинга {autoposting.id}"
             )
+
+            # Обрабатываем подходящие посты
+            await self._process_suitable_posts(autoposting, suitable_posts)
 
             # Обновляем время последней активности
             await self._update_last_active(autoposting.id)
@@ -266,6 +270,40 @@ class Autoposting:
         reason = filter_result.get("reason", "не указана")
 
         return is_suitable, reason
+
+    async def _process_suitable_posts(self, autoposting: model.Autoposting, suitable_posts: list[dict]):
+        if not suitable_posts:
+            self.logger.info(f"📭 Нет подходящих постов для автопостинга {autoposting.id}")
+            return
+
+        selected_post = random.choice(suitable_posts)
+        self.logger.info(f"🎲 Выбран случайный пост {selected_post['link']} для генерации публикации")
+
+        try:
+            # Генерируем текст публикации
+            publication_data = await self.publication_service.generate_autoposting_publication_text(
+                autoposting_category_id=autoposting.autoposting_category_id,
+                source_post_text=selected_post['text']
+            )
+            self.logger.info(
+                f"✅ Текст публикации успешно сгенерирован для автопостинга {autoposting.id}"
+            )
+            self.logger.info(f"📝 Сгенерированный текст: {publication_data['text'][:100]}...")
+
+            # Генерируем изображение для публикации
+            images_url = await self.publication_service.generate_autoposting_publication_image(
+                autoposting_category_id=autoposting.autoposting_category_id,
+                publication_text=publication_data['text']
+            )
+
+            self.logger.info(
+                f"🎨 Изображение успешно сгенерировано для автопостинга {autoposting.id}: {images_url[0]}"
+            )
+
+        except Exception as gen_err:
+            self.logger.error(
+                f"❗ Ошибка при генерации публикации для автопостинга {autoposting.id}: {str(gen_err)}"
+            )
 
     async def _update_last_active(self, autoposting_id: int):
         await self.publication_service.update_autoposting(

@@ -488,6 +488,22 @@ class IPublicationService(Protocol):
     ) -> str:
         pass
 
+    @abstractmethod
+    async def generate_autoposting_publication_text(
+            self,
+            autoposting_category_id: int,
+            source_post_text: str
+    ) -> dict:
+        pass
+
+    @abstractmethod
+    async def generate_autoposting_publication_image(
+            self,
+            autoposting_category_id: int,
+            publication_text: str
+    ) -> list[str]:
+        pass
+
 
 class IPublicationRepo(Protocol):
     @abstractmethod
@@ -757,5 +773,22 @@ class IPublicationPromptGenerator(Protocol):
             self,
             filter_prompt: str,
             post_text: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_generate_autoposting_text_system_prompt(
+            self,
+            autoposting_category: model.AutopostingCategory,
+            organization: model.Organization,
+            source_post_text: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_generate_autoposting_image_system_prompt(
+            self,
+            prompt_for_image_style: str,
+            publication_text: str
     ) -> str:
         pass
