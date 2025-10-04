@@ -611,6 +611,22 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.get_all_autopostings",
+                kind=SpanKind.INTERNAL,
+        ) as span:
+            try:
+                rows = await self.db.select(get_all_autopostings, {})
+                autopostings = model.Autoposting.serialize(rows) if rows else []
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def delete_autoposting(self, autoposting_id: int) -> None:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.delete_autoposting",

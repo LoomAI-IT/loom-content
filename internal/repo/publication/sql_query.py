@@ -272,6 +272,11 @@ WHERE organization_id = :organization_id
 ORDER BY created_at DESC;
 """
 
+get_all_autopostings = """
+SELECT * FROM autopostings
+ORDER BY created_at DESC;
+"""
+
 delete_autoposting = """
 DELETE FROM autopostings
 WHERE id = :autoposting_id;

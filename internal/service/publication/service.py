@@ -996,6 +996,22 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.get_all_autopostings",
+                kind=SpanKind.INTERNAL,
+        ) as span:
+            try:
+                autopostings = await self.repo.get_all_autopostings()
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     async def update_autoposting(
             self,
             autoposting_id: int,

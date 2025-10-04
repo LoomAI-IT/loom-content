@@ -442,6 +442,10 @@ class IPublicationService(Protocol):
         pass
 
     @abstractmethod
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        pass
+
+    @abstractmethod
     async def update_autoposting(
             self,
             autoposting_id: int,
@@ -687,6 +691,10 @@ class IPublicationRepo(Protocol):
         pass
 
     @abstractmethod
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        pass
+
+    @abstractmethod
     async def delete_autoposting(self, autoposting_id: int) -> None:
         pass
 
@@ -739,5 +747,13 @@ class IPublicationPromptGenerator(Protocol):
             prompt_for_image_style: str,
             publication_text: str,
             changes: str
+    ) -> str:
+        pass
+
+    @abstractmethod
+    async def get_filter_post_system_prompt(
+            self,
+            filter_prompt: str,
+            post_text: str
     ) -> str:
         pass

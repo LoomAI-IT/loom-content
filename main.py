@@ -1,3 +1,5 @@
+import argparse
+import asyncio
 import uvicorn
 from aiogram import Bot
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -30,6 +32,7 @@ from internal.repo.video_cut.repo import VideoCutRepo
 from internal.repo.social_network.repo import SocialNetworkRepo
 
 from internal.app.http.app import NewHTTP
+from internal.app.autoposting.app import Autoposting
 
 from internal.config.config import Config
 
@@ -143,12 +146,33 @@ social_network_controller = SocialNetworkController(tel, social_network_service)
 http_middleware = HttpMiddleware(tel, cfg.prefix, loom_authorization_client)
 
 if __name__ == "__main__":
-    app = NewHTTP(
-        db=db,
-        publication_controller=publication_controller,
-        video_cut_controller=video_cut_controller,
-        social_network_controller=social_network_controller,
-        http_middleware=http_middleware,
-        prefix=cfg.prefix,
+    parser = argparse.ArgumentParser(description="Loom Content Service")
+    parser.add_argument(
+        "mode",
+        choices=["http", "autoposting"],
+        help="Режим запуска: http - HTTP сервер, autoposting - автопостинг"
     )
-    uvicorn.run(app, host="0.0.0.0", port=int(cfg.http_port), access_log=False)
+
+    args = parser.parse_args()
+
+    if args.mode == "http":
+        app = NewHTTP(
+            db=db,
+            publication_controller=publication_controller,
+            video_cut_controller=video_cut_controller,
+            social_network_controller=social_network_controller,
+            http_middleware=http_middleware,
+            prefix=cfg.prefix,
+        )
+        uvicorn.run(app, host="0.0.0.0", port=int(cfg.http_port), access_log=False)
+
+    elif args.mode == "autoposting":
+        asyncio.run(
+            Autoposting(
+                tel=tel,
+                publication_service=publication_service,
+                telegram_client=telegram_client,
+                openai_client=openai_client,
+                prompt_generator=publication_prompt_generator,
+            )
+        )
