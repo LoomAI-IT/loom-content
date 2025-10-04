@@ -16,7 +16,8 @@ update_branch_on_server() {
     echo "🖥️  Dev сервер:  $DEV_HOST"
     echo ""
 
-    SSH_OUTPUT=$(sshpass -p "$DEV_PASSWORD" ssh -o StrictHostKeyChecking=no root@$DEV_HOST -p 22 \
+    # Выполняем SSH команду и выводим результат в реальном времени
+    sshpass -p "$DEV_PASSWORD" ssh -o StrictHostKeyChecking=no root@$DEV_HOST -p 22 \
         SERVICE_NAME="$SERVICE_NAME" \
         BRANCH_NAME="$BRANCH_NAME" \
         AUTHOR_NAME="$AUTHOR_NAME" \
@@ -550,19 +551,10 @@ main() {
 
 main
 EOFMAIN
-)
 
-    local ssh_exit_code=$?
-
-    if [ $ssh_exit_code -ne 0 ]; then
+    if [ $? -ne 0 ]; then
         echo ""
-        echo "❌ Обновление завершилось с ошибкой (код: $ssh_exit_code)"
-        echo ""
-        echo "═══════════════════════════════════════════════════════════"
-        echo "ВЫВОД SSH:"
-        echo "═══════════════════════════════════════════════════════════"
-        echo "$SSH_OUTPUT"
-        echo "═══════════════════════════════════════════════════════════"
+        echo "❌ Обновление завершилось с ошибкой"
         exit 1
     fi
 
