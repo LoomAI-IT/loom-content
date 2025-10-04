@@ -111,7 +111,8 @@ CREATE TABLE IF NOT EXISTS autopostings (
     tg_channels TEXT[] DEFAULT '{}',
     required_moderation BOOLEAN DEFAULT FALSE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    last_active TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );
 """
 
