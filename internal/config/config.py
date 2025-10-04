@@ -52,6 +52,9 @@ class Config:
         self.loom_authorization_host = os.getenv("LOOM_AUTHORIZATION_CONTAINER_NAME", "localhost")
         self.loom_authorization_port = os.getenv("LOOM_AUTHORIZATION_PORT", "8001")
 
+        self.loom_employee_host = os.getenv("LOOM_EMPLOYEE_CONTAINER_NAME", "localhost")
+        self.loom_employee_port = os.getenv("LOOM_EMPLOYEE_PORT", "8001")
+
         # Loom Organization service
         self.loom_organization_host = os.getenv("LOOM_ORGANIZATION_CONTAINER_NAME", "localhost")
         self.loom_organization_port = os.getenv("LOOM_ORGANIZATION_PORT", "8002")

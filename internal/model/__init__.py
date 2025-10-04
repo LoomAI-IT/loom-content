@@ -5,3 +5,4 @@ from internal.model.publication import *
 from internal.model.video_cut import *
 
 from internal.model.client.loom_organization import *
+from internal.model.client.loom_employee import *

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from internal import interface, model
 
 
-class AutopostingService:
+class Autoposting:
     def __init__(
         self,
         tel: interface.ITelemetry,
@@ -12,6 +12,7 @@ class AutopostingService:
         telegram_client: interface.ITelegramClient,
         openai_client: interface.IOpenAIClient,
         prompt_generator: interface.IPublicationPromptGenerator,
+        loom_employee_client: interface.ILoomEmployeeClient,
     ):
         self.tel = tel
         self.logger = tel.logger()
@@ -19,6 +20,7 @@ class AutopostingService:
         self.telegram_client = telegram_client
         self.openai_client = openai_client
         self.prompt_generator = prompt_generator
+        self.loom_employee_client = loom_employee_client
 
     async def run(self):
         self.logger.info("🚀 Сервис автопостинга запущен и готов к работе")
@@ -280,21 +282,3 @@ class AutopostingService:
         self.logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА в главном цикле автопостинга: {str(err)}")
         self.logger.error("🔄 Повторная попытка через 5 минут...")
         await asyncio.sleep(5 * 60)
-
-
-async def Autoposting(
-    tel: interface.ITelemetry,
-    publication_service: interface.IPublicationService,
-    telegram_client: interface.ITelegramClient,
-    openai_client: interface.IOpenAIClient,
-    prompt_generator: interface.IPublicationPromptGenerator,
-):
-    """Точка входа для сервиса автопостинга (для обратной совместимости)"""
-    service = AutopostingService(
-        tel=tel,
-        publication_service=publication_service,
-        telegram_client=telegram_client,
-        openai_client=openai_client,
-        prompt_generator=prompt_generator,
-    )
-    await service.run()
