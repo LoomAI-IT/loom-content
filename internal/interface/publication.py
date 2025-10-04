@@ -431,8 +431,8 @@ class IPublicationService(Protocol):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None,
-            required_moderation: bool = False
+            tg_channels: list[str],
+            required_moderation: bool
     ) -> int:
         pass
 
@@ -470,7 +470,7 @@ class IPublicationService(Protocol):
             self,
             autoposting_id: int,
             tg_channel_username: str
-    ) -> model.ViewedTelegramPost | None:
+    ) -> list[model.ViewedTelegramPost]:
         pass
 
     @abstractmethod
@@ -661,8 +661,8 @@ class IPublicationRepo(Protocol):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None,
-            required_moderation: bool = False
+            tg_channels: list[str],
+            required_moderation: bool
     ) -> int:
         pass
 

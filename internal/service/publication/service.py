@@ -953,8 +953,8 @@ class PublicationService(interface.IPublicationService):
             autoposting_category_id: int,
             period_in_hours: int,
             filter_prompt: str,
-            tg_channels: list[str] = None,
-            required_moderation: bool = False
+            tg_channels: list[str],
+            required_moderation: bool
     ) -> int:
         with self.tracer.start_as_current_span(
                 "PublicationService.create_autoposting",
@@ -967,7 +967,7 @@ class PublicationService(interface.IPublicationService):
                     autoposting_category_id=autoposting_category_id,
                     period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
-                    tg_channels=tg_channels or [],
+                    tg_channels=tg_channels,
                     required_moderation=required_moderation
                 )
 
@@ -1077,7 +1077,7 @@ class PublicationService(interface.IPublicationService):
             self,
             autoposting_id: int,
             tg_channel_username: str
-    ) -> model.ViewedTelegramPost | None:
+    ) -> list[model.ViewedTelegramPost]:
         with self.tracer.start_as_current_span(
                 "PublicationService.get_viewed_telegram_post",
                 kind=SpanKind.INTERNAL,
@@ -1093,7 +1093,7 @@ class PublicationService(interface.IPublicationService):
                 )
 
                 span.set_status(Status(StatusCode.OK))
-                return viewed_posts[0] if viewed_posts else None
+                return viewed_posts
 
             except Exception as err:
                 span.record_exception(err)

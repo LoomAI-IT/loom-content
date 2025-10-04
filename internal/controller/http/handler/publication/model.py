@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional, List
 
 
 # ПУБЛИКАЦИИ
@@ -25,7 +24,7 @@ class ModeratePublicationBody(BaseModel):
     publication_id: int
     moderator_id: int
     moderation_status: str
-    moderation_comment: Optional[str] = ""
+    moderation_comment: str = ""
 
 
 # РУБРИКИ
@@ -37,14 +36,14 @@ class CreateCategoryBody(BaseModel):
     goal: str
 
     # Структура контента
-    structure_skeleton: List[str]
+    structure_skeleton: list[str]
     structure_flex_level_min: int
     structure_flex_level_max: int
     structure_flex_level_comment: str
 
     # Требования к контенту
-    must_have: List[str]
-    must_avoid: List[str]
+    must_have: list[str]
+    must_avoid: list[str]
 
     # Правила для соцсетей
     social_networks_rules: str
@@ -59,53 +58,53 @@ class CreateCategoryBody(BaseModel):
 
     # Стиль и тон
     cta_type: str
-    tone_of_voice: List[str] = []
+    tone_of_voice: list[str] = []
 
     # Бренд и примеры
-    brand_rules: List[str] = []
-    good_samples: List[dict] = []
+    brand_rules: list[str] = []
+    good_samples: list[dict] = []
 
     # Дополнительная информация
-    additional_info: List[str] = []
+    additional_info: list[str] = []
 
 
 class UpdateCategoryBody(BaseModel):
-    name: Optional[str] = None
-    prompt_for_image_style: Optional[str] = None
+    name: str = None
+    prompt_for_image_style: str = None
 
-    goal: Optional[str] = None
+    goal: str = None
 
     # Структура контента
-    structure_skeleton: Optional[List[str]] = None
-    structure_flex_level_min: Optional[int] = None
-    structure_flex_level_max: Optional[int] = None
-    structure_flex_level_comment: Optional[str] = None
+    structure_skeleton: list[str] = None
+    structure_flex_level_min: int = None
+    structure_flex_level_max: int = None
+    structure_flex_level_comment: str = None
 
     # Требования к контенту
-    must_have: Optional[List[str]] = None
-    must_avoid: Optional[List[str]] = None
+    must_have: list[str] = None
+    must_avoid: list[str] = None
 
     # Правила для соцсетей
-    social_networks_rules: Optional[str] = None
+    social_networks_rules: str = None
 
     # Ограничения по длине
-    len_min: Optional[int] = None
-    len_max: Optional[int] = None
+    len_min: int = None
+    len_max: int = None
 
     # Ограничения по хештегам
-    n_hashtags_min: Optional[int] = None
-    n_hashtags_max: Optional[int] = None
+    n_hashtags_min: int = None
+    n_hashtags_max: int = None
 
     # Стиль и тон
-    cta_type: Optional[str] = None
-    tone_of_voice: Optional[List[str]] = None
+    cta_type: str = None
+    tone_of_voice: list[str] = None
 
     # Бренд и примеры
-    brand_rules: Optional[List[str]] = None
-    good_samples: Optional[List[dict]] = None
+    brand_rules: list[str] = None
+    good_samples: list[dict] = None
 
     # Дополнительная информация
-    additional_info: Optional[List[str]] = None
+    additional_info: list[str] = None
 
 
 # РУБРИКИ ДЛЯ АВТОПОСТИНГА
@@ -117,14 +116,14 @@ class CreateAutopostingCategoryBody(BaseModel):
     goal: str
 
     # Структура контента
-    structure_skeleton: List[str]
+    structure_skeleton: list[str]
     structure_flex_level_min: int
     structure_flex_level_max: int
     structure_flex_level_comment: str
 
     # Требования к контенту
-    must_have: List[str]
-    must_avoid: List[str]
+    must_have: list[str]
+    must_avoid: list[str]
 
     # Правила для соцсетей
     social_networks_rules: str
@@ -139,53 +138,53 @@ class CreateAutopostingCategoryBody(BaseModel):
 
     # Стиль и тон
     cta_type: str
-    tone_of_voice: List[str] = []
+    tone_of_voice: list[str]
 
     # Бренд и примеры
-    brand_rules: List[str] = []
-    good_samples: List[dict] = []
+    brand_rules: list[str]
+    good_samples: list[dict]
 
     # Дополнительная информация
-    additional_info: List[str] = []
+    additional_info: list[str]
 
 
 class UpdateAutopostingCategoryBody(BaseModel):
-    name: Optional[str] = None
-    prompt_for_image_style: Optional[str] = None
+    name: str = None
+    prompt_for_image_style: str = None
 
-    goal: Optional[str] = None
+    goal: str = None
 
     # Структура контента
-    structure_skeleton: Optional[List[str]] = None
-    structure_flex_level_min: Optional[int] = None
-    structure_flex_level_max: Optional[int] = None
-    structure_flex_level_comment: Optional[str] = None
+    structure_skeleton: list[str] = None
+    structure_flex_level_min: int = None
+    structure_flex_level_max: int = None
+    structure_flex_level_comment: str = None
 
     # Требования к контенту
-    must_have: Optional[List[str]] = None
-    must_avoid: Optional[List[str]] = None
+    must_have: list[str] = None
+    must_avoid: list[str] = None
 
     # Правила для соцсетей
-    social_networks_rules: Optional[str] = None
+    social_networks_rules: str = None
 
     # Ограничения по длине
-    len_min: Optional[int] = None
-    len_max: Optional[int] = None
+    len_min: int = None
+    len_max: int = None
 
     # Ограничения по хештегам
-    n_hashtags_min: Optional[int] = None
-    n_hashtags_max: Optional[int] = None
+    n_hashtags_min: int = None
+    n_hashtags_max: int = None
 
     # Стиль и тон
-    cta_type: Optional[str] = None
-    tone_of_voice: Optional[List[str]] = None
+    cta_type: str = None
+    tone_of_voice: list[str] = None
 
     # Бренд и примеры
-    brand_rules: Optional[List[str]] = None
-    good_samples: Optional[List[dict]] = None
+    brand_rules: list[str] = None
+    good_samples: list[dict] = None
 
     # Дополнительная информация
-    additional_info: Optional[List[str]] = None
+    additional_info: list[str] = None
 
 
 # АВТОПОСТИНГ
@@ -194,15 +193,15 @@ class CreateAutopostingBody(BaseModel):
     autoposting_category_id: int
     period_in_hours: int
     filter_prompt: str
-    tg_channels: Optional[List[str]] | None = None
-    required_moderation: Optional[bool] = False
+    tg_channels: list[str]= None
+    required_moderation: bool = False
 
 
 class UpdateAutopostingBody(BaseModel):
     autoposting_id: int
-    autoposting_category_id: Optional[int] | None = None
-    period_in_hours: Optional[int] | None = None
-    filter_prompt: Optional[str] | None = None
-    enabled: Optional[bool] | None = None
-    tg_channels: Optional[List[str]] | None = None
-    required_moderation: Optional[bool] | None = None
+    autoposting_category_id: int = None
+    period_in_hours: int = None
+    filter_prompt: str = None
+    enabled: bool = None
+    tg_channels: list[str] = None
+    required_moderation: bool = None

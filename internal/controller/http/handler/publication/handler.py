@@ -972,7 +972,7 @@ class PublicationController(interface.IPublicationController):
                     status_code=200,
                     content={
                         "message": "Autopostings retrieved successfully",
-                        "data": [autoposting.to_dict() for autoposting in autopostings]
+                        "autopostings": [autoposting.to_dict() for autoposting in autopostings]
                     }
                 )
 
