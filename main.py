@@ -96,7 +96,12 @@ vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
 )
 
-telegram_client = LTelegramClient(cfg.tg_bot_token, cfg.tg_session_string)
+telegram_client = LTelegramClient(
+    cfg.tg_bot_token,
+    cfg.tg_session_string,
+    cfg.tg_api_id,
+    cfg.tg_api_hash,
+)
 
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)

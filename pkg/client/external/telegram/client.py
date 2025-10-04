@@ -24,8 +24,8 @@ class LTelegramClient(interface.ITelegramClient):
             self,
             bot_token: str,
             session_string: str,
-            api_id: int = None,
-            api_hash: str = None,
+            api_id: int,
+            api_hash: str,
     ):
         self.bot = Bot(token=bot_token)
         self.bot.session.middleware(AiogramSulgukMiddleware())
