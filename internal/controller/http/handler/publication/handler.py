@@ -751,8 +751,9 @@ class PublicationController(interface.IPublicationController):
 
                 autoposting_id = await self.publication_service.create_autoposting(
                     organization_id=body.organization_id,
+                    autoposting_categories_id=body.autoposting_categories_id,
+                    period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
-                    rewrite_prompt=body.rewrite_prompt,
                     tg_channels=body.tg_channels or []
                 )
 
@@ -823,8 +824,9 @@ class PublicationController(interface.IPublicationController):
 
                 await self.publication_service.update_autoposting(
                     autoposting_id=body.autoposting_id,
+                    autoposting_categories_id=body.autoposting_categories_id,
+                    period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
-                    rewrite_prompt=body.rewrite_prompt,
                     enabled=body.enabled,
                     tg_channels=body.tg_channels
                 )

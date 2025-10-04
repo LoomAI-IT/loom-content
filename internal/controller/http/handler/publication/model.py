@@ -111,13 +111,16 @@ class UpdateCategoryBody(BaseModel):
 # АВТОПОСТИНГ
 class CreateAutopostingBody(BaseModel):
     organization_id: int
+    autoposting_categories_id: int
+    period_in_hours: int
     filter_prompt: str
-    rewrite_prompt: str
     tg_channels: Optional[List[str]] | None = None
 
 
 class UpdateAutopostingBody(BaseModel):
+    autoposting_id: int
+    autoposting_categories_id: Optional[int] | None = None
+    period_in_hours: Optional[int] | None = None
     filter_prompt: Optional[str] | None = None
-    rewrite_prompt: Optional[str] | None = None
     enabled: Optional[bool] | None = None
     tg_channels: Optional[List[str]] | None = None

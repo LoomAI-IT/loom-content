@@ -150,15 +150,17 @@ WHERE id = :category_id;
 create_autoposting = """
 INSERT INTO autopostings (
     organization_id,
+    autoposting_categories_id,
+    period_in_hours,
     filter_prompt,
-    rewrite_prompt,
     tg_channels,
     enabled
 )
 VALUES (
     :organization_id,
+    :autoposting_categories_id,
+    :period_in_hours,
     :filter_prompt,
-    :rewrite_prompt,
     :tg_channels,
     FALSE
 )
@@ -167,9 +169,10 @@ RETURNING id;
 
 update_autoposting = """
 UPDATE autopostings
-SET 
+SET
+    autoposting_categories_id = COALESCE(:autoposting_categories_id, autoposting_categories_id),
+    period_in_hours = COALESCE(:period_in_hours, period_in_hours),
     filter_prompt = COALESCE(:filter_prompt, filter_prompt),
-    rewrite_prompt = COALESCE(:rewrite_prompt, rewrite_prompt),
     enabled = COALESCE(:enabled, enabled),
     tg_channels = COALESCE(:tg_channels, tg_channels)
 WHERE id = :autoposting_id;

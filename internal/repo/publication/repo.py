@@ -366,8 +366,9 @@ class PublicationRepo(interface.IPublicationRepo):
     async def create_autoposting(
             self,
             organization_id: int,
+            autoposting_categories_id: int,
+            period_in_hours: int,
             filter_prompt: str,
-            rewrite_prompt: str,
             tg_channels: list[str] = None
     ) -> int:
         with self.tracer.start_as_current_span(
@@ -380,8 +381,9 @@ class PublicationRepo(interface.IPublicationRepo):
             try:
                 args = {
                     'organization_id': organization_id,
+                    'autoposting_categories_id': autoposting_categories_id,
+                    'period_in_hours': period_in_hours,
                     'filter_prompt': filter_prompt,
-                    'rewrite_prompt': rewrite_prompt,
                     'tg_channels': tg_channels or [],
                 }
 
@@ -397,8 +399,9 @@ class PublicationRepo(interface.IPublicationRepo):
     async def update_autoposting(
             self,
             autoposting_id: int,
+            autoposting_categories_id: int = None,
+            period_in_hours: int = None,
             filter_prompt: str = None,
-            rewrite_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
@@ -412,8 +415,9 @@ class PublicationRepo(interface.IPublicationRepo):
             try:
                 args = {
                     'autoposting_id': autoposting_id,
+                    'autoposting_categories_id': autoposting_categories_id,
+                    'period_in_hours': period_in_hours,
                     'filter_prompt': filter_prompt,
-                    'rewrite_prompt': rewrite_prompt,
                     'enabled': enabled,
                     'tg_channels': tg_channels,
                 }

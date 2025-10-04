@@ -794,8 +794,9 @@ class PublicationService(interface.IPublicationService):
     async def create_autoposting(
             self,
             organization_id: int,
+            autoposting_categories_id: int,
+            period_in_hours: int,
             filter_prompt: str,
-            rewrite_prompt: str,
             tg_channels: list[str] = None
     ) -> int:
         with self.tracer.start_as_current_span(
@@ -806,8 +807,9 @@ class PublicationService(interface.IPublicationService):
             try:
                 autoposting_id = await self.repo.create_autoposting(
                     organization_id=organization_id,
+                    autoposting_categories_id=autoposting_categories_id,
+                    period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
-                    rewrite_prompt=rewrite_prompt,
                     tg_channels=tg_channels or []
                 )
 
@@ -839,8 +841,9 @@ class PublicationService(interface.IPublicationService):
     async def update_autoposting(
             self,
             autoposting_id: int,
+            autoposting_categories_id: int = None,
+            period_in_hours: int = None,
             filter_prompt: str = None,
-            rewrite_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
@@ -852,8 +855,9 @@ class PublicationService(interface.IPublicationService):
             try:
                 await self.repo.update_autoposting(
                     autoposting_id=autoposting_id,
+                    autoposting_categories_id=autoposting_categories_id,
+                    period_in_hours=period_in_hours,
                     filter_prompt=filter_prompt,
-                    rewrite_prompt=rewrite_prompt,
                     enabled=enabled,
                     tg_channels=tg_channels
                 )

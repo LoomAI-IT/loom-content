@@ -343,8 +343,9 @@ class IPublicationService(Protocol):
     async def create_autoposting(
             self,
             organization_id: int,
+            autoposting_categories_id: int,
+            period_in_hours: int,
             filter_prompt: str,
-            rewrite_prompt: str,
             tg_channels: list[str] = None
     ) -> int:
         pass
@@ -357,8 +358,9 @@ class IPublicationService(Protocol):
     async def update_autoposting(
             self,
             autoposting_id: int,
+            autoposting_categories_id: int = None,
+            period_in_hours: int = None,
             filter_prompt: str = None,
-            rewrite_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
@@ -492,8 +494,9 @@ class IPublicationRepo(Protocol):
     async def create_autoposting(
             self,
             organization_id: int,
+            autoposting_categories_id: int,
+            period_in_hours: int,
             filter_prompt: str,
-            rewrite_prompt: str,
             tg_channels: list[str] = None
     ) -> int:
         pass
@@ -502,8 +505,9 @@ class IPublicationRepo(Protocol):
     async def update_autoposting(
             self,
             autoposting_id: int,
+            autoposting_categories_id: int = None,
+            period_in_hours: int = None,
             filter_prompt: str = None,
-            rewrite_prompt: str = None,
             enabled: bool = None,
             tg_channels: list[str] = None
     ) -> None:
