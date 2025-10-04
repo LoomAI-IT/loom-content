@@ -1,5 +1,6 @@
 import asyncio
 import random
+import traceback
 from datetime import datetime, timedelta
 
 from internal import interface, model
@@ -334,7 +335,8 @@ class Autoposting:
 
         except Exception as gen_err:
             self.logger.error(
-                f"❗ Ошибка при генерации публикации для автопостинга {autoposting.id}: {str(gen_err)}"
+                f"❗ Ошибка при генерации публикации для автопостинга {autoposting.id}: {str(gen_err)}",
+            {"traceback": traceback.format_exc()}
             )
 
     async def _update_last_active(self, autoposting_id: int):
