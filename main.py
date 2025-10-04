@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     if args.mode == "http":
         app = NewHTTP(
-            db=db,
+            # db=db,
             publication_controller=publication_controller,
             video_cut_controller=video_cut_controller,
             social_network_controller=social_network_controller,

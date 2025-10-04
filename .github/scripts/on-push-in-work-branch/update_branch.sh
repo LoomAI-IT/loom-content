@@ -495,9 +495,6 @@ wait_for_health() {
     log_to_both "=== CONTAINER LOGS (last 100 lines) ==="
     docker logs --tail 100 $SERVICE_NAME 2>&1 | tee -a "$LOG_FILE"
     log_to_both ""
-    log_to_both "=== DOCKER EVENTS (last 50) ==="
-    docker events --since 5m --filter "container=$SERVICE_NAME" 2>&1 | tail -50 | tee -a "$LOG_FILE" || echo "No events" | tee -a "$LOG_FILE"
-    log_to_both ""
 
     exit 1
 }
