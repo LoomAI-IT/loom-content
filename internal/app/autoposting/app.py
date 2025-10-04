@@ -214,7 +214,6 @@ class Autoposting:
                     continue
 
                 # Помечаем пост просмотренным
-                await self._mark_post_as_viewed(autoposting.id, channel_username, post_link)
 
                 processed_count += 1
                 self.logger.info(f"🤖 Анализ поста #{processed_count} из @{channel_username} через OpenAI...")
@@ -233,6 +232,7 @@ class Autoposting:
                     })
                     self.logger.info(f"✅ Пост из @{channel_username} прошел фильтр! Причина: {reason}")
                 else:
+                    await self._mark_post_as_viewed(autoposting.id, channel_username, post_link)
                     self.logger.info(f"❌ Пост из @{channel_username} не прошел фильтр. Причина: {reason}")
 
             except Exception as post_err:
@@ -327,7 +327,7 @@ class Autoposting:
                 )
 
             self.logger.info(
-                f"🎨 Изображение успешно сгенерировано для автопостинга {autoposting.id}: {images_url[0]}"
+                f"🎨 Изображение успешно сгенерировано для автопостинга {autoposting.id}: {image_url}"
             )
 
         except Exception as gen_err:
@@ -344,9 +344,9 @@ class Autoposting:
 
     async def _sleep_until_next_iteration(self):
         self.logger.info("😴 Переход в режим ожидания на 30 минут...")
-        await asyncio.sleep(30 * 60)
+        await asyncio.sleep(1 * 60)
 
     async def _handle_critical_error(self, err: Exception):
         self.logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА в главном цикле автопостинга: {str(err)}")
         self.logger.error("🔄 Повторная попытка через 5 минут...")
-        await asyncio.sleep(5 * 60)
+        await asyncio.sleep(1 * 60)
