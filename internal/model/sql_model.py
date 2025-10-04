@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS autopostings (
     required_moderation BOOLEAN DEFAULT FALSE,
 
     last_active TIMESTAMP DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
 
