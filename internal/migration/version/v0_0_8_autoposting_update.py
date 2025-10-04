@@ -81,7 +81,7 @@ ALTER TABLE autopostings
 
 add_new_autoposting_columns = """
 ALTER TABLE autopostings
-    ADD COLUMN IF NOT EXISTS autoposting_categories_id INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS autoposting_category_id INTEGER NOT NULL DEFAULT 0,
     ADD COLUMN IF NOT EXISTS period_in_hours INTEGER NOT NULL DEFAULT 0;
 """
 
@@ -102,7 +102,7 @@ DROP TABLE IF EXISTS viewed_telegram_posts;
 
 drop_new_autoposting_columns = """
 ALTER TABLE autopostings
-    DROP COLUMN IF EXISTS autoposting_categories_id,
+    DROP COLUMN IF EXISTS autoposting_category_id,
     DROP COLUMN IF EXISTS period_in_hours;
 """
 

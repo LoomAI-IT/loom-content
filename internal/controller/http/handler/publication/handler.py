@@ -734,6 +734,178 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(Status(StatusCode.ERROR, str(err)))
                 raise err
 
+    # РУБРИКИ ДЛЯ АВТОПОСТИНГА
+    async def create_autoposting_category(
+            self,
+            body: CreateAutopostingCategoryBody,
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.create_autoposting_category",
+                kind=SpanKind.INTERNAL,
+                attributes={"organization_id": body.organization_id}
+        ) as span:
+            try:
+                self.logger.info("Create autoposting category request", {
+                    "organization_id": body.organization_id
+                })
+
+                autoposting_category_id = await self.publication_service.create_autoposting_category(
+                    organization_id=body.organization_id,
+                    name=body.name,
+                    prompt_for_image_style=body.prompt_for_image_style,
+                    goal=body.goal,
+                    structure_skeleton=body.structure_skeleton,
+                    structure_flex_level_min=body.structure_flex_level_min,
+                    structure_flex_level_max=body.structure_flex_level_max,
+                    structure_flex_level_comment=body.structure_flex_level_comment,
+                    must_have=body.must_have,
+                    must_avoid=body.must_avoid,
+                    social_networks_rules=body.social_networks_rules,
+                    len_min=body.len_min,
+                    len_max=body.len_max,
+                    n_hashtags_min=body.n_hashtags_min,
+                    n_hashtags_max=body.n_hashtags_max,
+                    cta_type=body.cta_type,
+                    tone_of_voice=body.tone_of_voice,
+                    brand_rules=body.brand_rules,
+                    good_samples=body.good_samples,
+                    additional_info=body.additional_info
+                )
+
+                self.logger.info("Autoposting category created successfully", {
+                    "autoposting_category_id": autoposting_category_id,
+                    "organization_id": body.organization_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=201,
+                    content={
+                        "message": "Autoposting category created successfully",
+                        "autoposting_category_id": autoposting_category_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def get_autoposting_category_by_id(self, autoposting_category_id: int) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.get_autoposting_category_by_id",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                self.logger.info("Get autoposting category by ID request", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                category = await self.publication_service.get_autoposting_category_by_id(autoposting_category_id)
+
+                self.logger.info("Autoposting category retrieved successfully", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content=category.to_dict()
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def update_autoposting_category(
+            self,
+            autoposting_category_id: int,
+            body: UpdateAutopostingCategoryBody
+    ) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.update_autoposting_category",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                self.logger.info("Update autoposting category request", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                await self.publication_service.update_autoposting_category(
+                    autoposting_category_id=autoposting_category_id,
+                    name=body.name,
+                    prompt_for_image_style=body.prompt_for_image_style,
+                    goal=body.goal,
+                    structure_skeleton=body.structure_skeleton,
+                    structure_flex_level_min=body.structure_flex_level_min,
+                    structure_flex_level_max=body.structure_flex_level_max,
+                    structure_flex_level_comment=body.structure_flex_level_comment,
+                    must_have=body.must_have,
+                    must_avoid=body.must_avoid,
+                    social_networks_rules=body.social_networks_rules,
+                    len_min=body.len_min,
+                    len_max=body.len_max,
+                    n_hashtags_min=body.n_hashtags_min,
+                    n_hashtags_max=body.n_hashtags_max,
+                    cta_type=body.cta_type,
+                    tone_of_voice=body.tone_of_voice,
+                    brand_rules=body.brand_rules,
+                    good_samples=body.good_samples,
+                    additional_info=body.additional_info
+                )
+
+                self.logger.info("Autoposting category updated successfully", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Autoposting category updated successfully",
+                        "autoposting_category_id": autoposting_category_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
+    async def delete_autoposting_category(self, autoposting_category_id: int) -> JSONResponse:
+        with self.tracer.start_as_current_span(
+                "PublicationController.delete_autoposting_category",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                self.logger.info("Delete autoposting category request", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                await self.publication_service.delete_autoposting_category(autoposting_category_id)
+
+                self.logger.info("Autoposting category deleted successfully", {
+                    "autoposting_category_id": autoposting_category_id
+                })
+
+                span.set_status(Status(StatusCode.OK))
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "message": "Autoposting category deleted successfully",
+                        "autoposting_category_id": autoposting_category_id
+                    }
+                )
+
+            except Exception as err:
+                span.record_exception(err)
+                span.set_status(Status(StatusCode.ERROR, str(err)))
+                raise err
+
     # АВТОПОСТИНГ
     async def create_autoposting(
             self,
@@ -751,7 +923,7 @@ class PublicationController(interface.IPublicationController):
 
                 autoposting_id = await self.publication_service.create_autoposting(
                     organization_id=body.organization_id,
-                    autoposting_categories_id=body.autoposting_categories_id,
+                    autoposting_category_id=body.autoposting_category_id,
                     period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
                     tg_channels=body.tg_channels or []
@@ -824,7 +996,7 @@ class PublicationController(interface.IPublicationController):
 
                 await self.publication_service.update_autoposting(
                     autoposting_id=body.autoposting_id,
-                    autoposting_categories_id=body.autoposting_categories_id,
+                    autoposting_category_id=body.autoposting_category_id,
                     period_in_hours=body.period_in_hours,
                     filter_prompt=body.filter_prompt,
                     enabled=body.enabled,

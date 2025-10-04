@@ -103,7 +103,7 @@ create_autopostings_table = """
 CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
-    autoposting_categories_id INTEGER NOT NULL,
+    autoposting_category_id INTEGER NOT NULL,
     
     period_in_hours INTEGER NOT NULL,    
     enabled BOOLEAN DEFAULT FALSE,

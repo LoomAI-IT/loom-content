@@ -284,7 +284,7 @@ class AutopostingCategory:
 class Autoposting:
     id: int
     organization_id: int
-    autoposting_categories_id: int
+    autoposting_category_id: int
 
     period_in_hours: int
     enabled: bool
@@ -299,7 +299,7 @@ class Autoposting:
             cls(
                 id=row.id,
                 organization_id=row.organization_id,
-                autoposting_categories_id=row.autoposting_categories_id,
+                autoposting_category_id=row.autoposting_category_id,
                 period_in_hours=row.period_in_hours,
                 enabled=row.enabled,
                 filter_prompt=row.filter_prompt,
@@ -313,7 +313,7 @@ class Autoposting:
         return {
             "id": self.id,
             "organization_id": self.organization_id,
-            "autoposting_categories_id": self.autoposting_categories_id,
+            "autoposting_category_id": self.autoposting_category_id,
             "period_in_hours": self.period_in_hours,
             "enabled": self.enabled,
             "filter_prompt": self.filter_prompt,
