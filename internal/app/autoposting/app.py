@@ -310,6 +310,11 @@ class Autoposting:
                 image_url=images_url[0]
             )
 
+            await self.publication_service.change_publication(
+                publication_id=publication_id,
+                tg_source=True
+            )
+
             if not moderators:
                 await self.publication_service.moderate_publication(
                     publication_id=publication_id,
