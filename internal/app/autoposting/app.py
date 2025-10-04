@@ -262,8 +262,8 @@ class Autoposting:
         filter_result, _ = await self.openai_client.generate_json(
             history=[{"role": "user", "content": "Проанализируй этот пост"}],
             system_prompt=filter_system_prompt,
-            temperature=0.3,
-            llm_model="gpt-4o-mini",
+            temperature=1,
+            llm_model="gpt-5",
         )
 
         is_suitable = filter_result.get("is_suitable", False)
@@ -295,6 +295,28 @@ class Autoposting:
                 autoposting_category_id=autoposting.autoposting_category_id,
                 publication_text=publication_data['text']
             )
+
+            employees = await self.loom_employee_client.get_employees_by_organization(autoposting.organization_id)
+
+            moderators = [employee for employee in employees if employee.role == "moderator"]
+
+            publication_id = await self.publication_service.create_publication(
+                organization_id=autoposting.organization_id,
+                category_id=autoposting.autoposting_category_id,
+                creator_id=0,
+                text_reference=selected_post['text'],
+                text=publication_data['text'],
+                moderation_status="moderation",
+                image_url=images_url[0]
+            )
+
+            if not moderators:
+                await self.publication_service.moderate_publication(
+                    publication_id=publication_id,
+                    moderator_id=0,
+                    moderation_status="approved",
+                    moderation_comment=""
+                )
 
             self.logger.info(
                 f"🎨 Изображение успешно сгенерировано для автопостинга {autoposting.id}: {images_url[0]}"
