@@ -80,8 +80,8 @@ class VideoCutService(interface.IVideoCutService):
                 return project_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vizard_video_cuts(
@@ -157,8 +157,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def change_video_cut(
@@ -188,8 +188,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_video_cut(self, video_cut_id: int) -> None:
@@ -211,8 +211,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def send_video_cut_to_moderation(
@@ -233,8 +233,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def publish_video_cut(
@@ -274,8 +274,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cut_by_id(self, video_cut_id: int) -> model.VideoCut:
@@ -293,8 +293,8 @@ class VideoCutService(interface.IVideoCutService):
                 return video_cuts[0]
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]:
@@ -310,8 +310,8 @@ class VideoCutService(interface.IVideoCutService):
                 return video_cuts
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def moderate_video_cut(
@@ -341,8 +341,8 @@ class VideoCutService(interface.IVideoCutService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_video_cut(
@@ -372,8 +372,8 @@ class VideoCutService(interface.IVideoCutService):
                 return video_io, content_type, video_cut.video_name
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def _download_video_from_url(self, video_url: str) -> tuple[bytes, str]:

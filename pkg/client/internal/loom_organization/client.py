@@ -40,7 +40,7 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as e:
-                span.record_exception(e)
+                
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise
 
@@ -59,6 +59,6 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
                 span.set_status(Status(StatusCode.OK))
                 return model.Organization(**json_response)
             except Exception as e:
-                span.record_exception(e)
+                
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise

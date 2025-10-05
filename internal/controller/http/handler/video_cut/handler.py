@@ -33,11 +33,7 @@ class VideoCutController(interface.IVideoCutController):
                 }
         ) as span:
             try:
-                self.logger.info("Generate video cut request", {
-                    "organization_id": body.organization_id,
-                    "creator_id": body.creator_id,
-                    "youtube_video_reference": body.youtube_video_reference
-                })
+                self.logger.info("Начало генерации нарезки видео")
 
                 project_id = await self.video_cut_service.generate_vizard_video_cuts(
                     organization_id=body.organization_id,
@@ -45,23 +41,19 @@ class VideoCutController(interface.IVideoCutController):
                     youtube_video_reference=body.youtube_video_reference,
                 )
 
-                self.logger.info("Video cut generated successfully", {
-                    "project_id": project_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Нарезка видео сгенерирована")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Video cut generated successfully",
                         "project_id": project_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vizard_video_cuts(
@@ -80,13 +72,13 @@ class VideoCutController(interface.IVideoCutController):
                 )
 
                 return JSONResponse(
-                    content={"message": "Video cut created successfully"},
+                    content={},
                     status_code=201,
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def change_video_cut(
@@ -99,9 +91,7 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"video_cut_id": body.video_cut_id}
         ) as span:
             try:
-                self.logger.info("Change video cut request", {
-                    "video_cut_id": body.video_cut_id
-                })
+                self.logger.info("Начало изменения нарезки видео")
 
                 await self.video_cut_service.change_video_cut(
                     video_cut_id=body.video_cut_id,
@@ -112,22 +102,19 @@ class VideoCutController(interface.IVideoCutController):
                     youtube_source=body.youtube_source
                 )
 
-                self.logger.info("Video cut changed successfully", {
-                    "video_cut_id": body.video_cut_id
-                })
+                self.logger.info("Нарезка видео изменена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Video cut updated successfully",
                         "video_cut_id": body.video_cut_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_video_cut(self, video_cut_id: int) -> JSONResponse:
@@ -137,28 +124,23 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"video_cut_id": video_cut_id}
         ) as span:
             try:
-                self.logger.info("Delete video cut request", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Начало удаления нарезки видео")
 
                 await self.video_cut_service.delete_video_cut(video_cut_id)
 
-                self.logger.info("Video cut deleted successfully", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Нарезка видео удалена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Video cut deleted successfully",
                         "video_cut_id": video_cut_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def send_video_cut_to_moderation(
@@ -171,30 +153,25 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"video_cut_id": video_cut_id}
         ) as span:
             try:
-                self.logger.info("Send video cut to moderation request", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Начало отправки нарезки видео на модерацию")
 
                 await self.video_cut_service.send_video_cut_to_moderation(
                     video_cut_id=video_cut_id
                 )
 
-                self.logger.info("Video cut sent to moderation successfully", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Нарезка видео отправлена на модерацию")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Video cut sent to moderation successfully",
                         "video_cut_id": video_cut_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cut_by_id(self, video_cut_id: int) -> JSONResponse:
@@ -204,28 +181,23 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"video_cut_id": video_cut_id}
         ) as span:
             try:
-                self.logger.info("Get video cut by ID request", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Начало получения нарезки видео")
 
                 video_cut = await self.video_cut_service.get_video_cut_by_id(video_cut_id)
 
-                self.logger.info("Video cut retrieved successfully", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Нарезка видео получена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Video cut retrieved successfully",
                         "data": video_cut.to_dict()
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cuts_by_organization(self, organization_id: int) -> JSONResponse:
@@ -235,16 +207,11 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                self.logger.info("Get video cuts by organization request", {
-                    "organization_id": organization_id
-                })
+                self.logger.info("Начало получения нарезок видео организации")
 
                 video_cuts = await self.video_cut_service.get_video_cuts_by_organization(organization_id)
 
-                self.logger.info("Video cuts retrieved successfully", {
-                    "organization_id": organization_id,
-                    "count": len(video_cuts)
-                })
+                self.logger.info("Нарезки видео организации получены")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -253,8 +220,8 @@ class VideoCutController(interface.IVideoCutController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def moderate_video_cut(
@@ -271,11 +238,7 @@ class VideoCutController(interface.IVideoCutController):
                 }
         ) as span:
             try:
-                self.logger.info("Moderate video cut request", {
-                    "video_cut_id": body.video_cut_id,
-                    "moderator_id": body.moderator_id,
-                    "moderation_status": body.moderation_status
-                })
+                self.logger.info("Начало модерации нарезки видео")
 
                 await self.video_cut_service.moderate_video_cut(
                     video_cut_id=body.video_cut_id,
@@ -284,24 +247,20 @@ class VideoCutController(interface.IVideoCutController):
                     moderation_comment=body.moderation_comment
                 )
 
-                self.logger.info("Video cut moderated successfully", {
-                    "video_cut_id": body.video_cut_id,
-                    "moderation_status": body.moderation_status
-                })
+                self.logger.info("Нарезка видео промодерирована")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Video cut moderated successfully",
                         "video_cut_id": body.video_cut_id,
                         "moderation_status": body.moderation_status
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_video_cut(
@@ -314,9 +273,7 @@ class VideoCutController(interface.IVideoCutController):
                 attributes={"video_cut_id": video_cut_id}
         ) as span:
             try:
-                self.logger.info("Download video cut request", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Начало скачивания нарезки видео")
 
                 video_io, content_type, video_name = await self.video_cut_service.download_video_cut(video_cut_id)
 
@@ -334,9 +291,7 @@ class VideoCutController(interface.IVideoCutController):
                     finally:
                         video_io.close()
 
-                self.logger.info("Video cut downloaded successfully", {
-                    "video_cut_id": video_cut_id
-                })
+                self.logger.info("Нарезка видео скачана")
 
                 span.set_status(Status(StatusCode.OK))
                 return StreamingResponse(
@@ -351,6 +306,6 @@ class VideoCutController(interface.IVideoCutController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

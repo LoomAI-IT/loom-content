@@ -78,8 +78,8 @@ class PublicationService(interface.IPublicationService):
                 return publication_data
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def regenerate_publication_text(
@@ -148,8 +148,8 @@ class PublicationService(interface.IPublicationService):
                 return publication_data
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def generate_publication_image(
@@ -234,8 +234,8 @@ class PublicationService(interface.IPublicationService):
 
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_publication(
@@ -306,8 +306,8 @@ class PublicationService(interface.IPublicationService):
                 return publication_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def change_publication(
@@ -379,8 +379,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_publication(
@@ -421,8 +421,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_publication_image(
@@ -458,8 +458,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def send_publication_to_moderation(
@@ -480,8 +480,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def moderate_publication(
@@ -519,8 +519,8 @@ class PublicationService(interface.IPublicationService):
                 return post_links
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_publication_by_id(self, publication_id: int) -> model.Publication:
@@ -538,8 +538,8 @@ class PublicationService(interface.IPublicationService):
                 return publications[0]
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_publications_by_organization(self, organization_id: int) -> list[model.Publication]:
@@ -555,8 +555,8 @@ class PublicationService(interface.IPublicationService):
                 return publications
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_publication_image(
@@ -589,8 +589,8 @@ class PublicationService(interface.IPublicationService):
                 return image_io, content_type
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_other_image(
@@ -615,8 +615,8 @@ class PublicationService(interface.IPublicationService):
                 return image_io, content_type
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # РУБРИКИ
@@ -676,8 +676,8 @@ class PublicationService(interface.IPublicationService):
                 return category_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_category_by_id(self, category_id: int) -> model.Category:
@@ -695,8 +695,8 @@ class PublicationService(interface.IPublicationService):
                 return categories[0]
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_categories_by_organization(self, organization_id: int) -> list[model.Category]:
@@ -712,8 +712,8 @@ class PublicationService(interface.IPublicationService):
                 return categories
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_category(
@@ -771,8 +771,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_category(self, category_id: int) -> None:
@@ -787,8 +787,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
@@ -848,8 +848,8 @@ class PublicationService(interface.IPublicationService):
                 return autoposting_category_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_autoposting_category_by_id(self, autoposting_category_id: int) -> model.AutopostingCategory:
@@ -868,8 +868,8 @@ class PublicationService(interface.IPublicationService):
                 return categories[0]
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_autoposting_category(
@@ -927,8 +927,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
@@ -943,8 +943,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # АВТОПОСТИНГ
@@ -978,8 +978,8 @@ class PublicationService(interface.IPublicationService):
                 return autoposting_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
@@ -995,8 +995,8 @@ class PublicationService(interface.IPublicationService):
                 return autopostings
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_all_autopostings(self) -> list[model.Autoposting]:
@@ -1011,8 +1011,8 @@ class PublicationService(interface.IPublicationService):
                 return autopostings
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_autoposting(
@@ -1048,8 +1048,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_autoposting(self, autoposting_id: int) -> None:
@@ -1064,8 +1064,8 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # ПРОСМОТРЕННЫЕ TELEGRAM ПОСТЫ
@@ -1095,8 +1095,8 @@ class PublicationService(interface.IPublicationService):
                 return viewed_post_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_viewed_telegram_post(
@@ -1122,8 +1122,8 @@ class PublicationService(interface.IPublicationService):
                 return viewed_posts
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def transcribe_audio(
@@ -1148,8 +1148,8 @@ class PublicationService(interface.IPublicationService):
                 return transcribed_text
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def generate_autoposting_publication_text(
@@ -1193,8 +1193,8 @@ class PublicationService(interface.IPublicationService):
                 return publication_data
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def generate_autoposting_publication_image(
@@ -1246,8 +1246,8 @@ class PublicationService(interface.IPublicationService):
                 return images_url
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def _debit_organization_balance(self, organization_id: int, usd_cost: float):

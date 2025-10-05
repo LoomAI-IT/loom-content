@@ -63,8 +63,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return llm_response, generate_cost
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def generate_json(
@@ -127,8 +127,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return llm_response_json, generate_cost
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def transcribe_audio(
@@ -203,8 +203,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return transcript.text, cost_details
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
     # Добавьте эти методы в ваш класс GPTClient:
 
@@ -328,8 +328,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return images, cost_details
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def edit_image(
@@ -419,8 +419,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return images, cost_details
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     def _calculate_image_cost(
@@ -503,8 +503,8 @@ class OpenAIClient(interface.IOpenAIClient):
                 return response.content
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     def _prepare_messages(self, history: list, system_prompt: str, pdf_file: bytes, llm_model: str) -> list:
@@ -681,8 +681,8 @@ class OpenAIClient(interface.IOpenAIClient):
                     text += page.extract_text()
                 return text
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     def _pdf_to_images(self, pdf_bytes: bytes) -> list[str]:
@@ -703,8 +703,8 @@ class OpenAIClient(interface.IOpenAIClient):
 
                 return base64_images
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     def _calculate_transcription_cost(

@@ -46,7 +46,7 @@ class LoomTgBotClient(interface.ILoomTgBotClient):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as e:
-                span.record_exception(e)
+                
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise
 
@@ -69,6 +69,6 @@ class LoomTgBotClient(interface.ILoomTgBotClient):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as e:
-                span.record_exception(e)
+                
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 raise

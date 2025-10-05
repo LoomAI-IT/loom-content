@@ -30,18 +30,14 @@ class PublicationController(interface.IPublicationController):
                 }
         ) as span:
             try:
-                self.logger.info("Generate publication text request", {
-                    "category_id": body.category_id
-                })
+                self.logger.info("Начало генерации текста публикации")
 
                 text_data = await self.publication_service.generate_publication_text(
                     category_id=body.category_id,
                     text_reference=body.text_reference
                 )
 
-                self.logger.info("Publication text generated successfully", {
-                    "category_id": body.category_id
-                })
+                self.logger.info("Текст публикации сгенерирован")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -50,8 +46,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def regenerate_publication_text(
@@ -66,9 +62,7 @@ class PublicationController(interface.IPublicationController):
                 }
         ) as span:
             try:
-                self.logger.info("Regenerate publication text request", {
-                    "category_id": body.category_id
-                })
+                self.logger.info("Начало регенерации текста публикации")
 
                 text_data = await self.publication_service.regenerate_publication_text(
                     category_id=body.category_id,
@@ -76,9 +70,7 @@ class PublicationController(interface.IPublicationController):
                     prompt=body.prompt
                 )
 
-                self.logger.info("Publication text regenerated successfully", {
-                    "category_id": body.category_id
-                })
+                self.logger.info("Текст публикации регенерирован")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -87,8 +79,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def generate_publication_image(
@@ -107,9 +99,7 @@ class PublicationController(interface.IPublicationController):
                 }
         ) as span:
             try:
-                self.logger.info("Generate publication image request", {
-                    "category_id": category_id
-                })
+                self.logger.info("Начало генерации изображения публикации")
 
                 images_url = await self.publication_service.generate_publication_image(
                     category_id=category_id,
@@ -119,9 +109,7 @@ class PublicationController(interface.IPublicationController):
                     image_file=image_file,
                 )
 
-                self.logger.info("Publication image generated successfully", {
-                    "category_id": category_id
-                })
+                self.logger.info("Изображение публикации сгенерировано")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -130,8 +118,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_publication(
@@ -155,11 +143,7 @@ class PublicationController(interface.IPublicationController):
                 }
         ) as span:
             try:
-                self.logger.info("Create publication request", {
-                    "organization_id": organization_id,
-                    "category_id": category_id,
-                    "creator_id": creator_id
-                })
+                self.logger.info("Начало создания публикации")
 
                 publication_id = await self.publication_service.create_publication(
                     organization_id=organization_id,
@@ -172,23 +156,19 @@ class PublicationController(interface.IPublicationController):
                     image_file=image_file
                 )
 
-                self.logger.info("Publication created successfully", {
-                    "publication_id": publication_id,
-                    "organization_id": organization_id
-                })
+                self.logger.info("Публикация создана")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Publication created successfully",
                         "publication_id": publication_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def change_publication(
@@ -206,9 +186,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Change publication request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало изменения публикации")
 
                 await self.publication_service.change_publication(
                     publication_id=publication_id,
@@ -219,22 +197,19 @@ class PublicationController(interface.IPublicationController):
                     image_file=image_file,
                 )
 
-                self.logger.info("Publication changed successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Публикация изменена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Publication updated successfully",
                         "publication_id": publication_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_publication_image(
@@ -247,30 +222,25 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Delete publication image request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало удаления изображения публикации")
 
                 await self.publication_service.delete_publication_image(
                     publication_id=publication_id
                 )
 
-                self.logger.info("Publication image deleted successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Изображение публикации удалено")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Publication image deleted successfully",
                         "publication_id": publication_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def send_publication_to_moderation(
@@ -283,30 +253,25 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Send publication to moderation request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало отправки публикации на модерацию")
 
                 await self.publication_service.send_publication_to_moderation(
                     publication_id=publication_id
                 )
 
-                self.logger.info("Publication sent to moderation successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Публикация отправлена на модерацию")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Publication sent to moderation successfully",
                         "publication_id": publication_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def moderate_publication(
@@ -323,11 +288,7 @@ class PublicationController(interface.IPublicationController):
                 }
         ) as span:
             try:
-                self.logger.info("Moderate publication request", {
-                    "publication_id": body.publication_id,
-                    "moderator_id": body.moderator_id,
-                    "moderation_status": body.moderation_status
-                })
+                self.logger.info("Начало модерации публикации")
 
                 post_links = await self.publication_service.moderate_publication(
                     publication_id=body.publication_id,
@@ -336,10 +297,7 @@ class PublicationController(interface.IPublicationController):
                     moderation_comment=body.moderation_comment
                 )
 
-                self.logger.info("Publication moderated successfully", {
-                    "publication_id": body.publication_id,
-                    "moderation_status": body.moderation_status
-                })
+                self.logger.info("Публикация промодерирована")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -348,8 +306,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_publication_by_id(self, publication_id: int) -> JSONResponse:
@@ -359,15 +317,11 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Get publication by ID request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало получения публикации")
 
                 publication = await self.publication_service.get_publication_by_id(publication_id)
 
-                self.logger.info("Publication retrieved successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Публикация получена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -376,8 +330,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_publications_by_organization(self, organization_id: int) -> JSONResponse:
@@ -387,16 +341,11 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                self.logger.info("Get publications by organization request", {
-                    "organization_id": organization_id
-                })
+                self.logger.info("Начало получения публикаций организации")
 
                 publications = await self.publication_service.get_publications_by_organization(organization_id)
 
-                self.logger.info("Publications retrieved successfully", {
-                    "organization_id": organization_id,
-                    "count": len(publications)
-                })
+                self.logger.info("Публикации организации получены")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -405,8 +354,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_publication_image(
@@ -419,9 +368,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Download publication image request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало скачивания изображения публикации")
 
                 image_io, content_type = await self.publication_service.download_publication_image(publication_id)
 
@@ -435,9 +382,7 @@ class PublicationController(interface.IPublicationController):
                     finally:
                         image_io.close()
 
-                self.logger.info("Publication image downloaded successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Изображение публикации скачано")
 
                 span.set_status(Status(StatusCode.OK))
                 return StreamingResponse(
@@ -449,8 +394,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def download_other_image(
@@ -463,9 +408,7 @@ class PublicationController(interface.IPublicationController):
                 kind=SpanKind.INTERNAL
         ) as span:
             try:
-                self.logger.info("Download other image request", {
-                    "image_fid": image_fid
-                })
+                self.logger.info("Начало скачивания изображения")
 
                 image_io, content_type = await self.publication_service.download_other_image(image_fid, image_name)
 
@@ -479,9 +422,7 @@ class PublicationController(interface.IPublicationController):
                     finally:
                         image_io.close()
 
-                self.logger.info("Other image downloaded successfully", {
-                    "image_fid": image_fid
-                })
+                self.logger.info("Изображение скачано")
 
                 span.set_status(Status(StatusCode.OK))
                 return StreamingResponse(
@@ -493,8 +434,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_publication(
@@ -507,30 +448,25 @@ class PublicationController(interface.IPublicationController):
                 attributes={"publication_id": publication_id}
         ) as span:
             try:
-                self.logger.info("Delete publication request", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Начало удаления публикации")
 
                 await self.publication_service.delete_publication(
                     publication_id=publication_id
                 )
 
-                self.logger.info("Publication deleted successfully", {
-                    "publication_id": publication_id
-                })
+                self.logger.info("Публикация удалена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Publication deleted successfully",
                         "publication_id": publication_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # РУБРИКИ
@@ -544,9 +480,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create category request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания рубрики")
 
                 category_id = await self.publication_service.create_category(
                     organization_id=body.organization_id,
@@ -571,23 +505,19 @@ class PublicationController(interface.IPublicationController):
                     additional_info=body.additional_info
                 )
 
-                self.logger.info("Category created successfully", {
-                    "category_id": category_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Рубрика создана")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Category created successfully",
                         "category_id": category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_category_by_id(self, category_id: int) -> JSONResponse:
@@ -597,15 +527,11 @@ class PublicationController(interface.IPublicationController):
                 attributes={"category_id": category_id}
         ) as span:
             try:
-                self.logger.info("Get category by ID request", {
-                    "category_id": category_id
-                })
+                self.logger.info("Начало получения рубрики")
 
                 category = await self.publication_service.get_category_by_id(category_id)
 
-                self.logger.info("Category retrieved successfully", {
-                    "category_id": category_id
-                })
+                self.logger.info("Рубрика получена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -614,8 +540,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_categories_by_organization(self, organization_id: int) -> JSONResponse:
@@ -625,16 +551,11 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                self.logger.info("Get categories by organization request", {
-                    "organization_id": organization_id
-                })
+                self.logger.info("Начало получения рубрик организации")
 
                 categories = await self.publication_service.get_categories_by_organization(organization_id)
 
-                self.logger.info("Categories retrieved successfully", {
-                    "organization_id": organization_id,
-                    "count": len(categories)
-                })
+                self.logger.info("Рубрики организации получены")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -643,8 +564,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_category(
@@ -658,9 +579,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"category_id": category_id}
         ) as span:
             try:
-                self.logger.info("Update category request", {
-                    "category_id": category_id
-                })
+                self.logger.info("Начало обновления рубрики")
 
                 await self.publication_service.update_category(
                     category_id=category_id,
@@ -685,22 +604,19 @@ class PublicationController(interface.IPublicationController):
                     additional_info=body.additional_info
                 )
 
-                self.logger.info("Category updated successfully", {
-                    "category_id": category_id
-                })
+                self.logger.info("Рубрика обновлена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Category updated successfully",
                         "category_id": category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_category(self, category_id: int) -> JSONResponse:
@@ -710,28 +626,23 @@ class PublicationController(interface.IPublicationController):
                 attributes={"category_id": category_id}
         ) as span:
             try:
-                self.logger.info("Delete category request", {
-                    "category_id": category_id
-                })
+                self.logger.info("Начало удаления рубрики")
 
                 await self.publication_service.delete_category(category_id)
 
-                self.logger.info("Category deleted successfully", {
-                    "category_id": category_id
-                })
+                self.logger.info("Рубрика удалена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Category deleted successfully",
                         "category_id": category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
@@ -745,9 +656,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create autoposting category request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания рубрики автопостинга")
 
                 autoposting_category_id = await self.publication_service.create_autoposting_category(
                     organization_id=body.organization_id,
@@ -772,23 +681,19 @@ class PublicationController(interface.IPublicationController):
                     additional_info=body.additional_info
                 )
 
-                self.logger.info("Autoposting category created successfully", {
-                    "autoposting_category_id": autoposting_category_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Рубрика автопостинга создана")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Autoposting category created successfully",
                         "autoposting_category_id": autoposting_category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_autoposting_category_by_id(self, autoposting_category_id: int) -> JSONResponse:
@@ -798,15 +703,11 @@ class PublicationController(interface.IPublicationController):
                 attributes={"autoposting_category_id": autoposting_category_id}
         ) as span:
             try:
-                self.logger.info("Get autoposting category by ID request", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Начало получения рубрики автопостинга")
 
                 category = await self.publication_service.get_autoposting_category_by_id(autoposting_category_id)
 
-                self.logger.info("Autoposting category retrieved successfully", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Рубрика автопостинга получена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
@@ -815,8 +716,8 @@ class PublicationController(interface.IPublicationController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_autoposting_category(
@@ -830,9 +731,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"autoposting_category_id": autoposting_category_id}
         ) as span:
             try:
-                self.logger.info("Update autoposting category request", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Начало обновления рубрики автопостинга")
 
                 await self.publication_service.update_autoposting_category(
                     autoposting_category_id=autoposting_category_id,
@@ -857,22 +756,19 @@ class PublicationController(interface.IPublicationController):
                     additional_info=body.additional_info
                 )
 
-                self.logger.info("Autoposting category updated successfully", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Рубрика автопостинга обновлена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Autoposting category updated successfully",
                         "autoposting_category_id": autoposting_category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_autoposting_category(self, autoposting_category_id: int) -> JSONResponse:
@@ -882,28 +778,23 @@ class PublicationController(interface.IPublicationController):
                 attributes={"autoposting_category_id": autoposting_category_id}
         ) as span:
             try:
-                self.logger.info("Delete autoposting category request", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Начало удаления рубрики автопостинга")
 
                 await self.publication_service.delete_autoposting_category(autoposting_category_id)
 
-                self.logger.info("Autoposting category deleted successfully", {
-                    "autoposting_category_id": autoposting_category_id
-                })
+                self.logger.info("Рубрика автопостинга удалена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Autoposting category deleted successfully",
                         "autoposting_category_id": autoposting_category_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # АВТОПОСТИНГ
@@ -917,9 +808,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create autoposting request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания автопостинга")
 
                 autoposting_id = await self.publication_service.create_autoposting(
                     organization_id=body.organization_id,
@@ -931,23 +820,19 @@ class PublicationController(interface.IPublicationController):
                     need_image=body.need_image
                 )
 
-                self.logger.info("Autoposting created successfully", {
-                    "autoposting_id": autoposting_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Автопостинг создан")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Autoposting created successfully",
                         "autoposting_id": autoposting_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_autoposting_by_organization(self, organization_id: int) -> JSONResponse:
@@ -957,29 +842,23 @@ class PublicationController(interface.IPublicationController):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                self.logger.info("Get autoposting by organization request", {
-                    "organization_id": organization_id
-                })
+                self.logger.info("Начало получения автопостингов организации")
 
                 autopostings = await self.publication_service.get_autoposting_by_organization(organization_id)
 
-                self.logger.info("Autopostings retrieved successfully", {
-                    "organization_id": organization_id,
-                    "count": len(autopostings)
-                })
+                self.logger.info("Автопостинги организации получены")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Autopostings retrieved successfully",
                         "autopostings": [autoposting.to_dict() for autoposting in autopostings]
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_autoposting(
@@ -993,9 +872,7 @@ class PublicationController(interface.IPublicationController):
                 attributes={"autoposting_id": autoposting_id}
         ) as span:
             try:
-                self.logger.info("Update autoposting request", {
-                    "autoposting_id": autoposting_id
-                })
+                self.logger.info("Начало обновления автопостинга")
 
                 await self.publication_service.update_autoposting(
                     autoposting_id=autoposting_id,
@@ -1008,22 +885,19 @@ class PublicationController(interface.IPublicationController):
                     need_image=body.need_image
                 )
 
-                self.logger.info("Autoposting updated successfully", {
-                    "autoposting_id": autoposting_id
-                })
+                self.logger.info("Автопостинг обновлен")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Autoposting updated successfully",
                         "autoposting_id": autoposting_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_autoposting(self, autoposting_id: int) -> JSONResponse:
@@ -1033,28 +907,23 @@ class PublicationController(interface.IPublicationController):
                 attributes={"autoposting_id": autoposting_id}
         ) as span:
             try:
-                self.logger.info("Delete autoposting request", {
-                    "autoposting_id": autoposting_id
-                })
+                self.logger.info("Начало удаления автопостинга")
 
                 await self.publication_service.delete_autoposting(autoposting_id)
 
-                self.logger.info("Autoposting deleted successfully", {
-                    "autoposting_id": autoposting_id
-                })
+                self.logger.info("Автопостинг удален")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Autoposting deleted successfully",
                         "autoposting_id": autoposting_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def transcribe_audio(
@@ -1074,6 +943,6 @@ class PublicationController(interface.IPublicationController):
                     status_code=200
                 )
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

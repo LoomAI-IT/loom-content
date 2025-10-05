@@ -27,31 +27,25 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create YouTube request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания YouTube")
 
                 youtube_id = await self.social_network_service.create_youtube(
                     organization_id=body.organization_id
                 )
 
-                self.logger.info("YouTube created successfully", {
-                    "youtube_id": youtube_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("YouTube создан")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "YouTube created successfully",
                         "youtube_id": youtube_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_instagram(
@@ -64,31 +58,25 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create Instagram request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания Instagram")
 
                 instagram_id = await self.social_network_service.create_instagram(
                     organization_id=body.organization_id
                 )
 
-                self.logger.info("Instagram created successfully", {
-                    "instagram_id": instagram_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Instagram создан")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Instagram created successfully",
                         "instagram_id": instagram_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def check_telegram_channel_permission(
@@ -101,30 +89,25 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"channel": tg_channel_username}
         ) as span:
             try:
-                self.logger.info("Check Telegram channel permission request", {
-                    "channel": tg_channel_username
-                })
+                self.logger.info("Начало проверки прав на канал Telegram")
 
                 has_permission = await self.social_network_service.check_telegram_channel_permission(
                     tg_channel_username=tg_channel_username
                 )
 
-                self.logger.info("Telegram channel permission check completed", {
-                    "channel": tg_channel_username,
-                })
+                self.logger.info("Проверка прав на канал Telegram завершена")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Telegram channel permission check completed",
                         "has_permission": has_permission,
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_telegram(
@@ -137,9 +120,7 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create Telegram request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания Telegram")
 
                 telegram_id = await self.social_network_service.create_telegram(
                     organization_id=body.organization_id,
@@ -147,23 +128,19 @@ class SocialNetworkController(interface.ISocialNetworkController):
                     autoselect=body.autoselect,
                 )
 
-                self.logger.info("Telegram created successfully", {
-                    "telegram_id": telegram_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Telegram создан")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Telegram created successfully",
                         "telegram_id": telegram_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_telegram(
@@ -178,9 +155,7 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 }
         ) as span:
             try:
-                self.logger.info("Update Telegram request", {
-                    "organization_id": body.organization_id,
-                })
+                self.logger.info("Начало обновления Telegram")
 
                 await self.social_network_service.update_telegram(
                     organization_id=body.organization_id,
@@ -188,21 +163,17 @@ class SocialNetworkController(interface.ISocialNetworkController):
                     autoselect=body.autoselect
                 )
 
-                self.logger.info("Telegram updated successfully", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Telegram обновлен")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Telegram updated successfully",
-                    }
+                    content={}
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_telegram(
@@ -217,30 +188,23 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 }
         ) as span:
             try:
-                self.logger.info("Delete Telegram request", {
-                    "organization_id": organization_id,
-                })
+                self.logger.info("Начало удаления Telegram")
 
                 await self.social_network_service.delete_telegram(
                     organization_id=organization_id,
                 )
 
-                self.logger.info("Telegram deleted successfully", {
-
-                    "organization_id": organization_id
-                })
+                self.logger.info("Telegram удален")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
-                    content={
-                        "message": "Telegram deleted successfully",
-                    }
+                    content={}
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vkontakte(
@@ -253,31 +217,25 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"organization_id": body.organization_id}
         ) as span:
             try:
-                self.logger.info("Create Vkontakte request", {
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("Начало создания VKontakte")
 
                 vkontakte_id = await self.social_network_service.create_vkontakte(
                     organization_id=body.organization_id
                 )
 
-                self.logger.info("Vkontakte created successfully", {
-                    "vkontakte_id": vkontakte_id,
-                    "organization_id": body.organization_id
-                })
+                self.logger.info("VKontakte создан")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=201,
                     content={
-                        "message": "Vkontakte created successfully",
                         "vkontakte_id": vkontakte_id
                     }
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
@@ -288,25 +246,16 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 attributes={"organization_id": organization_id}
         ) as span:
             try:
-                self.logger.info("Get social networks by organization request", {
-                    "organization_id": organization_id
-                })
+                self.logger.info("Начало получения соцсетей организации")
 
                 social_networks = await self.social_network_service.get_social_networks_by_organization(organization_id)
 
-                self.logger.info("Social networks retrieved successfully", {
-                    "organization_id": organization_id,
-                    "youtube_count": len(social_networks["youtube"]),
-                    "instagram_count": len(social_networks["instagram"]),
-                    "telegram_count": len(social_networks["telegram"]),
-                    "vkontakte_count": len(social_networks["vkontakte"])
-                })
+                self.logger.info("Соцсети организации получены")
 
                 span.set_status(Status(StatusCode.OK))
                 return JSONResponse(
                     status_code=200,
                     content={
-                        "message": "Social networks retrieved successfully",
                         "data": {
                             "youtube": [youtube.to_dict() for youtube in social_networks["youtube"]],
                             "instagram": [instagram.to_dict() for instagram in social_networks["instagram"]],
@@ -317,6 +266,6 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 )
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

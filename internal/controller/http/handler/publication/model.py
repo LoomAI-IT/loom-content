@@ -35,36 +35,28 @@ class CreateCategoryBody(BaseModel):
 
     goal: str
 
-    # Структура контента
     structure_skeleton: list[str]
     structure_flex_level_min: int
     structure_flex_level_max: int
     structure_flex_level_comment: str
 
-    # Требования к контенту
     must_have: list[str]
     must_avoid: list[str]
 
-    # Правила для соцсетей
     social_networks_rules: str
 
-    # Ограничения по длине
     len_min: int
     len_max: int
 
-    # Ограничения по хештегам
     n_hashtags_min: int
     n_hashtags_max: int
 
-    # Стиль и тон
     cta_type: str
     tone_of_voice: list[str] = []
 
-    # Бренд и примеры
     brand_rules: list[str] = []
     good_samples: list[dict] = []
 
-    # Дополнительная информация
     additional_info: list[str] = []
 
 
@@ -74,36 +66,28 @@ class UpdateCategoryBody(BaseModel):
 
     goal: str = None
 
-    # Структура контента
     structure_skeleton: list[str] = None
     structure_flex_level_min: int = None
     structure_flex_level_max: int = None
     structure_flex_level_comment: str = None
 
-    # Требования к контенту
     must_have: list[str] = None
     must_avoid: list[str] = None
 
-    # Правила для соцсетей
     social_networks_rules: str = None
 
-    # Ограничения по длине
     len_min: int = None
     len_max: int = None
 
-    # Ограничения по хештегам
     n_hashtags_min: int = None
     n_hashtags_max: int = None
 
-    # Стиль и тон
     cta_type: str = None
     tone_of_voice: list[str] = None
 
-    # Бренд и примеры
     brand_rules: list[str] = None
     good_samples: list[dict] = None
 
-    # Дополнительная информация
     additional_info: list[str] = None
 
 
@@ -115,36 +99,28 @@ class CreateAutopostingCategoryBody(BaseModel):
 
     goal: str
 
-    # Структура контента
     structure_skeleton: list[str]
     structure_flex_level_min: int
     structure_flex_level_max: int
     structure_flex_level_comment: str
 
-    # Требования к контенту
     must_have: list[str]
     must_avoid: list[str]
 
-    # Правила для соцсетей
     social_networks_rules: str
 
-    # Ограничения по длине
     len_min: int
     len_max: int
 
-    # Ограничения по хештегам
     n_hashtags_min: int
     n_hashtags_max: int
 
-    # Стиль и тон
     cta_type: str
     tone_of_voice: list[str]
 
-    # Бренд и примеры
     brand_rules: list[str]
     good_samples: list[dict]
 
-    # Дополнительная информация
     additional_info: list[str]
 
 
@@ -154,36 +130,28 @@ class UpdateAutopostingCategoryBody(BaseModel):
 
     goal: str = None
 
-    # Структура контента
     structure_skeleton: list[str] = None
     structure_flex_level_min: int = None
     structure_flex_level_max: int = None
     structure_flex_level_comment: str = None
 
-    # Требования к контенту
     must_have: list[str] = None
     must_avoid: list[str] = None
 
-    # Правила для соцсетей
     social_networks_rules: str = None
 
-    # Ограничения по длине
     len_min: int = None
     len_max: int = None
 
-    # Ограничения по хештегам
     n_hashtags_min: int = None
     n_hashtags_max: int = None
 
-    # Стиль и тон
     cta_type: str = None
     tone_of_voice: list[str] = None
 
-    # Бренд и примеры
     brand_rules: list[str] = None
     good_samples: list[dict] = None
 
-    # Дополнительная информация
     additional_info: list[str] = None
 
 
@@ -193,7 +161,7 @@ class CreateAutopostingBody(BaseModel):
     autoposting_category_id: int
     period_in_hours: int
     filter_prompt: str
-    tg_channels: list[str]= None
+    tg_channels: list[str] = None
     required_moderation: bool = False
     need_image: bool
 

@@ -67,21 +67,13 @@ class HttpMiddleware(interface.IHttpMiddleware):
                     response.headers[common.TRACE_ID_HEADER] = trace_id
                     response.headers[common.SPAN_ID_HEADER] = span_id
 
-                    if status_code >= 500:
-                        err = Exception("Internal server error")
-                        root_span.record_exception(err)
-                        root_span.set_status(Status(StatusCode.ERROR, str(err)))
-                        root_span.set_attribute(common.ERROR_KEY, True)
-                        raise err
-                    else:
-                        root_span.set_status(Status(StatusCode.OK))
+                    root_span.set_status(Status(StatusCode.OK))
 
                     return response
 
                 except Exception as err:
                     root_span.record_exception(err)
                     root_span.set_status(Status(StatusCode.ERROR, str(err)))
-                    root_span.set_attribute(common.ERROR_KEY, True)
                     return JSONResponse(
                         status_code=500,
                         content={"message": "Internal Server Error"},
@@ -153,10 +145,7 @@ class HttpMiddleware(interface.IHttpMiddleware):
                 request_attrs[common.HTTP_STATUS_KEY] = status_code
                 request_attrs[common.HTTP_REQUEST_DURATION_KEY] = duration_seconds
 
-                if status_code >= 500:
-                    error_request_counter.add(1, attributes=request_attrs)
-                else:
-                    ok_request_counter.add(1, attributes=request_attrs)
+                ok_request_counter.add(1, attributes=request_attrs)
 
                 request_duration.record(duration_seconds, attributes=request_attrs)
                 response_content_length = response.headers.get("content-length")
@@ -246,33 +235,23 @@ class HttpMiddleware(interface.IHttpMiddleware):
                             two_fa_status=False,
                             role="guest",
                             message="guest",
-                            status_code=200,
+                            status_code=200
                         )
                     else:
-                        access_token = request.cookies.get("Access-Token")
-                        if not access_token:
-                            authorization_data = model.AuthorizationData(
-                                account_id=0,
-                                two_fa_status=False,
-                                role="guest",
-                                message="guest",
-                                status_code=200
-                            )
-                        else:
-                            authorization_data = await self.loom_authorization_client.check_authorization(access_token)
+                        authorization_data = await self.loom_authorization_client.check_authorization(access_token)
 
-                        request.state.authorization_data = authorization_data
+                    request.state.authorization_data = authorization_data
 
-                        if authorization_data.status_code == 403:
-                            self.logger.warning(authorization_data.message)
-                            return JSONResponse(status_code=403, content={"error": authorization_data.message})
+                    if authorization_data.status_code == 403:
+                        self.logger.warning(authorization_data.message)
+                        return JSONResponse(status_code=403, content={"error": authorization_data.message})
 
                     response = await call_next(request)
 
                     span.set_status(Status(StatusCode.OK))
                     return response
                 except Exception as e:
-                    span.record_exception(e)
+
                     span.set_status(Status(StatusCode.ERROR, str(e)))
                     raise e
 

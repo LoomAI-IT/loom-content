@@ -33,8 +33,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return youtube_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_instagram(
@@ -53,8 +53,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return instagram_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def check_telegram_channel_permission(
@@ -74,8 +74,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return has_permission
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_telegram(
@@ -96,8 +96,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return telegram_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_telegram(
@@ -121,8 +121,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_telegram(
@@ -140,8 +140,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vkontakte(
@@ -160,8 +160,8 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return vkontakte_id
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
@@ -192,6 +192,6 @@ class SocialNetworkService(interface.ISocialNetworkService):
                 return social_networks
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

@@ -31,8 +31,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return youtube_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_instagram(
@@ -51,8 +51,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return instagram_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_telegram(
@@ -77,8 +77,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return telegram_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_telegram(
@@ -102,8 +102,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_telegram(
@@ -123,8 +123,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vkontakte(
@@ -143,8 +143,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return vkontakte_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
@@ -162,8 +162,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return youtubes
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_instagrams_by_organization(self, organization_id: int) -> List[model.Instagram]:
@@ -180,8 +180,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return instagrams
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_telegrams_by_organization(self, organization_id: int) -> List[model.Telegram]:
@@ -198,8 +198,8 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return telegrams
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_vkontakte_by_organization(self, organization_id: int) -> List[model.Vkontakte]:
@@ -216,6 +216,6 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
                 span.set_status(Status(StatusCode.OK))
                 return vkontakte
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

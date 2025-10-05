@@ -44,8 +44,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.OK))
                 return video_cut_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def create_vizard_video_cut(
@@ -93,8 +93,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.OK))
                 return video_cut_id
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def change_video_cut(
@@ -133,8 +133,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete_video_cut(self, video_cut_id: int) -> None:
@@ -149,8 +149,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cut_by_id(self, video_cut_id: int) -> list[model.VideoCut]:
@@ -169,8 +169,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.OK))
                 return video_cuts
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cuts_by_project_id(self, project_id: int) -> list[model.VideoCut]:
@@ -187,8 +187,8 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.OK))
                 return video_cuts
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def get_video_cuts_by_organization(self, organization_id: int) -> list[model.VideoCut]:
@@ -207,6 +207,6 @@ class VideoCutRepo(interface.IVideoCutRepo):
                 span.set_status(Status(StatusCode.OK))
                 return video_cuts
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

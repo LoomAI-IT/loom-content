@@ -52,8 +52,8 @@ class PG(interface.IDB):
                     return rows[0][0]
 
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def delete(self, query: str, query_params: dict) -> None:
@@ -67,8 +67,8 @@ class PG(interface.IDB):
                     await session.commit()
                     span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update(self, query: str, query_params: dict) -> None:
@@ -82,8 +82,8 @@ class PG(interface.IDB):
                     await session.commit()
                     span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def select(self, query: str, query_params: dict) -> Sequence[Any]:
@@ -99,8 +99,8 @@ class PG(interface.IDB):
                     span.set_status(Status(StatusCode.OK))
                     return rows
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def multi_query(
