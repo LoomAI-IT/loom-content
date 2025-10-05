@@ -783,7 +783,7 @@ class PublicationService(interface.IPublicationService):
         ) as span:
             try:
                 await self.repo.delete_category(category_id)
-
+                await self.repo.delete_publication_by_category_id(category_id)
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
@@ -931,23 +931,108 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
+    # АВТОПОСТИНГ
+    async def generate_autoposting_publication_text(
+            self,
+            autoposting_category_id: int,
+            source_post_text: str
+    ) -> dict:
         with self.tracer.start_as_current_span(
-                "PublicationService.delete_autoposting_category",
+                "PublicationService.generate_autoposting_publication_text",
                 kind=SpanKind.INTERNAL,
                 attributes={"autoposting_category_id": autoposting_category_id}
         ) as span:
             try:
-                await self.repo.delete_autoposting_category(autoposting_category_id)
+                # Получаем категорию автопостинга
+                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
+                if not categories:
+                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
+
+                autoposting_category = categories[0]
+
+                # Получаем организацию
+                organization = await self.organization_client.get_organization_by_id(
+                    autoposting_category.organization_id)
+
+                # Генерируем промпт для автопостинга
+                text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
+                    autoposting_category,
+                    organization,
+                    source_post_text
+                )
+
+                # Генерируем текст публикации
+                publication_data, generate_cost = await self.openai_client.generate_json(
+                    history=[{"role": "user", "content": "Создай пост для социальной сети на основе исходного поста"}],
+                    system_prompt=text_system_prompt,
+                    temperature=1,
+                    llm_model="gpt-5"
+                )
+                await self._debit_organization_balance(autoposting_category.organization_id,
+                                                       generate_cost["total_cost"])
 
                 span.set_status(Status(StatusCode.OK))
+                return publication_data
 
             except Exception as err:
-                
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
-    # АВТОПОСТИНГ
+    async def generate_autoposting_publication_image(
+            self,
+            autoposting_category_id: int,
+            publication_text: str
+    ) -> list[str]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.generate_autoposting_publication_image",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                # Получаем категорию автопостинга
+                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
+                if not categories:
+                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
+
+                autoposting_category = categories[0]
+
+                # Генерируем промпт для изображения
+                image_system_prompt = await self.prompt_generator.get_generate_autoposting_image_system_prompt(
+                    autoposting_category.prompt_for_image_style,
+                    publication_text
+                )
+
+                # Генерируем изображение
+                images, generate_cost = await self.openai_client.generate_image(
+                    prompt=image_system_prompt,
+                    image_model="gpt-image-1",
+                    size="1024x1024",
+                    quality="low",
+                    n=1,
+                )
+
+                images_url = []
+                for image in images:
+                    image_bytes = base64.b64decode(image)
+                    image_name = "autoposting_image.png"
+
+                    upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
+
+                    image_url = f"https://{self.loom_domain}/api/content/image/{upload_response.fid}/{image_name}"
+                    images_url.append(image_url)
+
+                await self._debit_organization_balance(autoposting_category.organization_id,
+                                                       generate_cost["total_cost"])
+
+                span.set_status(Status(StatusCode.OK))
+                return images_url
+
+            except Exception as err:
+
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
+
     async def create_autoposting(
             self,
             organization_id: int,
@@ -976,39 +1061,6 @@ class PublicationService(interface.IPublicationService):
 
                 span.set_status(Status(StatusCode.OK))
                 return autoposting_id
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
-    async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
-        with self.tracer.start_as_current_span(
-                "PublicationService.get_autoposting_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                autopostings = await self.repo.get_autoposting_by_organization(organization_id)
-
-                span.set_status(Status(StatusCode.OK))
-                return autopostings
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
-    async def get_all_autopostings(self) -> list[model.Autoposting]:
-        with self.tracer.start_as_current_span(
-                "PublicationService.get_all_autopostings",
-                kind=SpanKind.INTERNAL,
-        ) as span:
-            try:
-                autopostings = await self.repo.get_all_autopostings()
-
-                span.set_status(Status(StatusCode.OK))
-                return autopostings
 
             except Exception as err:
                 
@@ -1048,6 +1100,39 @@ class PublicationService(interface.IPublicationService):
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
+
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
+
+    async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.get_autoposting_by_organization",
+                kind=SpanKind.INTERNAL,
+                attributes={"organization_id": organization_id}
+        ) as span:
+            try:
+                autopostings = await self.repo.get_autoposting_by_organization(organization_id)
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+
+            except Exception as err:
+                
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
+
+    async def get_all_autopostings(self) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationService.get_all_autopostings",
+                kind=SpanKind.INTERNAL,
+        ) as span:
+            try:
+                autopostings = await self.repo.get_all_autopostings()
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+
+            except Exception as err:
                 
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
@@ -1059,6 +1144,9 @@ class PublicationService(interface.IPublicationService):
                 attributes={"autoposting_id": autoposting_id}
         ) as span:
             try:
+                autoposting = (await self.repo.get_autoposting_by_id(autoposting_id))[0]
+                await self.repo.delete_publication_by_category_id(autoposting.autoposting_category_id)
+                await self.repo.delete_autoposting_category(autoposting.autoposting_category_id)
                 await self.repo.delete_autoposting(autoposting_id)
 
                 span.set_status(Status(StatusCode.OK))
@@ -1146,104 +1234,6 @@ class PublicationService(interface.IPublicationService):
                 await self._debit_organization_balance(organization_id, generate_cost["total_cost"])
 
                 return transcribed_text
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
-    async def generate_autoposting_publication_text(
-            self,
-            autoposting_category_id: int,
-            source_post_text: str
-    ) -> dict:
-        with self.tracer.start_as_current_span(
-                "PublicationService.generate_autoposting_publication_text",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                # Получаем категорию автопостинга
-                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
-                if not categories:
-                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
-
-                autoposting_category = categories[0]
-
-                # Получаем организацию
-                organization = await self.organization_client.get_organization_by_id(autoposting_category.organization_id)
-
-                # Генерируем промпт для автопостинга
-                text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
-                    autoposting_category,
-                    organization,
-                    source_post_text
-                )
-
-                # Генерируем текст публикации
-                publication_data, generate_cost = await self.openai_client.generate_json(
-                    history=[{"role": "user", "content": "Создай пост для социальной сети на основе исходного поста"}],
-                    system_prompt=text_system_prompt,
-                    temperature=1,
-                    llm_model="gpt-5"
-                )
-                await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
-
-                span.set_status(Status(StatusCode.OK))
-                return publication_data
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
-    async def generate_autoposting_publication_image(
-            self,
-            autoposting_category_id: int,
-            publication_text: str
-    ) -> list[str]:
-        with self.tracer.start_as_current_span(
-                "PublicationService.generate_autoposting_publication_image",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                # Получаем категорию автопостинга
-                categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
-                if not categories:
-                    raise ValueError(f"Autoposting category {autoposting_category_id} not found")
-
-                autoposting_category = categories[0]
-
-                # Генерируем промпт для изображения
-                image_system_prompt = await self.prompt_generator.get_generate_autoposting_image_system_prompt(
-                    autoposting_category.prompt_for_image_style,
-                    publication_text
-                )
-
-                # Генерируем изображение
-                images, generate_cost = await self.openai_client.generate_image(
-                    prompt=image_system_prompt,
-                    image_model="gpt-image-1",
-                    size="1024x1024",
-                    quality="low",
-                    n=1,
-                )
-
-                images_url = []
-                for image in images:
-                    image_bytes = base64.b64decode(image)
-                    image_name = "autoposting_image.png"
-
-                    upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
-
-                    image_url = f"https://{self.loom_domain}/api/content/image/{upload_response.fid}/{image_name}"
-                    images_url.append(image_url)
-
-                await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
-
-                span.set_status(Status(StatusCode.OK))
-                return images_url
 
             except Exception as err:
                 

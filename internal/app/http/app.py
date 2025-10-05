@@ -215,14 +215,6 @@ def include_publication_handlers(
         tags=["AutopostingCategory"]
     )
 
-    # Удаление рубрики для автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting-category/{autoposting_category_id}",
-        publication_controller.delete_autoposting_category,
-        methods=["DELETE"],
-        tags=["AutopostingCategory"]
-    )
-
     # АВТОПОСТИНГ
 
     # Создание автопостинга

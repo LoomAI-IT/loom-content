@@ -39,10 +39,9 @@ DELETE FROM publications
 WHERE id = :publication_id;
 """
 
-add_openai_rub_cost_to_publication = """
-UPDATE publications
-SET openai_rub_cost = openai_rub_cost + :amount_rub
-WHERE id = :publication_id;
+delete_publication_by_category_id = """
+DELETE FROM publications
+WHERE category_id = :category_id;
 """
 
 get_publication_by_id = """
@@ -220,13 +219,13 @@ SET
 WHERE id = :autoposting_category_id;
 """
 
-get_autoposting_category_by_id = """
-SELECT * FROM autoposting_categories
+delete_autoposting_category = """
+DELETE FROM autoposting_categories
 WHERE id = :autoposting_category_id;
 """
 
-delete_autoposting_category = """
-DELETE FROM autoposting_categories
+get_autoposting_category_by_id = """
+SELECT * FROM autoposting_categories
 WHERE id = :autoposting_category_id;
 """
 
@@ -272,6 +271,12 @@ WHERE id = :autoposting_id;
 get_autoposting_by_organization = """
 SELECT * FROM autopostings
 WHERE organization_id = :organization_id
+ORDER BY created_at DESC;
+"""
+
+get_autoposting_by_id = """
+SELECT * FROM autopostings
+WHERE id = :autoposting_id
 ORDER BY created_at DESC;
 """
 

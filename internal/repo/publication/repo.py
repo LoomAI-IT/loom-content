@@ -111,30 +111,19 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
-    async def add_openai_rub_cost_to_publication(
-            self,
-            publication_id: int,
-            amount_rub: int
-    ) -> None:
+    async def delete_publication_by_category_id(self, category_id: int) -> None:
         with self.tracer.start_as_current_span(
-                "PublicationRepo.add_openai_rub_cost_to_publication",
+                "PublicationRepo.delete_publication_by_category_id",
                 kind=SpanKind.INTERNAL,
-                attributes={
-                    "publication_id": publication_id,
-                    "amount_rub": amount_rub
-                }
+                attributes={"category_id": category_id}
         ) as span:
             try:
-                args = {
-                    'publication_id': publication_id,
-                    'amount_rub': amount_rub,
-                }
-
-                await self.db.update(add_openai_rub_cost_to_publication, args)
+                args = {'category_id': category_id}
+                await self.db.delete(delete_publication_by_category_id, args)
 
                 span.set_status(Status(StatusCode.OK))
             except Exception as err:
-                
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
@@ -484,6 +473,22 @@ class PublicationRepo(interface.IPublicationRepo):
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
+    async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.delete_autoposting_category",
+                kind=SpanKind.INTERNAL,
+                attributes={"autoposting_category_id": autoposting_category_id}
+        ) as span:
+            try:
+                args = {'autoposting_category_id': autoposting_category_id}
+                await self.db.delete(delete_autoposting_category, args)
+
+                span.set_status(Status(StatusCode.OK))
+            except Exception as err:
+
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
+
     async def get_autoposting_category_by_id(self, autoposting_category_id: int) -> list[model.AutopostingCategory]:
         with self.tracer.start_as_current_span(
                 "PublicationRepo.get_autoposting_category_by_id",
@@ -496,22 +501,6 @@ class PublicationRepo(interface.IPublicationRepo):
 
                 span.set_status(Status(StatusCode.OK))
                 return model.AutopostingCategory.serialize(rows)
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_autoposting_category",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                args = {'autoposting_category_id': autoposting_category_id}
-                await self.db.delete(delete_autoposting_category, args)
-
-                span.set_status(Status(StatusCode.OK))
             except Exception as err:
                 
                 span.set_status(StatusCode.ERROR, str(err))
@@ -612,6 +601,26 @@ class PublicationRepo(interface.IPublicationRepo):
                 return autopostings
             except Exception as err:
                 
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
+
+    async def get_autoposting_by_id(self, autoposting_id: int) -> list[model.Autoposting]:
+        with self.tracer.start_as_current_span(
+                "PublicationRepo.get_autoposting_by_id",
+                kind=SpanKind.INTERNAL,
+                attributes={
+                    "autoposting_id": autoposting_id
+                }
+        ) as span:
+            try:
+                args = {'autoposting_id': autoposting_id}
+                rows = await self.db.select(get_autoposting_by_id, args)
+                autopostings = model.Autoposting.serialize(rows) if rows else []
+
+                span.set_status(Status(StatusCode.OK))
+                return autopostings
+            except Exception as err:
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 

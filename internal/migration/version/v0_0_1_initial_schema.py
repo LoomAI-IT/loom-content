@@ -20,6 +20,8 @@ class InitialSchemaMigration(Migration):
             create_instagrams_table,
             create_telegrams_table,
             create_vkontakte_table,
+            create_viewed_telegram_posts_table,
+            create_autoposting_categories_table
         ]
 
         await db.multi_query(queries)
@@ -34,6 +36,8 @@ class InitialSchemaMigration(Migration):
             drop_instagrams_table,
             drop_telegrams_table,
             drop_vkontakte_table,
+            drop_viewed_telegram_posts_table,
+            drop_autoposting_categories_table
         ]
 
         await db.multi_query(queries)
@@ -45,7 +49,32 @@ CREATE TABLE IF NOT EXISTS categories (
     
     name TEXT NOT NULL,
     prompt_for_image_style TEXT NOT NULL,
-    prompt_for_text_style TEXT NOT NULL,
+
+    goal TEXT NOT NULL,
+    
+    structure_skeleton TEXT[] NOT NULL,
+    structure_flex_level_min INTEGER NOT NULL,
+    structure_flex_level_max INTEGER NOT NULL,
+    structure_flex_level_comment TEXT NOT NULL,
+    
+    must_have TEXT[] NOT NULL,
+    must_avoid TEXT[] NOT NULL,
+    
+    social_networks_rules TEXT NOT NULL,
+    
+    len_min INTEGER NOT NULL,
+    len_max INTEGER NOT NULL,
+    
+    n_hashtags_min INTEGER NOT NULL,
+    n_hashtags_max INTEGER NOT NULL,
+    
+    cta_type TEXT NOT NULL,
+    tone_of_voice TEXT[] DEFAULT '{}',
+    
+    brand_rules TEXT[] DEFAULT '{}',
+    good_samples JSONB[] NOT NULL,
+
+    additional_info TEXT[] NOT NULL,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -110,12 +139,66 @@ create_autopostings_table = """
 CREATE TABLE IF NOT EXISTS autopostings (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
-    
-    enabled bool DEFAULT FALSE,
-    filter_prompt TEXT NOT NULL,
-    rewrite_prompt TEXT NOT NULL,
-    tg_channels TEXT[] DEFAULT '{}',
+    autoposting_category_id INTEGER NOT NULL,
 
+    period_in_hours INTEGER NOT NULL,
+    enabled BOOLEAN DEFAULT FALSE,
+    filter_prompt TEXT NOT NULL,
+    tg_channels TEXT[] DEFAULT '{}',
+    required_moderation BOOLEAN DEFAULT FALSE,
+    need_image BOOLEAN DEFAULT FALSE,
+
+    last_active TIMESTAMP DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+create_viewed_telegram_posts_table = """
+CREATE TABLE IF NOT EXISTS viewed_telegram_posts (
+    id SERIAL PRIMARY KEY,
+    autoposting_id INTEGER NOT NULL,
+    
+    tg_channel_username TEXT NOT NULL,
+    link TEXT NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+create_autoposting_categories_table = """
+CREATE TABLE IF NOT EXISTS autoposting_categories (
+    id SERIAL PRIMARY KEY,
+    organization_id INTEGER NOT NULL,
+    
+    name TEXT NOT NULL,
+    prompt_for_image_style TEXT NOT NULL,
+
+    goal TEXT NOT NULL,
+    
+    structure_skeleton TEXT[] NOT NULL,
+    structure_flex_level_min INTEGER NOT NULL,
+    structure_flex_level_max INTEGER NOT NULL,
+    structure_flex_level_comment TEXT NOT NULL,
+    
+    must_have TEXT[] NOT NULL,
+    must_avoid TEXT[] NOT NULL,
+    
+    social_networks_rules TEXT NOT NULL,
+    
+    len_min INTEGER NOT NULL,
+    len_max INTEGER NOT NULL,
+    
+    n_hashtags_min INTEGER NOT NULL,
+    n_hashtags_max INTEGER NOT NULL,
+    
+    cta_type TEXT NOT NULL,
+    tone_of_voice TEXT[] DEFAULT '{}',
+    
+    brand_rules TEXT[] DEFAULT '{}',
+    good_samples JSONB[] NOT NULL,
+    
+    additional_info TEXT[] NOT NULL,
+    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """
@@ -191,4 +274,12 @@ DROP TABLE IF EXISTS telegrams CASCADE;
 
 drop_vkontakte_table = """
 DROP TABLE IF EXISTS vkontakte CASCADE;
+"""
+
+drop_viewed_telegram_posts_table = """
+DROP TABLE IF EXISTS viewed_telegram_posts CASCADE;
+"""
+
+drop_autoposting_categories_table = """
+DROP TABLE IF EXISTS autoposting_categories CASCADE;
 """

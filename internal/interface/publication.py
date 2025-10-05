@@ -159,10 +159,6 @@ class IPublicationController(Protocol):
     ) -> JSONResponse:
         pass
 
-    @abstractmethod
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> JSONResponse:
-        pass
-
     # АВТОПОСТИНГ
     @abstractmethod
     async def create_autoposting(
@@ -420,10 +416,6 @@ class IPublicationService(Protocol):
     ) -> None:
         pass
 
-    @abstractmethod
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
-        pass
-
     # АВТОПОСТИНГ
     @abstractmethod
     async def create_autoposting(
@@ -539,11 +531,7 @@ class IPublicationRepo(Protocol):
     async def delete_publication(self, publication_id: int) -> None: pass
 
     @abstractmethod
-    async def add_openai_rub_cost_to_publication(
-            self,
-            publication_id: int,
-            amount_rub: int
-    ) -> None: pass
+    async def delete_publication_by_category_id(self, category_id: int) -> None: pass
 
     @abstractmethod
     async def get_publication_by_id(self, publication_id: int) -> list[model.Publication]:
@@ -676,8 +664,7 @@ class IPublicationRepo(Protocol):
         pass
 
     @abstractmethod
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
-        pass
+    async def delete_autoposting_category(self, autoposting_category_id: int) -> None: pass
 
     @abstractmethod
     async def create_autoposting(
@@ -714,6 +701,9 @@ class IPublicationRepo(Protocol):
     @abstractmethod
     async def get_all_autopostings(self) -> list[model.Autoposting]:
         pass
+
+    @abstractmethod
+    async def get_autoposting_by_id(self, autoposting_id: int) -> list[model.Autoposting]: pass
 
     @abstractmethod
     async def delete_autoposting(self, autoposting_id: int) -> None:

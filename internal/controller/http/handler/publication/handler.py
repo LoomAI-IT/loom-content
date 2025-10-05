@@ -771,32 +771,6 @@ class PublicationController(interface.IPublicationController):
                 span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
-    async def delete_autoposting_category(self, autoposting_category_id: int) -> JSONResponse:
-        with self.tracer.start_as_current_span(
-                "PublicationController.delete_autoposting_category",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                self.logger.info("Начало удаления рубрики автопостинга")
-
-                await self.publication_service.delete_autoposting_category(autoposting_category_id)
-
-                self.logger.info("Рубрика автопостинга удалена")
-
-                span.set_status(Status(StatusCode.OK))
-                return JSONResponse(
-                    status_code=200,
-                    content={
-                        "autoposting_category_id": autoposting_category_id
-                    }
-                )
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
     # АВТОПОСТИНГ
     async def create_autoposting(
             self,
