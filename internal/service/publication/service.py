@@ -52,6 +52,7 @@ class PublicationService(interface.IPublicationService):
                 # Получаем категорию для промптов
                 categories = await self.repo.get_category_by_id(category_id)
                 if not categories:
+                    self.logger.info("Категория не найдена")
                     raise ValueError(f"Category {category_id} not found")
 
                 category = categories[0]
@@ -97,6 +98,7 @@ class PublicationService(interface.IPublicationService):
                 # Получаем категорию для стиля
                 categories = await self.repo.get_category_by_id(category_id)
                 if not categories:
+                    self.logger.info("Категория не найдена")
                     raise ValueError(f"Category {category_id} not found")
 
                 category = categories[0]
@@ -106,6 +108,7 @@ class PublicationService(interface.IPublicationService):
 
                 # Генерируем промпт для текста
                 if prompt:
+                    self.logger.info("Регенерация текста публикации с промптом")
                     text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
                         category,
                         organization,
@@ -123,6 +126,7 @@ class PublicationService(interface.IPublicationService):
                         llm_model="gpt-5"
                     )
                 else:
+                    self.logger.info("Регенерация текста публикации без промпта")
                     text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
                         category,
                         organization,
@@ -169,6 +173,7 @@ class PublicationService(interface.IPublicationService):
                 # Получаем категорию для стиля
                 categories = await self.repo.get_category_by_id(category_id)
                 if not categories:
+                    self.logger.info("Категория не найдена")
                     raise ValueError(f"Category {category_id} not found")
 
                 category = categories[0]
@@ -176,6 +181,7 @@ class PublicationService(interface.IPublicationService):
                 # Генерируем промпт для изображения
                 if prompt:
                     if image_file:
+                        self.logger.info("Редактирование изображения с промптом и файлом")
                         image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
                             category.prompt_for_image_style,
                             publication_text,
@@ -191,6 +197,7 @@ class PublicationService(interface.IPublicationService):
                             n=1
                         )
                     else:
+                        self.logger.info("Генерация изображения с промптом")
                         image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
                             category.prompt_for_image_style,
                             publication_text,
@@ -205,6 +212,7 @@ class PublicationService(interface.IPublicationService):
                         )
 
                 else:
+                    self.logger.info("Генерация изображения без промпта")
                     image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
                         category.prompt_for_image_style,
                         publication_text
@@ -271,6 +279,7 @@ class PublicationService(interface.IPublicationService):
 
                 # Обрабатываем изображение
                 if image_file and image_file.filename:
+                    self.logger.info("Загрузка изображения из файла")
                     # Загружаем файл изображения
                     image_content = await image_file.read()
                     image_io = io.BytesIO(image_content)
@@ -287,6 +296,7 @@ class PublicationService(interface.IPublicationService):
                     )
 
                 elif image_url:
+                    self.logger.info("Загрузка изображения по URL")
                     # Загружаем изображение по URL (старая логика)
                     image_content = await self.openai_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
@@ -330,9 +340,11 @@ class PublicationService(interface.IPublicationService):
 
                 # Если загружается новое изображение, сначала удаляем старое
                 if image_file or image_url:
+                    self.logger.info("Удаление старого изображения перед загрузкой нового")
                     # Получаем текущую публикацию для проверки старого изображения
                     publications = await self.repo.get_publication_by_id(publication_id)
                     if publications and publications[0].image_fid:
+                        self.logger.info("Старое изображение найдено, удаление")
                         old_publication = publications[0]
                         # Удаляем старый файл из Storage
                         try:
@@ -340,13 +352,13 @@ class PublicationService(interface.IPublicationService):
                                 old_publication.image_fid,
                                 old_publication.image_name
                             )
-                            self.logger.info(f"Deleted old image: {old_publication.image_fid}")
                         except Exception as delete_error:
                             self.logger.warning(
                                 f"Failed to delete old image: {str(delete_error)}"
                             )
 
                 if image_file and image_file.filename:
+                    self.logger.info("Загрузка нового изображения из файла")
                     # Загружаем файл изображения
                     image_content = await image_file.read()
                     image_io = io.BytesIO(image_content)
@@ -357,6 +369,7 @@ class PublicationService(interface.IPublicationService):
                     image_fid = upload_response.fid
 
                 elif image_url:
+                    self.logger.info("Загрузка нового изображения по URL")
                     # Загружаем изображение по URL
                     image_content = await self.openai_client.download_image_from_url(image_url)
                     image_io = io.BytesIO(image_content)
@@ -396,18 +409,16 @@ class PublicationService(interface.IPublicationService):
                 # Получаем публикацию для проверки существования и получения информации о файле
                 publications = await self.repo.get_publication_by_id(publication_id)
                 if not publications:
+                    self.logger.info("Публикация не найдена")
                     raise ValueError(f"Publication {publication_id} not found")
 
                 publication = publications[0]
 
                 # Удаляем файл изображения из Storage если есть
                 if publication.image_fid and publication.image_name:
+                    self.logger.info("Удаление изображения публикации")
                     try:
                         await self.storage.delete(publication.image_fid, publication.image_name)
-                        self.logger.info(f"Deleted image file for publication {publication_id}", {
-                            "image_fid": publication.image_fid,
-                            "image_name": publication.image_name
-                        })
                     except Exception as delete_error:
                         self.logger.warning(f"Failed to delete image file: {str(delete_error)}", {
                             "publication_id": publication_id,
@@ -416,8 +427,6 @@ class PublicationService(interface.IPublicationService):
 
                 # Удаляем публикацию из БД
                 await self.repo.delete_publication(publication_id)
-
-                self.logger.info(f"Publication {publication_id} deleted successfully")
                 span.set_status(Status(StatusCode.OK))
 
             except Exception as err:
@@ -438,12 +447,14 @@ class PublicationService(interface.IPublicationService):
                 # Получаем публикацию
                 publications = await self.repo.get_publication_by_id(publication_id)
                 if not publications:
+                    self.logger.info("Публикация не найдена")
                     raise ValueError(f"Publication {publication_id} not found")
 
                 publication = publications[0]
 
                 # Удаляем файл из Storage если есть
                 if publication.image_fid:
+                    self.logger.info("Удаление изображения из хранилища")
                     try:
                         await self.storage.delete(publication.image_fid, publication.image_name)
                     except Exception as delete_error:
@@ -509,9 +520,11 @@ class PublicationService(interface.IPublicationService):
                 )
                 post_links = {}
                 if moderation_status == model.ModerationStatus.APPROVED.value:
+                    self.logger.info("Публикация одобрена, публикуем в соцсети")
                     publication = (await self.repo.get_publication_by_id(publication_id))[0]
 
                     if publication.tg_source:
+                        self.logger.info("Публикация в Telegram")
                         tg_post_link = await self._publish_to_telegram(publication)
                         post_links["telegram"] = tg_post_link
 
@@ -532,6 +545,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 publications = await self.repo.get_publication_by_id(publication_id)
                 if not publications:
+                    self.logger.info("Публикация не найдена")
                     raise ValueError(f"Publication {publication_id} not found")
 
                 span.set_status(Status(StatusCode.OK))
@@ -572,11 +586,13 @@ class PublicationService(interface.IPublicationService):
                 # Получаем публикацию
                 publications = await self.repo.get_publication_by_id(publication_id)
                 if not publications:
+                    self.logger.info("Публикация не найдена")
                     raise ValueError(f"Publication {publication_id} not found")
 
                 publication = publications[0]
 
                 if not publication.image_fid:
+                    self.logger.info("У публикации нет изображения")
                     raise ValueError(f"Publication {publication_id} has no image")
 
                 # Скачиваем из Storage
@@ -689,6 +705,7 @@ class PublicationService(interface.IPublicationService):
             try:
                 categories = await self.repo.get_category_by_id(category_id)
                 if not categories:
+                    self.logger.info("Категория не найдена")
                     raise ValueError(f"Category {category_id} not found")
 
                 span.set_status(Status(StatusCode.OK))
@@ -862,6 +879,7 @@ class PublicationService(interface.IPublicationService):
                 categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
 
                 if not categories:
+                    self.logger.info("Категория автопостинга не найдена")
                     raise ValueError(f"Autoposting category with id {autoposting_category_id} not found")
 
                 span.set_status(Status(StatusCode.OK))
@@ -946,6 +964,7 @@ class PublicationService(interface.IPublicationService):
                 # Получаем категорию автопостинга
                 categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
                 if not categories:
+                    self.logger.info("Категория автопостинга не найдена")
                     raise ValueError(f"Autoposting category {autoposting_category_id} not found")
 
                 autoposting_category = categories[0]
@@ -993,6 +1012,7 @@ class PublicationService(interface.IPublicationService):
                 # Получаем категорию автопостинга
                 categories = await self.repo.get_autoposting_category_by_id(autoposting_category_id)
                 if not categories:
+                    self.logger.info("Категория автопостинга не найдена")
                     raise ValueError(f"Autoposting category {autoposting_category_id} not found")
 
                 autoposting_category = categories[0]
@@ -1252,6 +1272,7 @@ class PublicationService(interface.IPublicationService):
         ))[0]
 
         if publication.image_fid:
+            self.logger.info("Публикация с изображением")
             photo_io, _ = await self.storage.download(publication.image_fid, publication.image_name)
             tg_post_link = await self.telegram_client.send_photo(
                 telegram_account.tg_channel_username,
@@ -1259,6 +1280,7 @@ class PublicationService(interface.IPublicationService):
                 caption=publication.text,
             )
         else:
+            self.logger.info("Публикация без изображения")
             tg_post_link = await self.telegram_client.send_text_message(
                 telegram_account.tg_channel_username,
                 text=publication.text,
