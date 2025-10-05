@@ -1,5 +1,7 @@
 import argparse
 import asyncio
+from contextvars import ContextVar
+
 import uvicorn
 from aiogram import Bot
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -49,6 +51,8 @@ args = parser.parse_args()
 cfg = Config()
 cfg.service_name = cfg.service_name if args.mode == "http" else cfg.service_name + "-autoposting"
 
+log_context: ContextVar[dict] = ContextVar('log_context', default={})
+
 alert_manager = AlertManager(
     cfg.alert_tg_bot_token,
     cfg.service_name,
@@ -69,6 +73,7 @@ tel = Telemetry(
     cfg.service_version,
     cfg.otlp_host,
     cfg.otlp_port,
+    log_context,
     alert_manager
 )
 
@@ -84,25 +89,29 @@ loom_authorization_client = LoomAuthorizationClient(
     tel=tel,
     host=cfg.loom_authorization_host,
     port=cfg.loom_authorization_port,
+    log_context=log_context
 )
 
 loom_employee_client = LoomEmployeeClient(
     tel=tel,
     host=cfg.loom_employee_host,
     port=cfg.loom_employee_port,
+    log_context=log_context
 )
 
 loom_organization_client = LoomOrganizationClient(
     tel=tel,
     host=cfg.loom_organization_host,
     port=cfg.loom_organization_port,
-    interserver_secret_key=cfg.interserver_secret_key
+    interserver_secret_key=cfg.interserver_secret_key,
+    log_context=log_context
 )
 loom_tg_bot_client = LoomTgBotClient(
     tel=tel,
     host=cfg.loom_tg_bot_host,
     port=cfg.loom_tg_bot_port,
-    interserver_secret_key=cfg.interserver_secret_key
+    interserver_secret_key=cfg.interserver_secret_key,
+    log_context=log_context
 )
 
 openai_client = OpenAIClient(
@@ -164,7 +173,7 @@ video_cut_controller = VideoCutController(tel, video_cut_service)
 social_network_controller = SocialNetworkController(tel, social_network_service)
 
 # Инициализация middleware
-http_middleware = HttpMiddleware(tel, cfg.prefix, loom_authorization_client)
+http_middleware = HttpMiddleware(tel, loom_authorization_client, cfg.prefix, log_context)
 
 autoposting = Autoposting(
     tel=tel,

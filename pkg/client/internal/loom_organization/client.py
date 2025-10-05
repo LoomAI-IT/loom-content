@@ -1,3 +1,5 @@
+from contextvars import ContextVar
+
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
 from internal import interface, model
@@ -11,12 +13,14 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
             host: str,
             port: int,
             interserver_secret_key: str,
+            log_context: ContextVar[dict],
     ):
         self.client = AsyncHTTPClient(
             host,
             port,
             prefix="/api/organization",
             use_tracing=True,
+            log_context=log_context
         )
         self.tracer = tel.tracer()
         self.interserver_secret_key = interserver_secret_key
