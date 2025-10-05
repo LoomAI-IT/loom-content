@@ -1,3 +1,5 @@
+from contextvars import ContextVar
+
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
 from internal import model
@@ -10,7 +12,8 @@ class LoomEmployeeClient(interface.ILoomEmployeeClient):
             self,
             tel: interface.ITelemetry,
             host: str,
-            port: int
+            port: int,
+            log_context: ContextVar[dict],
     ):
         logger = tel.logger()
         self.client = AsyncHTTPClient(
@@ -18,6 +21,7 @@ class LoomEmployeeClient(interface.ILoomEmployeeClient):
             port,
             prefix="/api/employee",
             use_tracing=True,
+            log_context=log_context
         )
         self.tracer = tel.tracer()
 
