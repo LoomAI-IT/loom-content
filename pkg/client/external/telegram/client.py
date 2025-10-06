@@ -81,20 +81,23 @@ class LTelegramClient(interface.ITelegramClient):
     ) -> bool:
         try:
             chat = await self.bot.get_chat(chat_id="@" + channel_id)
-            print(f"{chat=}")
+            print(f"{chat=}", flush=True)
+            print(f"Chat type: {chat.type}", flush=True)
+            print(f"Chat title: {chat.title if hasattr(chat, 'title') else 'N/A'}", flush=True)
 
             bot_member = await self.bot.get_chat_member(
                 chat_id="@" + channel_id,
                 user_id=self.bot.id
             )
-            print(f"{bot_member=}")
+            print(f"{bot_member=}", flush=True)
+            print(f"Bot status: {bot_member.status}", flush=True)
+            print(f"Bot permissions: {bot_member}", flush=True)
 
             allowed_statuses = ["administrator", "creator"]
 
             if bot_member.status in allowed_statuses:
                 return True
             elif bot_member.status == "member":
-
                 if chat.type in ["channel", "supergroup"]:
                     return False
                 else:
@@ -103,6 +106,9 @@ class LTelegramClient(interface.ITelegramClient):
                 return False
 
         except Exception as e:
+            print(f"Error checking permissions: {type(e).__name__}: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
             return False
 
     def _create_post_link(self, channel_username: str, message_id: int) -> str:
