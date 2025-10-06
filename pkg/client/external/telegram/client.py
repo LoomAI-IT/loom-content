@@ -81,20 +81,16 @@ class LTelegramClient(interface.ITelegramClient):
     ) -> bool:
         try:
             chat = await self.bot.get_chat(chat_id="@" + channel_id)
-            print(f"{chat=}")
-
             bot_member = await self.bot.get_chat_member(
                 chat_id="@" + channel_id,
                 user_id=self.bot.id
             )
-            print(f"{bot_member=}")
 
             allowed_statuses = ["administrator", "creator"]
 
             if bot_member.status in allowed_statuses:
                 return True
             elif bot_member.status == "member":
-
                 if chat.type in ["channel", "supergroup"]:
                     return False
                 else:
