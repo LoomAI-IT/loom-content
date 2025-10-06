@@ -1,10 +1,10 @@
 from contextvars import ContextVar
 
-from opentelemetry.trace import Status, StatusCode, SpanKind
+from opentelemetry.trace import SpanKind
 
-from internal import model
 from internal import interface
 from pkg.client.client import AsyncHTTPClient
+from pkg.trace_wrapper import traced_method
 
 
 class LoomTgBotClient(interface.ILoomTgBotClient):
@@ -29,50 +29,30 @@ class LoomTgBotClient(interface.ILoomTgBotClient):
 
         self.interserver_secret_key = interserver_secret_key
 
+    @traced_method(SpanKind.CLIENT)
     async def notify_vizard_video_cut_generated(
             self,
             account_id: int,
             youtube_video_reference: str,
             video_count: int,
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "LoomTgBotClient.notify_vizard_video_cut_generated",
-                kind=SpanKind.CLIENT
-        ) as span:
-            try:
-                body = {
-                    "account_id": account_id,
-                    "youtube_video_reference": youtube_video_reference,
-                    "video_count": video_count,
-                    "interserver_secret_key": self.interserver_secret_key,
-                }
-                response = await self.client.post("/video-cut/vizard/notify/generated", json=body)
+        body = {
+            "account_id": account_id,
+            "youtube_video_reference": youtube_video_reference,
+            "video_count": video_count,
+            "interserver_secret_key": self.interserver_secret_key,
+        }
+        response = await self.client.post("/video-cut/vizard/notify/generated", json=body)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as e:
-                
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise
-
+    @traced_method(SpanKind.CLIENT)
     async def set_cache_file(
             self,
             filename: str,
             file_id: str,
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "LoomTgBotClient.set_cache_file",
-                kind=SpanKind.CLIENT
-        ) as span:
-            try:
-                body = {
-                    "filename": filename,
-                    "file_id": file_id,
-                    "interserver_secret_key": self.interserver_secret_key,
-                }
-                response = await self.client.post("/file/cache", json=body)
-
-                span.set_status(Status(StatusCode.OK))
-            except Exception as e:
-                
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise
+        body = {
+            "filename": filename,
+            "file_id": file_id,
+            "interserver_secret_key": self.interserver_secret_key,
+        }
+        response = await self.client.post("/file/cache", json=body)

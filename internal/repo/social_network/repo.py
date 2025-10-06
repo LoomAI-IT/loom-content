@@ -1,6 +1,4 @@
-from typing import List
-from opentelemetry.trace import Status, StatusCode, SpanKind
-
+from pkg.trace_wrapper import traced_method
 from .sql_query import *
 from internal import interface, model
 
@@ -15,207 +13,107 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
         self.db = db
 
     # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+
+    @traced_method()
     async def create_youtube(
             self,
             organization_id: int
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.create_youtube",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                youtube_id = await self.db.insert(create_youtube, args)
+        args = {'organization_id': organization_id}
+        youtube_id = await self.db.insert(create_youtube, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return youtube_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return youtube_id
 
+    @traced_method()
     async def create_instagram(
             self,
             organization_id: int
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.create_instagram",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                instagram_id = await self.db.insert(create_instagram, args)
+        args = {'organization_id': organization_id}
+        instagram_id = await self.db.insert(create_instagram, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return instagram_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return instagram_id
 
+    @traced_method()
     async def create_telegram(
             self,
             organization_id: int,
             tg_channel_username: str,
             autoselect: bool,
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.create_telegram",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'tg_channel_username': tg_channel_username,
-                    'autoselect': autoselect,
-                }
-                telegram_id = await self.db.insert(create_telegram, args)
+        args = {
+            'organization_id': organization_id,
+            'tg_channel_username': tg_channel_username,
+            'autoselect': autoselect,
+        }
+        telegram_id = await self.db.insert(create_telegram, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return telegram_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return telegram_id
 
+    @traced_method()
     async def update_telegram(
             self,
             organization_id: int,
             tg_channel_username: str = None,
             autoselect: bool = None,
     ):
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.update_telegram",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'tg_channel_username': tg_channel_username,
-                    'autoselect': autoselect,
-                }
-                await self.db.update(update_telegram, args)
+        args = {
+            'organization_id': organization_id,
+            'tg_channel_username': tg_channel_username,
+            'autoselect': autoselect,
+        }
+        await self.db.update(update_telegram, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def delete_telegram(
             self,
             organization_id: int,
     ):
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.delete_telegram",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                }
-                await self.db.delete(delete_telegram, args)
+        args = {
+            'organization_id': organization_id,
+        }
+        await self.db.delete(delete_telegram, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def create_vkontakte(
             self,
             organization_id: int
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.create_vkontakte",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                vkontakte_id = await self.db.insert(create_vkontakte, args)
+        args = {'organization_id': organization_id}
+        vkontakte_id = await self.db.insert(create_vkontakte, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return vkontakte_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return vkontakte_id
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
-    async def get_youtubes_by_organization(self, organization_id: int) -> List[model.YouTube]:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.get_youtubes_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_youtubes_by_organization, args)
-                youtubes = model.YouTube.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return youtubes
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+    @traced_method()
+    async def get_youtubes_by_organization(self, organization_id: int) -> list[model.YouTube]:
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_youtubes_by_organization, args)
+        youtubes = model.YouTube.serialize(rows) if rows else []
 
-    async def get_instagrams_by_organization(self, organization_id: int) -> List[model.Instagram]:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.get_instagrams_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_instagrams_by_organization, args)
-                instagrams = model.Instagram.serialize(rows) if rows else []
+        return youtubes
 
-                span.set_status(Status(StatusCode.OK))
-                return instagrams
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+    @traced_method()
+    async def get_instagrams_by_organization(self, organization_id: int) -> list[model.Instagram]:
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_instagrams_by_organization, args)
+        instagrams = model.Instagram.serialize(rows) if rows else []
 
-    async def get_telegrams_by_organization(self, organization_id: int) -> List[model.Telegram]:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.get_telegrams_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_telegrams_by_organization, args)
-                telegrams = model.Telegram.serialize(rows) if rows else []
+        return instagrams
 
-                span.set_status(Status(StatusCode.OK))
-                return telegrams
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+    @traced_method()
+    async def get_telegrams_by_organization(self, organization_id: int) -> list[model.Telegram]:
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_telegrams_by_organization, args)
+        telegrams = model.Telegram.serialize(rows) if rows else []
 
-    async def get_vkontakte_by_organization(self, organization_id: int) -> List[model.Vkontakte]:
-        with self.tracer.start_as_current_span(
-                "SocialNetworkRepo.get_vkontakte_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_vkontakte_by_organization, args)
-                vkontakte = model.Vkontakte.serialize(rows) if rows else []
+        return telegrams
 
-                span.set_status(Status(StatusCode.OK))
-                return vkontakte
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+    @traced_method()
+    async def get_vkontakte_by_organization(self, organization_id: int) -> list[model.Vkontakte]:
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_vkontakte_by_organization, args)
+        vkontakte = model.Vkontakte.serialize(rows) if rows else []
+
+        return vkontakte

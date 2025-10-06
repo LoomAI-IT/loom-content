@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
-from opentelemetry.trace import Status, StatusCode, SpanKind
 
+from pkg.trace_wrapper import traced_method
 from .sql_query import *
 from internal import interface, model
 
@@ -16,6 +16,7 @@ class PublicationRepo(interface.IPublicationRepo):
         self.db = db
 
     # ПУБЛИКАЦИИ
+    @traced_method()
     async def create_publication(
             self,
             organization_id: int,
@@ -25,34 +26,19 @@ class PublicationRepo(interface.IPublicationRepo):
             text: str,
             moderation_status: str,
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.create_publication",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id,
-                    "category_id": category_id,
-                    "creator_id": creator_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'category_id': category_id,
-                    'creator_id': creator_id,
-                    'text_reference': text_reference,
-                    'text': text,
-                    'moderation_status': moderation_status,
-                }
+        args = {
+            'organization_id': organization_id,
+            'category_id': category_id,
+            'creator_id': creator_id,
+            'text_reference': text_reference,
+            'text': text,
+            'moderation_status': moderation_status,
+        }
 
-                publication_id = await self.db.insert(create_publication, args)
+        publication_id = await self.db.insert(create_publication, args)
+        return publication_id
 
-                span.set_status(Status(StatusCode.OK))
-                return publication_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def change_publication(
             self,
             publication_id: int,
@@ -66,108 +52,50 @@ class PublicationRepo(interface.IPublicationRepo):
             image_fid: str = None,
             image_name: str = None,
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.change_publication",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "publication_id": publication_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'publication_id': publication_id,
-                    'moderator_id': moderator_id,
-                    'vk_source': vk_source,
-                    'tg_source': tg_source,
-                    'text': text,
-                    'moderation_status': moderation_status if moderation_status else None,
-                    'moderation_comment': moderation_comment,
-                    'publication_at': publication_at,
-                    'image_fid': image_fid,
-                    'image_name': image_name,
-                }
+        args = {
+            'publication_id': publication_id,
+            'moderator_id': moderator_id,
+            'vk_source': vk_source,
+            'tg_source': tg_source,
+            'text': text,
+            'moderation_status': moderation_status if moderation_status else None,
+            'moderation_comment': moderation_comment,
+            'publication_at': publication_at,
+            'image_fid': image_fid,
+            'image_name': image_name,
+        }
 
-                await self.db.update(change_publication, args)
+        await self.db.update(change_publication, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def delete_publication(self, publication_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_publication",
-                kind=SpanKind.INTERNAL,
-                attributes={"publication_id": publication_id}
-        ) as span:
-            try:
-                args = {'publication_id': publication_id}
-                await self.db.delete(delete_publication, args)
+        args = {'publication_id': publication_id}
+        await self.db.delete(delete_publication, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def delete_publication_by_category_id(self, category_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_publication_by_category_id",
-                kind=SpanKind.INTERNAL,
-                attributes={"category_id": category_id}
-        ) as span:
-            try:
-                args = {'category_id': category_id}
-                await self.db.delete(delete_publication_by_category_id, args)
+        args = {'category_id': category_id}
+        await self.db.delete(delete_publication_by_category_id, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_publication_by_id(self, publication_id: int) -> list[model.Publication]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_publication_by_id",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "publication_id": publication_id
-                }
-        ) as span:
-            try:
-                args = {'publication_id': publication_id}
-                rows = await self.db.select(get_publication_by_id, args)
-                publications = model.Publication.serialize(rows) if rows else []
+        args = {'publication_id': publication_id}
+        rows = await self.db.select(get_publication_by_id, args)
+        publications = model.Publication.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return publications
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return publications
 
+    @traced_method()
     async def get_publications_by_organization(self, organization_id: int) -> list[model.Publication]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_publications_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id
-                }
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_publications_by_organization, args)
-                publications = model.Publication.serialize(rows) if rows else []
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_publications_by_organization, args)
+        publications = model.Publication.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return publications
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return publications
 
     # РУБРИКИ
+
+    @traced_method()
     async def create_category(
             self,
             organization_id: int,
@@ -191,46 +119,33 @@ class PublicationRepo(interface.IPublicationRepo):
             good_samples: list[dict],
             additional_info: list[str]
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.create_category",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'name': name,
-                    'prompt_for_image_style': prompt_for_image_style,
-                    'goal': goal,
-                    'structure_skeleton': structure_skeleton,
-                    'structure_flex_level_min': structure_flex_level_min,
-                    'structure_flex_level_max': structure_flex_level_max,
-                    'structure_flex_level_comment': structure_flex_level_comment,
-                    'must_have': must_have,
-                    'must_avoid': must_avoid,
-                    'social_networks_rules': social_networks_rules,
-                    'len_min': len_min,
-                    'len_max': len_max,
-                    'n_hashtags_min': n_hashtags_min,
-                    'n_hashtags_max': n_hashtags_max,
-                    'cta_type': cta_type,
-                    'tone_of_voice': tone_of_voice,
-                    'brand_rules': brand_rules,
-                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples],
-                    'additional_info': additional_info,
-                }
+        args = {
+            'organization_id': organization_id,
+            'name': name,
+            'prompt_for_image_style': prompt_for_image_style,
+            'goal': goal,
+            'structure_skeleton': structure_skeleton,
+            'structure_flex_level_min': structure_flex_level_min,
+            'structure_flex_level_max': structure_flex_level_max,
+            'structure_flex_level_comment': structure_flex_level_comment,
+            'must_have': must_have,
+            'must_avoid': must_avoid,
+            'social_networks_rules': social_networks_rules,
+            'len_min': len_min,
+            'len_max': len_max,
+            'n_hashtags_min': n_hashtags_min,
+            'n_hashtags_max': n_hashtags_max,
+            'cta_type': cta_type,
+            'tone_of_voice': tone_of_voice,
+            'brand_rules': brand_rules,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples],
+            'additional_info': additional_info,
+        }
 
-                category_id = await self.db.insert(create_category, args)
+        category_id = await self.db.insert(create_category, args)
+        return category_id
 
-                span.set_status(Status(StatusCode.OK))
-                return category_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def update_category(
             self,
             category_id: int,
@@ -254,104 +169,55 @@ class PublicationRepo(interface.IPublicationRepo):
             good_samples: list[dict] = None,
             additional_info: list[str] = None
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.update_category",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "category_id": category_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'category_id': category_id,
-                    'name': name,
-                    'prompt_for_image_style': prompt_for_image_style,
-                    'goal': goal,
-                    'structure_skeleton': structure_skeleton,
-                    'structure_flex_level_min': structure_flex_level_min,
-                    'structure_flex_level_max': structure_flex_level_max,
-                    'structure_flex_level_comment': structure_flex_level_comment,
-                    'must_have': must_have,
-                    'must_avoid': must_avoid,
-                    'social_networks_rules': social_networks_rules,
-                    'len_min': len_min,
-                    'len_max': len_max,
-                    'n_hashtags_min': n_hashtags_min,
-                    'n_hashtags_max': n_hashtags_max,
-                    'cta_type': cta_type,
-                    'tone_of_voice': tone_of_voice,
-                    'brand_rules': brand_rules,
-                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
-                    'additional_info': additional_info,
-                }
+        args = {
+            'category_id': category_id,
+            'name': name,
+            'prompt_for_image_style': prompt_for_image_style,
+            'goal': goal,
+            'structure_skeleton': structure_skeleton,
+            'structure_flex_level_min': structure_flex_level_min,
+            'structure_flex_level_max': structure_flex_level_max,
+            'structure_flex_level_comment': structure_flex_level_comment,
+            'must_have': must_have,
+            'must_avoid': must_avoid,
+            'social_networks_rules': social_networks_rules,
+            'len_min': len_min,
+            'len_max': len_max,
+            'n_hashtags_min': n_hashtags_min,
+            'n_hashtags_max': n_hashtags_max,
+            'cta_type': cta_type,
+            'tone_of_voice': tone_of_voice,
+            'brand_rules': brand_rules,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
+            'additional_info': additional_info,
+        }
 
-                await self.db.update(update_category, args)
+        await self.db.update(update_category, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_category_by_id(self, category_id: int) -> list[model.Category]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_category_by_id",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "category_id": category_id
-                }
-        ) as span:
-            try:
-                args = {'category_id': category_id}
-                rows = await self.db.select(get_category_by_id, args)
-                categories = model.Category.serialize(rows) if rows else []
+        args = {'category_id': category_id}
+        rows = await self.db.select(get_category_by_id, args)
+        categories = model.Category.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return categories
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return categories
 
+    @traced_method()
     async def get_categories_by_organization(self, organization_id: int) -> list[model.Category]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_categories_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id
-                }
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_categories_by_organization, args)
-                categories = model.Category.serialize(rows) if rows else []
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_categories_by_organization, args)
+        categories = model.Category.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return categories
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return categories
 
+    @traced_method()
     async def delete_category(self, category_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_category",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "category_id": category_id
-                }
-        ) as span:
-            try:
-                args = {'category_id': category_id}
-                await self.db.delete(delete_category, args)
-
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        args = {'category_id': category_id}
+        await self.db.delete(delete_category, args)
 
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
+
+    @traced_method()
     async def create_autoposting_category(
             self,
             organization_id: int,
@@ -375,44 +241,33 @@ class PublicationRepo(interface.IPublicationRepo):
             good_samples: list[dict],
             additional_info: list[str]
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.create_autoposting_category",
-                kind=SpanKind.INTERNAL,
-                attributes={"organization_id": organization_id}
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'name': name,
-                    'prompt_for_image_style': prompt_for_image_style,
-                    'goal': goal,
-                    'structure_skeleton': structure_skeleton,
-                    'structure_flex_level_min': structure_flex_level_min,
-                    'structure_flex_level_max': structure_flex_level_max,
-                    'structure_flex_level_comment': structure_flex_level_comment,
-                    'must_have': must_have,
-                    'must_avoid': must_avoid,
-                    'social_networks_rules': social_networks_rules,
-                    'len_min': len_min,
-                    'len_max': len_max,
-                    'n_hashtags_min': n_hashtags_min,
-                    'n_hashtags_max': n_hashtags_max,
-                    'cta_type': cta_type,
-                    'tone_of_voice': tone_of_voice,
-                    'brand_rules': brand_rules,
-                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
-                    'additional_info': additional_info
-                }
+        args = {
+            'organization_id': organization_id,
+            'name': name,
+            'prompt_for_image_style': prompt_for_image_style,
+            'goal': goal,
+            'structure_skeleton': structure_skeleton,
+            'structure_flex_level_min': structure_flex_level_min,
+            'structure_flex_level_max': structure_flex_level_max,
+            'structure_flex_level_comment': structure_flex_level_comment,
+            'must_have': must_have,
+            'must_avoid': must_avoid,
+            'social_networks_rules': social_networks_rules,
+            'len_min': len_min,
+            'len_max': len_max,
+            'n_hashtags_min': n_hashtags_min,
+            'n_hashtags_max': n_hashtags_max,
+            'cta_type': cta_type,
+            'tone_of_voice': tone_of_voice,
+            'brand_rules': brand_rules,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
+            'additional_info': additional_info
+        }
 
-                autoposting_category_id = await self.db.insert(create_autoposting_category, args)
+        autoposting_category_id = await self.db.insert(create_autoposting_category, args)
+        return autoposting_category_id
 
-                span.set_status(Status(StatusCode.OK))
-                return autoposting_category_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def update_autoposting_category(
             self,
             autoposting_category_id: int,
@@ -436,77 +291,46 @@ class PublicationRepo(interface.IPublicationRepo):
             good_samples: list[dict] = None,
             additional_info: list[str] = None
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.update_autoposting_category",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                args = {
-                    'autoposting_category_id': autoposting_category_id,
-                    'name': name,
-                    'prompt_for_image_style': prompt_for_image_style,
-                    'goal': goal,
-                    'structure_skeleton': structure_skeleton,
-                    'structure_flex_level_min': structure_flex_level_min,
-                    'structure_flex_level_max': structure_flex_level_max,
-                    'structure_flex_level_comment': structure_flex_level_comment,
-                    'must_have': must_have,
-                    'must_avoid': must_avoid,
-                    'social_networks_rules': social_networks_rules,
-                    'len_min': len_min,
-                    'len_max': len_max,
-                    'n_hashtags_min': n_hashtags_min,
-                    'n_hashtags_max': n_hashtags_max,
-                    'cta_type': cta_type,
-                    'tone_of_voice': tone_of_voice,
-                    'brand_rules': brand_rules,
-                    'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
-                    'additional_info': additional_info
-                }
+        args = {
+            'autoposting_category_id': autoposting_category_id,
+            'name': name,
+            'prompt_for_image_style': prompt_for_image_style,
+            'goal': goal,
+            'structure_skeleton': structure_skeleton,
+            'structure_flex_level_min': structure_flex_level_min,
+            'structure_flex_level_max': structure_flex_level_max,
+            'structure_flex_level_comment': structure_flex_level_comment,
+            'must_have': must_have,
+            'must_avoid': must_avoid,
+            'social_networks_rules': social_networks_rules,
+            'len_min': len_min,
+            'len_max': len_max,
+            'n_hashtags_min': n_hashtags_min,
+            'n_hashtags_max': n_hashtags_max,
+            'cta_type': cta_type,
+            'tone_of_voice': tone_of_voice,
+            'brand_rules': brand_rules,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
+            'additional_info': additional_info
+        }
 
-                await self.db.update(update_autoposting_category, args)
+        await self.db.update(update_autoposting_category, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def delete_autoposting_category(self, autoposting_category_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_autoposting_category",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                args = {'autoposting_category_id': autoposting_category_id}
-                await self.db.delete(delete_autoposting_category, args)
+        args = {'autoposting_category_id': autoposting_category_id}
+        await self.db.delete(delete_autoposting_category, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_autoposting_category_by_id(self, autoposting_category_id: int) -> list[model.AutopostingCategory]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_autoposting_category_by_id",
-                kind=SpanKind.INTERNAL,
-                attributes={"autoposting_category_id": autoposting_category_id}
-        ) as span:
-            try:
-                args = {'autoposting_category_id': autoposting_category_id}
-                rows = await self.db.select(get_autoposting_category_by_id, args)
+        args = {'autoposting_category_id': autoposting_category_id}
+        rows = await self.db.select(get_autoposting_category_by_id, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return model.AutopostingCategory.serialize(rows)
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return model.AutopostingCategory.serialize(rows)
 
     # АВТОПОСТИНГ
+
+    @traced_method()
     async def create_autoposting(
             self,
             organization_id: int,
@@ -517,33 +341,21 @@ class PublicationRepo(interface.IPublicationRepo):
             required_moderation: bool,
             need_image: bool
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.create_autoposting",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'organization_id': organization_id,
-                    'autoposting_category_id': autoposting_category_id,
-                    'period_in_hours': period_in_hours,
-                    'filter_prompt': filter_prompt,
-                    'tg_channels': tg_channels,
-                    'required_moderation': required_moderation,
-                    'need_image': need_image,
-                }
+        args = {
+            'organization_id': organization_id,
+            'autoposting_category_id': autoposting_category_id,
+            'period_in_hours': period_in_hours,
+            'filter_prompt': filter_prompt,
+            'tg_channels': tg_channels,
+            'required_moderation': required_moderation,
+            'need_image': need_image,
+        }
 
-                autoposting_id = await self.db.insert(create_autoposting, args)
+        autoposting_id = await self.db.insert(create_autoposting, args)
 
-                span.set_status(Status(StatusCode.OK))
-                return autoposting_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return autoposting_id
 
+    @traced_method()
     async def update_autoposting(
             self,
             autoposting_id: int,
@@ -556,164 +368,77 @@ class PublicationRepo(interface.IPublicationRepo):
             need_image: bool = None,
             last_active: datetime = None
     ) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.update_autoposting",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "autoposting_id": autoposting_id
-                }
-        ) as span:
-            try:
-                args = {
-                    'autoposting_id': autoposting_id,
-                    'autoposting_category_id': autoposting_category_id,
-                    'period_in_hours': period_in_hours,
-                    'filter_prompt': filter_prompt,
-                    'enabled': enabled,
-                    'tg_channels': tg_channels,
-                    'required_moderation': required_moderation,
-                    'need_image': need_image,
-                    'last_active': last_active,
-                }
+        args = {
+            'autoposting_id': autoposting_id,
+            'autoposting_category_id': autoposting_category_id,
+            'period_in_hours': period_in_hours,
+            'filter_prompt': filter_prompt,
+            'enabled': enabled,
+            'tg_channels': tg_channels,
+            'required_moderation': required_moderation,
+            'need_image': need_image,
+            'last_active': last_active,
+        }
 
-                await self.db.update(update_autoposting, args)
+        await self.db.update(update_autoposting, args)
 
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_autoposting_by_organization(self, organization_id: int) -> list[model.Autoposting]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_autoposting_by_organization",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "organization_id": organization_id
-                }
-        ) as span:
-            try:
-                args = {'organization_id': organization_id}
-                rows = await self.db.select(get_autoposting_by_organization, args)
-                autopostings = model.Autoposting.serialize(rows) if rows else []
+        args = {'organization_id': organization_id}
+        rows = await self.db.select(get_autoposting_by_organization, args)
+        autopostings = model.Autoposting.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return autopostings
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return autopostings
 
+    @traced_method()
     async def get_autoposting_by_id(self, autoposting_id: int) -> list[model.Autoposting]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_autoposting_by_id",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "autoposting_id": autoposting_id
-                }
-        ) as span:
-            try:
-                args = {'autoposting_id': autoposting_id}
-                rows = await self.db.select(get_autoposting_by_id, args)
-                autopostings = model.Autoposting.serialize(rows) if rows else []
+        args = {'autoposting_id': autoposting_id}
+        rows = await self.db.select(get_autoposting_by_id, args)
+        autopostings = model.Autoposting.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return autopostings
-            except Exception as err:
+        return autopostings
 
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_all_autopostings(self) -> list[model.Autoposting]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_all_autopostings",
-                kind=SpanKind.INTERNAL,
-        ) as span:
-            try:
-                rows = await self.db.select(get_all_autopostings, {})
-                autopostings = model.Autoposting.serialize(rows) if rows else []
+        rows = await self.db.select(get_all_autopostings, {})
+        autopostings = model.Autoposting.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return autopostings
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return autopostings
 
+    @traced_method()
     async def delete_autoposting(self, autoposting_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.delete_autoposting",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "autoposting_id": autoposting_id
-                }
-        ) as span:
-            try:
-                args = {'autoposting_id': autoposting_id}
-                await self.db.delete(delete_autoposting, args)
-
-                span.set_status(Status(StatusCode.OK))
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        args = {'autoposting_id': autoposting_id}
+        await self.db.delete(delete_autoposting, args)
 
     # ПРОСМОТРЕННЫЕ TELEGRAM ПОСТЫ
+
+    @traced_method()
     async def create_viewed_telegram_post(
             self,
             autoposting_id: int,
             tg_channel_username: str,
             link: str
     ) -> int:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.create_viewed_telegram_post",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username,
-                    "link": link
-                }
-        ) as span:
-            try:
-                args = {
-                    'autoposting_id': autoposting_id,
-                    'tg_channel_username': tg_channel_username,
-                    'link': link
-                }
+        args = {
+            'autoposting_id': autoposting_id,
+            'tg_channel_username': tg_channel_username,
+            'link': link
+        }
 
-                viewed_post_id = await self.db.insert(create_viewed_telegram_post, args)
+        viewed_post_id = await self.db.insert(create_viewed_telegram_post, args)
+        return viewed_post_id
 
-                span.set_status(Status(StatusCode.OK))
-                return viewed_post_id
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def get_viewed_telegram_post(
             self,
             autoposting_id: int,
             tg_channel_username: str
     ) -> list[model.ViewedTelegramPost]:
-        with self.tracer.start_as_current_span(
-                "PublicationRepo.get_viewed_telegram_post",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "autoposting_id": autoposting_id,
-                    "tg_channel_username": tg_channel_username
-                }
-        ) as span:
-            try:
-                args = {
-                    'autoposting_id': autoposting_id,
-                    'tg_channel_username': tg_channel_username
-                }
-                rows = await self.db.select(get_viewed_telegram_post, args)
-                viewed_posts = model.ViewedTelegramPost.serialize(rows) if rows else []
+        args = {
+            'autoposting_id': autoposting_id,
+            'tg_channel_username': tg_channel_username
+        }
+        rows = await self.db.select(get_viewed_telegram_post, args)
+        viewed_posts = model.ViewedTelegramPost.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
-                return viewed_posts
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        return viewed_posts
