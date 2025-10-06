@@ -148,7 +148,8 @@ publication_service = PublicationService(
     organization_client=loom_organization_client,
     vizard_client=vizard_client,
     telegram_client=telegram_client,
-    loom_domain=cfg.domain
+    loom_domain=cfg.domain,
+    environment=cfg.environment
 )
 
 video_cut_service = VideoCutService(

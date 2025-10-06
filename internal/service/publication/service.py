@@ -22,8 +22,8 @@ class PublicationService(interface.IPublicationService):
             organization_client: interface.ILoomOrganizationClient,
             vizard_client: interface.IVizardClient,
             telegram_client: interface.ITelegramClient,
-            loom_domain: str
-
+            loom_domain: str,
+            environment: str,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
@@ -36,6 +36,7 @@ class PublicationService(interface.IPublicationService):
         self.vizard_client = vizard_client
         self.telegram_client = telegram_client
         self.loom_domain = loom_domain
+        self.environment = environment
 
     # ПУБЛИКАЦИИ
     async def generate_publication_text(
@@ -178,6 +179,13 @@ class PublicationService(interface.IPublicationService):
 
                 category = categories[0]
 
+                if self.environment == "prod":
+                    size = "1536x1024"
+                    quality = "high"
+                else:
+                    size = "1024x1024"
+                    quality = "low"
+
                 # Генерируем промпт для изображения
                 if prompt:
                     if image_file:
@@ -192,8 +200,8 @@ class PublicationService(interface.IPublicationService):
                             image=image_content,
                             prompt=image_system_prompt,
                             image_model="gpt-image-1",
-                            size="1024x1024",
-                            quality="low",
+                            size=size,
+                            quality=quality,
                             n=1
                         )
                     else:
@@ -206,8 +214,8 @@ class PublicationService(interface.IPublicationService):
                         images, generate_cost = await self.openai_client.generate_image(
                             prompt=image_system_prompt,
                             image_model="gpt-image-1",
-                            size="1024x1024",
-                            quality="low",
+                            size=size,
+                            quality=quality,
                             n=1,
                         )
 
@@ -221,8 +229,8 @@ class PublicationService(interface.IPublicationService):
                     images, generate_cost = await self.openai_client.generate_image(
                         prompt=image_system_prompt,
                         image_model="gpt-image-1",
-                        size="1024x1024",
-                        quality="low",
+                        size=size,
+                        quality=quality,
                         n=1,
                     )
 
