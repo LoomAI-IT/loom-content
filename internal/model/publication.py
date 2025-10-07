@@ -118,7 +118,7 @@ class Publication:
     image_fid: str
     image_name: str
 
-    openai_rub_cost: int
+    openai_rub_cost: int # TODO нигде не используется, невозможно посчитать
 
     moderation_status: ModerationStatus
     moderation_comment: str
