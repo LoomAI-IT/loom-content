@@ -23,6 +23,7 @@ class PublicationService(interface.IPublicationService):
             organization_client: interface.ILoomOrganizationClient,
             vizard_client: interface.IVizardClient,
             telegram_client: interface.ITelegramClient,
+            loom_tg_bot_client: interface.ILoomTgBotClient,
             loom_domain: str,
             environment: str,
     ):
@@ -36,6 +37,7 @@ class PublicationService(interface.IPublicationService):
         self.organization_client = organization_client
         self.vizard_client = vizard_client
         self.telegram_client = telegram_client
+        self.loom_tg_bot_client = loom_tg_bot_client
         self.loom_domain = loom_domain
         self.environment = environment
 
@@ -365,6 +367,11 @@ class PublicationService(interface.IPublicationService):
                     tg_link=tg_post_link,
                 )
                 post_links["telegram"] = tg_post_link
+
+            await self.loom_tg_bot_client.notify_publication_approved(
+                account_id=publication.creator_id,
+                publication_id=publication_id,
+            )
 
         return post_links
 
