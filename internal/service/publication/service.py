@@ -257,19 +257,6 @@ class PublicationService(interface.IPublicationService):
         image_fid = None
         image_name = None
 
-        if image_file or image_url:
-            self.logger.info("Удаление старого изображения перед загрузкой нового")
-
-            publications = await self.repo.get_publication_by_id(publication_id)
-            if publications and publications[0].image_fid:
-                self.logger.info("Старое изображение найдено, удаление")
-                old_publication = publications[0]
-
-                await self.storage.delete(
-                    old_publication.image_fid,
-                    old_publication.image_name
-                )
-
         if image_file and image_file.filename:
             self.logger.info("Загрузка нового изображения из файла")
 
@@ -290,6 +277,7 @@ class PublicationService(interface.IPublicationService):
             upload_response = await self.storage.upload(image_io, image_name)
             image_fid = upload_response.fid
 
+        old_publication = (await self.repo.get_publication_by_id(publication_id))[0]
         await self.repo.change_publication(
             publication_id=publication_id,
             vk_source=vk_source,
@@ -298,6 +286,14 @@ class PublicationService(interface.IPublicationService):
             image_fid=image_fid,
             image_name=image_name,
         )
+
+        if image_file or image_url:
+            if old_publication.image_fid:
+                self.logger.info("Безопасное удаление старой картинки")
+                await self.storage.delete(
+                    old_publication.image_fid,
+                    old_publication.image_name
+                )
 
     @traced_method()
     async def delete_publication(
