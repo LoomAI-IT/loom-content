@@ -250,6 +250,8 @@ class PublicationService(interface.IPublicationService):
             publication_id: int,
             vk_source: bool = None,
             tg_source: bool = None,
+            vk_link: str = None,
+            tg_link: str = None,
             text: str = None,
             image_url: str = None,
             image_file: UploadFile = None,
@@ -282,6 +284,8 @@ class PublicationService(interface.IPublicationService):
             publication_id=publication_id,
             vk_source=vk_source,
             tg_source=tg_source,
+            vk_link=vk_link,
+            tg_link=tg_link,
             text=text,
             image_fid=image_fid,
             image_name=image_name,
@@ -356,6 +360,10 @@ class PublicationService(interface.IPublicationService):
             if publication.tg_source:
                 self.logger.info("Публикация в Telegram")
                 tg_post_link = await self._publish_to_telegram(publication)
+                await self.repo.change_publication(
+                    publication_id=publication_id,
+                    tg_link=tg_post_link,
+                )
                 post_links["telegram"] = tg_post_link
 
         return post_links
