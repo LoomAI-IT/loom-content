@@ -113,6 +113,9 @@ class Publication:
     vk_source: bool
     tg_source: bool
 
+    vk_link: str
+    tg_link: str
+
     text_reference: str
     text: str
     image_fid: str

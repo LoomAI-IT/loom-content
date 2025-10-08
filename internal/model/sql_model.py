@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS publications (
     moderator_id INTEGER DEFAULT NULL,
     vk_source BOOLEAN DEFAULT FALSE,
     tg_source BOOLEAN DEFAULT FALSE,
+    vk_link TEXT DEFAULT '',
+    tg_link TEXT DEFAULT '',
     
     text_reference TEXT NOT NULL,
     text TEXT NOT NULL,
