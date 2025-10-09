@@ -140,6 +140,8 @@ class Publication:
                 moderator_id=row.moderator_id,
                 vk_source=row.vk_source,
                 tg_source=row.tg_source,
+                vk_link=row.vk_link,
+                tg_link=row.tg_link,
                 text_reference=row.text_reference,
                 text=row.text,
                 image_fid=row.image_fid,
