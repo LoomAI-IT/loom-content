@@ -14,6 +14,13 @@ class ILoomTgBotClient(Protocol):
     ) -> None: pass
 
     @abstractmethod
+    async def notify_publication_approved(
+            self,
+            account_id: int,
+            publication_id: int,
+    ) -> None: pass
+
+    @abstractmethod
     async def set_cache_file(
             self,
             filename: str,

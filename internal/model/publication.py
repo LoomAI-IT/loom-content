@@ -113,6 +113,9 @@ class Publication:
     vk_source: bool
     tg_source: bool
 
+    vk_link: str
+    tg_link: str
+
     text_reference: str
     text: str
     image_fid: str
@@ -137,6 +140,8 @@ class Publication:
                 moderator_id=row.moderator_id,
                 vk_source=row.vk_source,
                 tg_source=row.tg_source,
+                vk_link=row.vk_link,
+                tg_link=row.tg_link,
                 text_reference=row.text_reference,
                 text=row.text,
                 image_fid=row.image_fid,
@@ -159,6 +164,8 @@ class Publication:
             "moderator_id": self.moderator_id,
             "vk_source": self.vk_source,
             "tg_source": self.tg_source,
+            "vk_link": self.vk_link,
+            "tg_link": self.tg_link,
             "text_reference": self.text_reference,
             "text": self.text,
             "image_fid": self.image_fid,

@@ -25,6 +25,8 @@ SET
     moderator_id = COALESCE(:moderator_id, moderator_id),
     vk_source = COALESCE(:vk_source, vk_source),
     tg_source = COALESCE(:tg_source, tg_source),
+    vk_link = COALESCE(:vk_link, vk_link),
+    tg_link = COALESCE(:tg_link, tg_link),
     text = COALESCE(:text, text),
     moderation_status = COALESCE(:moderation_status, moderation_status),
     moderation_comment = COALESCE(:moderation_comment, moderation_comment),
