@@ -58,6 +58,19 @@ class LoomTgBotClient(interface.ILoomTgBotClient):
         response = await self.client.post("/notify/publication/approved", json=body)
 
     @traced_method(SpanKind.CLIENT)
+    async def notify_publication_rejected(
+            self,
+            account_id: int,
+            publication_id: int,
+    ) -> None:
+        body = {
+            "account_id": account_id,
+            "publication_id": publication_id,
+            "interserver_secret_key": self.interserver_secret_key,
+        }
+        response = await self.client.post("/notify/publication/rejected", json=body)
+
+    @traced_method(SpanKind.CLIENT)
     async def set_cache_file(
             self,
             filename: str,

@@ -355,9 +355,9 @@ class PublicationService(interface.IPublicationService):
             moderation_comment=moderation_comment
         )
         post_links = {}
+        publication = (await self.repo.get_publication_by_id(publication_id))[0]
         if moderation_status == model.ModerationStatus.APPROVED.value:
             self.logger.info("Публикация одобрена, публикуем в соцсети")
-            publication = (await self.repo.get_publication_by_id(publication_id))[0]
 
             if publication.tg_source:
                 self.logger.info("Публикация в Telegram")
@@ -369,6 +369,12 @@ class PublicationService(interface.IPublicationService):
                 post_links["telegram"] = tg_post_link
 
             await self.loom_tg_bot_client.notify_publication_approved(
+                account_id=publication.creator_id,
+                publication_id=publication_id,
+            )
+        if moderation_status == model.ModerationStatus.REJECTED.value:
+            self.logger.info("Отправляем уведомление об отклоненной публикации")
+            await self.loom_tg_bot_client.notify_publication_rejected(
                 account_id=publication.creator_id,
                 publication_id=publication_id,
             )
