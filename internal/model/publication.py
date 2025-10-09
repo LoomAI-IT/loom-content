@@ -164,6 +164,8 @@ class Publication:
             "moderator_id": self.moderator_id,
             "vk_source": self.vk_source,
             "tg_source": self.tg_source,
+            "vk_link": self.vk_link,
+            "tg_link": self.tg_link,
             "text_reference": self.text_reference,
             "text": self.text,
             "image_fid": self.image_fid,
