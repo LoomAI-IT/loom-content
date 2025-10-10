@@ -186,17 +186,30 @@ autoposting = Autoposting(
     loom_employee_client=loom_employee_client
 )
 
+app = NewHTTP(
+    db=db,
+    publication_controller=publication_controller,
+    video_cut_controller=video_cut_controller,
+    social_network_controller=social_network_controller,
+    http_middleware=http_middleware,
+    prefix=cfg.prefix,
+)
+
 if __name__ == "__main__":
     if args.mode == "http":
-        app = NewHTTP(
-            db=db,
-            publication_controller=publication_controller,
-            video_cut_controller=video_cut_controller,
-            social_network_controller=social_network_controller,
-            http_middleware=http_middleware,
-            prefix=cfg.prefix,
+        if cfg.environment == "prod":
+            workers = 4
+        else:
+            workers = 1
+
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=int(cfg.http_port),
+            workers=workers,
+            loop="uvloop",
+            access_log=False,
         )
-        uvicorn.run(app, host="0.0.0.0", port=int(cfg.http_port), access_log=False)
 
     elif args.mode == "autoposting":
         asyncio.run(
