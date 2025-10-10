@@ -1,6 +1,7 @@
 from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
+from pkg.time_converter import to_msk
 
 
 class ModerationStatus(Enum):
@@ -150,7 +151,7 @@ class Publication:
                 moderation_status=ModerationStatus(row.moderation_status),
                 moderation_comment=row.moderation_comment,
                 publication_at=row.publication_at,
-                created_at=row.created_at
+                created_at=to_msk(row.created_at)
             )
             for row in rows
         ]
