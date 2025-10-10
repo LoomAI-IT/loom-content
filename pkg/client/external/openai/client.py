@@ -16,6 +16,7 @@ from openai.types.chat.chat_completion import ChatCompletion
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
 from internal import interface
+from pkg.trace_wrapper import traced_method
 
 from .price import *
 
@@ -35,6 +36,7 @@ class OpenAIClient(interface.IOpenAIClient):
             http_client=httpx.AsyncClient(proxy="http://32uLYMeQ:jLaDv4WK@193.160.72.227:62940")
         )
 
+    @traced_method(SpanKind.CLIENT)
     async def generate_str(
             self,
             history: list,
@@ -43,31 +45,21 @@ class OpenAIClient(interface.IOpenAIClient):
             llm_model: str,
             pdf_file: bytes = None,
     ) -> tuple[str, dict]:
-        with self.tracer.start_as_current_span(
-                "OpenAIClient.generate_str",
-                kind=SpanKind.CLIENT,
-        ) as span:
-            try:
-                messages = self._prepare_messages(history, system_prompt, pdf_file, llm_model)
+        messages = self._prepare_messages(history, system_prompt, pdf_file, llm_model)
 
-                completion_response = await self.client.chat.completions.create(
-                    model=llm_model,
-                    messages=messages,
-                    temperature=temperature,
-                    reasoning_effort="low"
-                )
+        completion_response = await self.client.chat.completions.create(
+            model=llm_model,
+            messages=messages,
+            temperature=temperature,
+            reasoning_effort="low"
+        )
 
-                generate_cost = self._calculate_llm_cost(completion_response)
-                llm_response = completion_response.choices[0].message.content
+        generate_cost = self._calculate_llm_cost(completion_response)
+        llm_response = completion_response.choices[0].message.content
 
-                span.set_status(Status(StatusCode.OK))
-                return llm_response, generate_cost
+        return llm_response, generate_cost
 
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise
-
+    @traced_method()
     async def generate_json(
             self,
             history: list,
@@ -76,62 +68,62 @@ class OpenAIClient(interface.IOpenAIClient):
             llm_model: str,
             pdf_file: bytes = None,
     ) -> tuple[dict, dict]:
-        with self.tracer.start_as_current_span(
-                "OpenAIClient.generate_json",
-                kind=SpanKind.CLIENT,
-        ) as span:
-            try:
-                llm_response_str, initial_generate_cost = await self.generate_str(
-                    history, system_prompt, temperature, llm_model, pdf_file
-                )
 
-                generate_cost = initial_generate_cost
+        llm_response_str, initial_generate_cost = await self.generate_str(
+            history, system_prompt, temperature, llm_model, pdf_file
+        )
 
-                try:
-                    llm_response_json = self._extract_and_parse_json(llm_response_str)
-                except Exception:
-                    llm_response_json, retry_generate_cost = await self._retry_llm_generate(
-                        history, llm_model, temperature, llm_response_str
-                    )
-                    generate_cost = {
-                        'total_cost': round(generate_cost["total_cost"] + retry_generate_cost["total_cost"], 6),
-                        'input_cost': round(generate_cost["input_cost"] + retry_generate_cost["input_cost"], 6),
-                        'output_cost': round(generate_cost["output_cost"] + retry_generate_cost["output_cost"], 6),
-                        'cached_tokens_savings': round(generate_cost["cached_tokens_savings"] + retry_generate_cost["cached_tokens_savings"], 6),
-                        'reasoning_cost': round(generate_cost["reasoning_cost"] + retry_generate_cost["reasoning_cost"], 6),
-                        'details': {
-                            'model': llm_model,
-                            'tokens': {
-                                'total_input_tokens': generate_cost["total_input_tokens"] + retry_generate_cost["total_input_tokens"],
-                                'regular_input_tokens': generate_cost["regular_input_tokens"] + retry_generate_cost["regular_input_tokens"],
-                                'cached_tokens': generate_cost["cached_tokens"] + retry_generate_cost["cached_tokens"],
-                                'output_tokens': generate_cost["output_tokens"] + retry_generate_cost["output_tokens"],
-                                'reasoning_tokens': generate_cost["reasoning_tokens"] + retry_generate_cost["reasoning_tokens"],
-                                'total_tokens': generate_cost["total_tokens"] + retry_generate_cost["total_tokens"]
-                            },
-                            'costs': {
-                                'regular_input_cost': round(generate_cost["regular_input_cost"] + retry_generate_cost["regular_input_cost"], 6),
-                                'cached_input_cost': round(generate_cost["cached_input_cost"] + retry_generate_cost["cached_input_cost"], 6),
-                                'output_cost': round(generate_cost["output_cost"] + retry_generate_cost["output_cost"], 6),
-                                'reasoning_cost': round(generate_cost["reasoning_cost"] + retry_generate_cost["reasoning_cost"], 6)
-                            },
-                            'pricing': {
-                                'input_price_per_1m': generate_cost["total_cost"],
-                                'output_price_per_1m': generate_cost["total_cost"],
-                                'cached_input_price_per_1m': generate_cost["total_cost"]
-                            }
-                        }
+        generate_cost = initial_generate_cost
+
+        try:
+            llm_response_json = self._extract_and_parse_json(llm_response_str)
+        except Exception:
+            llm_response_json, retry_generate_cost = await self._retry_llm_generate(
+                history, llm_model, temperature, llm_response_str
+            )
+            generate_cost = {
+                'total_cost': round(generate_cost["total_cost"] + retry_generate_cost["total_cost"], 6),
+                'input_cost': round(generate_cost["input_cost"] + retry_generate_cost["input_cost"], 6),
+                'output_cost': round(generate_cost["output_cost"] + retry_generate_cost["output_cost"], 6),
+                'cached_tokens_savings': round(
+                    generate_cost["cached_tokens_savings"] + retry_generate_cost["cached_tokens_savings"], 6),
+                'reasoning_cost': round(generate_cost["reasoning_cost"] + retry_generate_cost["reasoning_cost"],
+                                        6),
+                'details': {
+                    'model': llm_model,
+                    'tokens': {
+                        'total_input_tokens': generate_cost["total_input_tokens"] + retry_generate_cost[
+                            "total_input_tokens"],
+                        'regular_input_tokens': generate_cost["regular_input_tokens"] + retry_generate_cost[
+                            "regular_input_tokens"],
+                        'cached_tokens': generate_cost["cached_tokens"] + retry_generate_cost["cached_tokens"],
+                        'output_tokens': generate_cost["output_tokens"] + retry_generate_cost["output_tokens"],
+                        'reasoning_tokens': generate_cost["reasoning_tokens"] + retry_generate_cost[
+                            "reasoning_tokens"],
+                        'total_tokens': generate_cost["total_tokens"] + retry_generate_cost["total_tokens"]
+                    },
+                    'costs': {
+                        'regular_input_cost': round(
+                            generate_cost["regular_input_cost"] + retry_generate_cost["regular_input_cost"], 6),
+                        'cached_input_cost': round(
+                            generate_cost["cached_input_cost"] + retry_generate_cost["cached_input_cost"], 6),
+                        'output_cost': round(generate_cost["output_cost"] + retry_generate_cost["output_cost"],
+                                             6),
+                        'reasoning_cost': round(
+                            generate_cost["reasoning_cost"] + retry_generate_cost["reasoning_cost"], 6)
+                    },
+                    'pricing': {
+                        'input_price_per_1m': generate_cost["total_cost"],
+                        'output_price_per_1m': generate_cost["total_cost"],
+                        'cached_input_price_per_1m': generate_cost["total_cost"]
                     }
+                }
+            }
 
-                span.set_status(Status(StatusCode.OK))
-                self.logger.info("Ответ от LLM", {"llm_response_str": llm_response_str})
-                return llm_response_json, generate_cost
+        self.logger.info("Ответ от LLM", {"llm_response_str": llm_response_str})
+        return llm_response_json, generate_cost
 
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise
-
+    @traced_method()
     async def transcribe_audio(
             self,
             audio_file: bytes,
@@ -159,56 +151,30 @@ class OpenAIClient(interface.IOpenAIClient):
         Returns:
             Tuple[результат_транскрипции, детали_стоимости_или_None]
         """
+        audio_buffer = io.BytesIO(audio_file)
+        audio_buffer.name = filename
 
-        with self.tracer.start_as_current_span(
-                "OpenAIClient.transcribe_audio",
-                kind=SpanKind.CLIENT,
-                attributes={
-                    "model": audio_model,
-                    "filename": filename,
-                    "file_size_bytes": len(audio_file),
-                    "response_format": response_format,
-                }
-        ) as span:
-            try:
-                # Подготавливаем аудиофайл
-                audio_buffer = io.BytesIO(audio_file)
-                audio_buffer.name = filename
+        api_params: dict = {
+            "model": audio_model,
+            "file": audio_buffer,
+            "response_format": response_format
+        }
 
-                # Параметры для API вызова
-                api_params: dict = {
-                    "model": audio_model,
-                    "file": audio_buffer,
-                    "response_format": response_format
-                }
+        if language:
+            api_params["language"] = language
+        if prompt:
+            api_params["prompt"] = prompt
+        if temperature is not None:
+            api_params["temperature"] = temperature
+        if timestamp_granularities:
+            api_params["timestamp_granularities"] = timestamp_granularities
 
-                # Добавляем опциональные параметры
-                if language:
-                    api_params["language"] = language
-                if prompt:
-                    api_params["prompt"] = prompt
-                if temperature is not None:
-                    api_params["temperature"] = temperature
-                if timestamp_granularities:
-                    api_params["timestamp_granularities"] = timestamp_granularities
+        transcript: TranscriptionVerbose = await self.client.audio.transcriptions.create(**api_params)
 
-                # Выполняем транскрипцию
-                transcript: TranscriptionVerbose  = await self.client.audio.transcriptions.create(**api_params)
+        cost_details = self._calculate_transcription_cost(audio_model, transcript)
+        return transcript.text, cost_details
 
-
-                cost_details = self._calculate_transcription_cost(audio_model, transcript)
-
-
-                span.set_status(Status(StatusCode.OK))
-
-                return transcript.text, cost_details
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise
-    # Добавьте эти методы в ваш класс GPTClient:
-
+    @traced_method()
     async def generate_image(
             self,
             prompt: str,
@@ -238,101 +204,68 @@ class OpenAIClient(interface.IOpenAIClient):
             Каждое изображение содержит либо 'url', либо 'b64_json' в зависимости от response_format
         """
 
-        with self.tracer.start_as_current_span(
-                "OpenAIClient.generate_image",
-                kind=SpanKind.CLIENT,
-                attributes={
-                    "model": image_model,
-                    "size": size,
-                    "quality": quality,
-                    "n": n
-                }
-        ) as span:
-            try:
-                # Базовые параметры
-                params = {
-                    "model": image_model,
-                    "prompt": prompt,
-                    "n": n,
-                    # "response_format": "b64_json"
-                }
+        params = {
+            "model": image_model,
+            "prompt": prompt,
+            "n": n,
+        }
 
-                # Настройка параметров в зависимости от модели
-                if image_model == "dall-e-3":
-                    # DALL-E 3 всегда генерирует только 1 изображение
-                    if n != 1:
-                        self.logger.warning(f"DALL-E 3 поддерживает только n=1, изменено с {n} на 1")
-                        params["n"] = 1
+        if image_model == "dall-e-3":
+            if n != 1:
+                self.logger.warning(f"DALL-E 3 поддерживает только n=1, изменено с {n} на 1")
+                params["n"] = 1
 
-                    # Размеры для DALL-E 3
-                    if size:
-                        if size not in ["1024x1024", "1792x1024", "1024x1792"]:
-                            raise ValueError(f"Недопустимый размер для DALL-E 3: {size}")
-                        params["size"] = size
-                    else:
-                        params["size"] = "1024x1024"
+            if size:
+                if size not in ["1024x1024", "1792x1024", "1024x1792"]:
+                    raise ValueError(f"Недопустимый размер для DALL-E 3: {size}")
+                params["size"] = size
+            else:
+                params["size"] = "1024x1024"
 
-                    # Качество для DALL-E 3
-                    if quality:
-                        if quality not in ["standard", "hd"]:
-                            raise ValueError(f"Недопустимое качество для DALL-E 3: {quality}")
-                        params["quality"] = quality
-                    else:
-                        params["quality"] = "standard"
+            if quality:
+                if quality not in ["standard", "hd"]:
+                    raise ValueError(f"Недопустимое качество для DALL-E 3: {quality}")
+                params["quality"] = quality
+            else:
+                params["quality"] = "standard"
 
-                    # Стиль для DALL-E 3
-                    if style:
-                        params["style"] = style
+            if style:
+                params["style"] = style
 
-                elif image_model == "gpt-image-1":
-                    # Размеры для gpt-image-1
-                    if size:
-                        if size not in ["1024x1024", "1024x1536", "1536x1024"]:
-                            raise ValueError(f"Недопустимый размер для gpt-image-1: {size}")
-                        params["size"] = size
-                    else:
-                        params["size"] = "1024x1024"
+        elif image_model == "gpt-image-1":
+            if size:
+                if size not in ["1024x1024", "1024x1536", "1536x1024"]:
+                    raise ValueError(f"Недопустимый размер для gpt-image-1: {size}")
+                params["size"] = size
+            else:
+                params["size"] = "1024x1024"
 
-                    # Качество для gpt-image-1 (передается иначе)
-                    if quality:
-                        if quality not in ["low", "medium", "high"]:
-                            raise ValueError(f"Недопустимое качество для gpt-image-1: {quality}")
-                        params["quality"] = quality
-                    else:
-                        params["quality"] = "high"
+            if quality:
+                if quality not in ["low", "medium", "high"]:
+                    raise ValueError(f"Недопустимое качество для gpt-image-1: {quality}")
+                params["quality"] = quality
+            else:
+                params["quality"] = "high"
 
+            if style:
+                self.logger.warning("gpt-image-1 не поддерживает параметр style, игнорируется")
 
-                    # gpt-image-1 не поддерживает style
-                    if style:
-                        self.logger.warning("gpt-image-1 не поддерживает параметр style, игнорируется")
+        response: ImagesResponse = await self.client.images.generate(**params)
 
+        images = []
+        for img_data in response.data:
+            images.append(img_data.b64_json)
 
-                # Выполняем запрос
-                response: ImagesResponse = await self.client.images.generate(**params)
+        cost_details = self._calculate_image_cost(
+            image_model=image_model,
+            response=response,
+            quality=params.get("quality"),
+            size=params.get("size")
+        )
 
-                # Обрабатываем результат
-                images = []
-                for img_data in response.data:
-                    images.append(img_data.b64_json)
+        return images, cost_details
 
-                # Рассчитываем стоимость
-                cost_details = self._calculate_image_cost(
-                    image_model=image_model,
-                    operation="generation",
-                    quality=params.get("quality"),
-                    size=params.get("size"),
-                    count=len(images)
-                )
-
-                span.set_status(Status(StatusCode.OK))
-
-                return images, cost_details
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise
-
+    @traced_method()
     async def edit_image(
             self,
             image: bytes,
@@ -343,149 +276,162 @@ class OpenAIClient(interface.IOpenAIClient):
             size: str = None,
             n: int = 1,
     ) -> tuple[list[str], dict]:
+        if image_model != "gpt-image-1":
+            raise ValueError("Редактирование изображений поддерживается только для gpt-image-1")
 
-        with self.tracer.start_as_current_span(
-                "OpenAIClient.edit_image",
-                kind=SpanKind.CLIENT,
-                attributes={
-                    "model": image_model,
-                    "size": size,
-                    "n": n
-                }
-        ) as span:
-            try:
-                # DALL-E 3 не поддерживает редактирование
-                if image_model != "gpt-image-1":
-                    raise ValueError("Редактирование изображений поддерживается только для gpt-image-1")
+        if isinstance(image, bytes):
+            image_file = io.BytesIO(image)
+            image_file.name = "image.png"
+        else:
+            image_file = image
 
-                # Подготавливаем изображение
-                if isinstance(image, bytes):
-                    image_file = io.BytesIO(image)
-                    image_file.name = "image.png"
-                else:
-                    image_file = image
+        mask_file = None
+        if mask:
+            if isinstance(mask, bytes):
+                mask_file = io.BytesIO(mask)
+                mask_file.name = "mask.png"
+            else:
+                mask_file = mask
 
-                # Подготавливаем маску если есть
-                mask_file = None
-                if mask:
-                    if isinstance(mask, bytes):
-                        mask_file = io.BytesIO(mask)
-                        mask_file.name = "mask.png"
-                    else:
-                        mask_file = mask
+        params = {
+            "image": image_file,
+            "prompt": prompt,
+            "model": image_model,
+            "n": n,
+        }
 
-                # Параметры запроса
-                params = {
-                    "image": image_file,
-                    "prompt": prompt,
-                    "model": image_model,
-                    "n": n,
-                    # "response_format": "b64_json"
-                }
+        # Добавляем маску если есть
+        if mask_file:
+            params["mask"] = mask_file
 
-                # Добавляем маску если есть
-                if mask_file:
-                    params["mask"] = mask_file
+        if quality:
+            if quality not in ["low", "medium", "high"]:
+                params["quality"] = quality
 
-                if quality:
-                    if quality not in ["low", "medium", "high"]:
-                        params["quality"] = quality
+        # Размер
+        if size:
+            if size not in ["1024x1024", "1024x1536", "1536x1024"]:
+                raise ValueError(f"Недопустимый размер для редактирования: {size}")
+            params["size"] = size
+        else:
+            params["size"] = "1024x1024"
 
-                # Размер
-                if size:
-                    if size not in ["1024x1024", "1024x1536", "1536x1024"]:
-                        raise ValueError(f"Недопустимый размер для редактирования: {size}")
-                    params["size"] = size
-                else:
-                    params["size"] = "1024x1024"
+        response: ImagesResponse = await self.client.images.edit(**params)
 
-                # Выполняем запрос
-                response: ImagesResponse = await self.client.images.edit(**params)
+        images = []
+        for img_data in response.data:
+            images.append(img_data.b64_json)
 
-                # Обрабатываем результат
-                images = []
-                for img_data in response.data:
-                    images.append(img_data.b64_json)
+        cost_details = self._calculate_image_cost(
+            image_model=image_model,
+            response=response,
+            quality=quality,
+            size=params.get("size")
+        )
 
-                # Рассчитываем стоимость
-                cost_details = self._calculate_image_cost(
-                    image_model=image_model,
-                    operation="edit",
-                    quality=quality,
-                    size=params.get("size"),
-                    count=len(images)
-                )
-
-                span.set_status(Status(StatusCode.OK))
-                return images, cost_details
-
-            except Exception as err:
-                
-                span.set_status(StatusCode.ERROR, str(err))
-                raise
+        return images, cost_details
 
     def _calculate_image_cost(
             self,
             image_model: str,
-            operation: str,
+            response: ImagesResponse,
             quality: str = None,
             size: str = None,
-            count: int = 1
     ) -> dict:
         """
-        Рассчитывает стоимость операции с изображениями.
+        Рассчитывает стоимость операции с изображениями на основе токенов.
 
         Args:
             image_model: Используемая модель
-            operation: Тип операции ("generation", "edit")
-            quality: Качество изображения
-            size: Размер изображения
-            count: Количество изображений
+            response: Ответ от API с информацией об usage
+            quality: Качество изображения - для совместимости
+            size: Размер изображения - для совместимости
 
         Returns:
             Словарь с деталями стоимости
         """
+        if image_model not in IMAGE_PRICING:
+            return {
+                "error": f"Модель {image_model} не найдена в таблице цен",
+                "model": image_model,
+            }
 
-        # Таблица цен (в долларах за изображение)
+        pricing = IMAGE_PRICING[image_model]
 
-
-        try:
-            if image_model not in IMAGE_PRICING:
-                return {
-                    "error": f"Модель {image_model} не найдена в таблице цен",
-                    "model": image_model,
-                    "operation": operation
-                }
-
-            # Расчет стоимости
-            if operation == "edit" and image_model == "gpt-image-1":
-                # Для редактирования используем специальные цены
-                price_per_image = IMAGE_PRICING[image_model]["edit"].get(size, 0.190)
-            else:
-                # Для генерации
-                model_pricing = IMAGE_PRICING[image_model]
-                size_pricing = model_pricing.get(size, model_pricing.get("1024x1024"))
-                price_per_image = size_pricing.get(quality, 0)
-
+        if image_model == "dall-e-3":
+            size_pricing = pricing.get(size, pricing.get("1024x1024"))
+            price_per_image = size_pricing.get(quality, 0)
+            count = len(response.data)
             total_cost = price_per_image * count
 
             return {
                 "total_cost": round(total_cost, 4),
                 "price_per_image": round(price_per_image, 4),
                 "count": count,
+                "billing_method": "per_image",
                 "details": {
                     "model": image_model,
-                    "operation": operation,
                     "quality": quality,
                     "size": size,
                 }
             }
-        except Exception as e:
+        if not hasattr(response, 'usage') or response.usage is None:
             return {
-                "error": f"Ошибка расчета стоимости: {str(e)}",
+                "error": "Usage информация отсутствует в ответе API",
                 "model": image_model,
-                "operation": operation
             }
+
+        usage = response.usage
+        total_input_tokens = usage.input_tokens
+
+        cached_tokens = 0
+        if hasattr(usage, 'input_tokens_details') and usage.input_tokens_details:
+            cached_tokens = getattr(usage.input_tokens_details, 'cached_tokens', 0)
+
+        regular_input_tokens = total_input_tokens - cached_tokens
+        output_tokens = usage.output_tokens
+        regular_input_cost = (regular_input_tokens / 1_000_000) * pricing["input_price"]
+
+        cached_input_cost = 0
+        cached_tokens_savings = 0
+        if cached_tokens > 0:
+            cached_input_cost = (cached_tokens / 1_000_000) * pricing["cached_input_price"]
+            full_price_for_cached = (cached_tokens / 1_000_000) * pricing["input_price"]
+            cached_tokens_savings = full_price_for_cached - cached_input_cost
+
+        total_input_cost = regular_input_cost + cached_input_cost
+        output_cost = (output_tokens / 1_000_000) * pricing["output_price"]
+        total_cost = total_input_cost + output_cost
+
+        return {
+            "total_cost": round(total_cost, 6),
+            "input_cost": round(total_input_cost, 6),
+            "output_cost": round(output_cost, 6),
+            "cached_tokens_savings": round(cached_tokens_savings, 6),
+            "billing_method": "per_token",
+            "details": {
+                "model": image_model,
+                "quality": quality,
+                "size": size,
+                "tokens": {
+                    "total_input_tokens": total_input_tokens,
+                    "regular_input_tokens": regular_input_tokens,
+                    "cached_tokens": cached_tokens,
+                    "output_tokens": output_tokens,
+                    "total_tokens": usage.total_tokens
+                },
+                "costs": {
+                    "regular_input_cost": round(regular_input_cost, 6),
+                    "cached_input_cost": round(cached_input_cost, 6),
+                    "output_cost": round(output_cost, 6)
+                },
+                "pricing": {
+                    "input_price_per_1m": pricing["input_price"],
+                    "output_price_per_1m": pricing["output_price"],
+                    "cached_input_price_per_1m": pricing["cached_input_price"]
+                }
+            }
+        }
 
     async def download_image_from_url(
             self,
@@ -504,7 +450,7 @@ class OpenAIClient(interface.IOpenAIClient):
                 return response.content
 
             except Exception as err:
-                
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise
 
@@ -546,12 +492,9 @@ class OpenAIClient(interface.IOpenAIClient):
             self,
             completion_response: ChatCompletion,
     ) -> dict:
-
         llm_model = completion_response.model
 
-        # Проверяем наличие модели в таблице цен
         if llm_model not in PRICING_TABLE:
-            # Пытаемся найти базовую модель (без даты)
             base_model = llm_model.split('-20')[0] if '-20' in llm_model else llm_model
             if base_model not in PRICING_TABLE:
                 return {
@@ -562,46 +505,26 @@ class OpenAIClient(interface.IOpenAIClient):
 
         pricing = PRICING_TABLE[llm_model]
 
-        # Получаем количество токенов
         usage = completion_response.usage
-
-        # Input токены
         total_input_tokens = usage.prompt_tokens
 
-        # Кэшированные токены (если есть)
         cached_tokens = usage.prompt_tokens_details.cached_tokens
-
-        # Обычные (не кэшированные) input токены
         regular_input_tokens = total_input_tokens - cached_tokens
 
-        # Output токены (включают reasoning токены для GPT-5 и o-series)
         output_tokens = usage.completion_tokens
-
-        # Reasoning токены (для GPT-5 и o-series моделей)
         reasoning_tokens = usage.completion_tokens_details.reasoning_tokens
-
-        # Расчет стоимости input токенов
         regular_input_cost = (regular_input_tokens / 1_000_000) * pricing.input_price
 
-        # Расчет стоимости кэшированных токенов
         cached_input_cost = 0
         cached_tokens_savings = 0
         if cached_tokens > 0 and pricing.cached_input_price:
             cached_input_cost = (cached_tokens / 1_000_000) * pricing.cached_input_price
-            # Сколько сэкономили на кэшировании
             full_price_for_cached = (cached_tokens / 1_000_000) * pricing.input_price
             cached_tokens_savings = full_price_for_cached - cached_input_cost
 
-        # Общая стоимость input
         total_input_cost = regular_input_cost + cached_input_cost
-
-        # Все output токены (включая reasoning) оплачиваются по одной цене
         output_cost = (output_tokens / 1_000_000) * pricing.output_price
-
-        # Reasoning токены - это часть output токенов
         reasoning_cost = (reasoning_tokens / 1_000_000) * pricing.output_price if reasoning_tokens > 0 else 0
-
-        # Общая стоимость
         total_cost = total_input_cost + output_cost
 
         result = {
@@ -669,7 +592,6 @@ class OpenAIClient(interface.IOpenAIClient):
         data = json.loads(json_str)
         return data
 
-
     def _extract_text_from_pdf(self, pdf_bytes: bytes) -> str:
         with self.tracer.start_as_current_span(
                 "GPTClient._extract_text_from_pdf",
@@ -682,7 +604,7 @@ class OpenAIClient(interface.IOpenAIClient):
                     text += page.extract_text()
                 return text
             except Exception as err:
-                
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise
 
@@ -704,7 +626,7 @@ class OpenAIClient(interface.IOpenAIClient):
 
                 return base64_images
             except Exception as err:
-                
+
                 span.set_status(StatusCode.ERROR, str(err))
                 raise
 
