@@ -10,3 +10,6 @@ class ILoomOrganizationClient(Protocol):
 
     @abstractmethod
     async def get_organization_by_id(self, organization_id: int) -> model.Organization: pass
+
+    @abstractmethod
+    async def get_cost_multiplier(self, organization_id: int) -> model.CostMultiplier: pass

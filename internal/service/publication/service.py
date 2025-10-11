@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from fastapi import UploadFile
 
-from internal import interface, model
+from internal import interface, model, common
 
 from pkg.trace_wrapper import traced_method
 
@@ -40,6 +40,9 @@ class PublicationService(interface.IPublicationService):
         self.loom_tg_bot_client = loom_tg_bot_client
         self.loom_domain = loom_domain
         self.environment = environment
+        self.avg_generate_text_rub_cost = 3
+        self.avg_generate_image_rub_cost = 25
+        self.avg_transcribe_audio_rub_cost = 1
 
     # ПУБЛИКАЦИИ
 
@@ -51,6 +54,10 @@ class PublicationService(interface.IPublicationService):
     ) -> dict:
         category = (await self.repo.get_category_by_id(category_id))[0]
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            raise common.ErrInsufficientBalance()
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             category,
@@ -69,7 +76,10 @@ class PublicationService(interface.IPublicationService):
             llm_model="gpt-5"
         )
 
-        await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
         return publication_data
 
     @traced_method()
@@ -81,6 +91,10 @@ class PublicationService(interface.IPublicationService):
     ) -> dict:
         category = (await self.repo.get_category_by_id(category_id))[0]
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            raise common.ErrInsufficientBalance()
 
         if prompt:
             self.logger.info("Регенерация текста публикации с промптом")
@@ -119,7 +133,10 @@ class PublicationService(interface.IPublicationService):
                 llm_model="gpt-5"
             )
 
-        await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
         return publication_data
 
     @traced_method()
@@ -132,6 +149,11 @@ class PublicationService(interface.IPublicationService):
             image_file: UploadFile = None
     ) -> list[str]:
         category = (await self.repo.get_category_by_id(category_id))[0]
+        organization = await self.organization_client.get_organization_by_id(category.organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            raise common.ErrInsufficientBalance()
 
         if self.environment == "prod":
             size = "1536x1024"
@@ -189,7 +211,10 @@ class PublicationService(interface.IPublicationService):
 
         images_url = await self._upload_images(images)
 
-        await self._debit_organization_balance(category.organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        )
         return images_url
 
     @traced_method()
@@ -640,10 +665,13 @@ class PublicationService(interface.IPublicationService):
             source_post_text: str
     ) -> dict:
         autoposting_category = (await self.repo.get_autoposting_category_by_id(autoposting_category_id))[0]
-
         organization = await self.organization_client.get_organization_by_id(
             autoposting_category.organization_id
         )
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            raise common.ErrInsufficientBalance()
 
         text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
             autoposting_category,
@@ -662,7 +690,10 @@ class PublicationService(interface.IPublicationService):
             temperature=1,
             llm_model="gpt-5"
         )
-        await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            autoposting_category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
 
         return publication_data
 
@@ -673,6 +704,13 @@ class PublicationService(interface.IPublicationService):
             publication_text: str
     ) -> list[str]:
         autoposting_category = (await self.repo.get_autoposting_category_by_id(autoposting_category_id))[0]
+        organization = await self.organization_client.get_organization_by_id(
+            autoposting_category.organization_id
+        )
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+            raise common.ErrInsufficientBalance()
 
         image_system_prompt = await self.prompt_generator.get_generate_autoposting_image_system_prompt(
             autoposting_category.prompt_for_image_style,
@@ -689,7 +727,10 @@ class PublicationService(interface.IPublicationService):
 
         images_url = await self._upload_images(images)
 
-        await self._debit_organization_balance(autoposting_category.organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            autoposting_category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        )
         return images_url
 
     @traced_method()
@@ -792,6 +833,12 @@ class PublicationService(interface.IPublicationService):
             audio_file: UploadFile,
             organization_id: int,
     ) -> str:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "transcribe_audio"):
+            raise common.ErrInsufficientBalance()
+
         audio_content = await audio_file.read()
         transcribed_text, generate_cost = await self.openai_client.transcribe_audio(
             audio_content,
@@ -799,7 +846,10 @@ class PublicationService(interface.IPublicationService):
             "whisper-1",
             "ru"
         )
-        await self._debit_organization_balance(organization_id, generate_cost["total_cost"])
+        await self._debit_organization_balance(
+            organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.transcribe_audio_cost_multiplier,
+        )
 
         return transcribed_text
 
@@ -814,6 +864,20 @@ class PublicationService(interface.IPublicationService):
             image_url = f"https://{self.loom_domain}/api/content/image/{upload_response.fid}/{image_name}"
             images_url.append(image_url)
         return images_url
+
+    def _check_balance(
+            self,
+            organization: model.Organization,
+            organization_cost_multiplier: model.CostMultiplier,
+            operation: str
+    ) -> bool:
+        if operation == "generate_text":
+            return float(organization.rub_balance) < organization_cost_multiplier.generate_text_cost_multiplier * self.avg_generate_text_rub_cost
+        elif operation == "generate_image":
+            return float(organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
+        elif operation == "transcribe_audio":
+            return float(organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
+        return True
 
     async def _debit_organization_balance(self, organization_id: int, usd_cost: float):
         usd_cost = Decimal(str(usd_cost))
