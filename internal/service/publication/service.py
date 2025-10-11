@@ -57,6 +57,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
@@ -94,6 +95,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         if prompt:
@@ -153,6 +155,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         if self.environment == "prod":
@@ -671,6 +674,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
@@ -710,6 +714,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         image_system_prompt = await self.prompt_generator.get_generate_autoposting_image_system_prompt(
@@ -837,6 +842,7 @@ class PublicationService(interface.IPublicationService):
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "transcribe_audio"):
+            self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
         audio_content = await audio_file.read()
