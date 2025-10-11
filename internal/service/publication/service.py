@@ -154,7 +154,7 @@ class PublicationService(interface.IPublicationService):
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
-        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
+        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
