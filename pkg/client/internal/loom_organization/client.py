@@ -41,3 +41,10 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
         json_response = response.json()
 
         return model.Organization(**json_response)
+
+    @traced_method(SpanKind.CLIENT)
+    async def get_cost_multiplier(self, organization_id: int) -> model.CostMultiplier:
+        response = await self.client.get(f"/cost-multiplier/{organization_id}")
+        json_response = response.json()
+
+        return model.CostMultiplier(**json_response)

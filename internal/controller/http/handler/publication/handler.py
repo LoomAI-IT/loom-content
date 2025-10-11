@@ -2,7 +2,7 @@ from fastapi import Form, UploadFile, File
 
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from internal import interface
+from internal import interface, common
 from internal.controller.http.handler.publication.model import *
 from pkg.log_wrapper import auto_log
 from pkg.trace_wrapper import traced_method
@@ -26,14 +26,22 @@ class PublicationController(interface.IPublicationController):
             self,
             body: GeneratePublicationTextBody,
     ) -> JSONResponse:
-        text_data = await self.publication_service.generate_publication_text(
-            category_id=body.category_id,
-            text_reference=body.text_reference
-        )
-        return JSONResponse(
-            status_code=200,
-            content=text_data
-        )
+        try:
+            text_data = await self.publication_service.generate_publication_text(
+                category_id=body.category_id,
+                text_reference=body.text_reference
+            )
+            return JSONResponse(
+                status_code=200,
+                content=text_data
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -41,16 +49,24 @@ class PublicationController(interface.IPublicationController):
             self,
             body: RegeneratePublicationTextBody,
     ) -> JSONResponse:
-        text_data = await self.publication_service.regenerate_publication_text(
-            category_id=body.category_id,
-            publication_text=body.publication_text,
-            prompt=body.prompt
-        )
+        try:
+            text_data = await self.publication_service.regenerate_publication_text(
+                category_id=body.category_id,
+                publication_text=body.publication_text,
+                prompt=body.prompt
+            )
 
-        return JSONResponse(
-            status_code=200,
-            content=text_data
-        )
+            return JSONResponse(
+                status_code=200,
+                content=text_data
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -62,18 +78,26 @@ class PublicationController(interface.IPublicationController):
             prompt: str | None = Form(None),
             image_file: UploadFile = File(None),
     ) -> JSONResponse:
-        images_url = await self.publication_service.generate_publication_image(
-            category_id=category_id,
-            publication_text=publication_text,
-            text_reference=text_reference,
-            prompt=prompt,
-            image_file=image_file,
-        )
+        try:
+            images_url = await self.publication_service.generate_publication_image(
+                category_id=category_id,
+                publication_text=publication_text,
+                text_reference=text_reference,
+                prompt=prompt,
+                image_file=image_file,
+            )
 
-        return JSONResponse(
-            status_code=200,
-            content=images_url
-        )
+            return JSONResponse(
+                status_code=200,
+                content=images_url
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -530,9 +554,17 @@ class PublicationController(interface.IPublicationController):
             organization_id: int = Form(...),
             audio_file: UploadFile = File(...),
     ) -> JSONResponse:
-        text = await self.publication_service.transcribe_audio(audio_file, organization_id)
+        try:
+            text = await self.publication_service.transcribe_audio(audio_file, organization_id)
 
-        return JSONResponse(
-            content={"text": text},
-            status_code=200
-        )
+            return JSONResponse(
+                content={"text": text},
+                status_code=200
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
