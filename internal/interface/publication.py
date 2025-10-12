@@ -741,6 +741,14 @@ class IPublicationPromptGenerator(Protocol):
         pass
 
     @abstractmethod
+    async def get_generate_publication_text_system_prompt_INoT(
+            self,
+            category: model.Category,
+            organization: model.Organization,
+    ) -> str:
+        pass
+
+    @abstractmethod
     async def get_regenerate_publication_text_system_prompt(
             self,
             category: model.Category,
