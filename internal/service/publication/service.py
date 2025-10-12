@@ -867,6 +867,16 @@ class PublicationService(interface.IPublicationService):
             audio_file: UploadFile,
             organization_id: int,
     ) -> str:
+        if organization_id == -1:
+            audio_content = await audio_file.read()
+            transcribed_text, generate_cost = await self.openai_client.transcribe_audio(
+                audio_content,
+                audio_file.filename,
+                "whisper-1",
+                "ru"
+            )
+            return transcribed_text
+
         organization = await self.organization_client.get_organization_by_id(organization_id)
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
