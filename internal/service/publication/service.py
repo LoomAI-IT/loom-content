@@ -60,7 +60,7 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
+        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
             category,
             organization
         )
