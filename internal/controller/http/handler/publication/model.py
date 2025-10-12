@@ -33,22 +33,22 @@ class CreateCategoryBody(BaseModel):
     name: str
 
     goal: str
-    tone_of_voice: list[str] = []
-    brand_rules: list[str] = []
-    brand_vocabulary: list[dict] = []
-    tone_variations: list[dict] = []
+    tone_of_voice: list[str]
+    brand_rules: list[str]
+    brand_vocabulary: list[dict]
+    tone_variations: list[dict]
 
-    structure_variations: list[dict] = []
-    creativity_level: int = 5
-    experimentation_zones: list[str] = []
-    surprise_factors: list[dict] = []
-    humor_policy: dict = {}
-    audience_segments: list[dict] = []
-    emotional_palette: list[dict] = []
-    platform_specific_rules: dict = {}
+    structure_variations: list[dict]
+    creativity_level: int
+    experimentation_zones: list[str]
+    surprise_factors: list[dict]
+    humor_policy: dict
+    audience_segments: list[dict]
+    emotional_palette: list[dict]
+    platform_specific_rules: dict
 
-    must_have: list[dict] = []
-    must_avoid: list[dict] = []
+    must_have: list[dict]
+    must_avoid: list[dict]
 
     len_min: int
     len_max: int
@@ -57,11 +57,11 @@ class CreateCategoryBody(BaseModel):
     n_hashtags_max: int
 
     cta_type: str
-    cta_strategy: dict = {}
+    cta_strategy: dict
 
-    good_samples: list[dict] = []
-    bad_samples: list[dict] = []
-    additional_info: list[dict] = []
+    good_samples: list[dict]
+    bad_samples: list[dict]
+    additional_info: list[dict]
 
     prompt_for_image_style: str
 
