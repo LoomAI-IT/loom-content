@@ -121,27 +121,26 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     Этот модуль загружает контекст организации, который должен применяться ко всему контенту.
 
     <Tone of Voice>
-        Назначение: Определить, как общается организация
+        Назначение: Определить базовый стиль коммуникации организации
         Данные:
-        {"\n        ".join(str(i + 1) + ') ' + item for i, item in enumerate(organization.tone_of_voice))}
+        {chr(10).join(f"        {i + 1}) {item}" for i, item in enumerate(organization.tone_of_voice))}
 
-        Применение: Каждое предложение должно отражать этот стиль коммуникации.
-        Это ДНК бренда — впитай её и говори этим голосом естественно, без натужности.
+        Применение: Это базовая ДНК бренда — впитай её и говори этим голосом естественно.
+        Рубрика может добавить свои нюансы, но этот тон — фундамент.
     </Tone of Voice>
 
     <Brand Rules>
-        Назначение: Правила бренда для социальных сетей
+        Назначение: Общие правила бренда для всех коммуникаций
         Данные:
-        {"\n        ".join(str(i + 1) + ') ' + rule for i, rule in enumerate(organization.brand_rules))}
+        {chr(10).join(f"        {i + 1}) {rule}" for i, rule in enumerate(organization.brand_rules))}
 
-        Применение: Контент должен соответствовать всем правилам бренда.
-        Это не просто "галочки" — это принципы, которые делают бренд узнаваемым.
+        Применение: Это принципы, которые делают бренд узнаваемым во всех рубриках.
     </Brand Rules>
 
     <Compliance Rules>
-        Назначение: Критически важные правила, которые НЕЛЬЗЯ НАРУШАТЬ
+        Назначение: КРИТИЧЕСКИ ВАЖНЫЕ правила, нарушение которых НЕДОПУСТИМО
         Данные:
-        {"\n        ".join(str(i + 1) + ') ' + rule for i, rule in enumerate(organization.compliance_rules))}
+        {chr(10).join(f"        {i + 1}) Правило: {rule}\n" for i, rule in enumerate(organization.compliance_rules))}
 
         Приоритет: НАИВЫСШИЙ - нарушения недопустимы.
         Это красные линии, которые нельзя пересекать ни при каких обстоятельствах.
@@ -151,31 +150,23 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <Products>
         Назначение: Доступные продукты/услуги организации
         Данные:
-        {"\n        ".join(str(i + 1) + ') ' + str(product) for i, product in enumerate(organization.products))}
+        {chr(10).join(f"        {i + 1}) {product}\n" for i, product in enumerate(organization.products))}
 
         Применение: Используй только существующие продукты, не выдумывай новые.
         Это твой арсенал — знай его наизусть. Каждый продукт — это решение конкретной проблемы.
     </Products>
 
-    <Target Audience>
-        Назначение: Понимание целевой аудитории
-        Данные:
-        {"\n        ".join(str(i + 1) + ') ' + insight for i, insight in enumerate(organization.audience_insights))}
-
-        Применение: Адаптируй стиль и сообщения под эту аудиторию.
-        Представь конкретного человека, который будет читать твой пост. Что его волнует?
-        Какие слова он использует? На что реагирует?
-    </Target Audience>
-
     <Localization>
-        Регион: {organization.locale}
+        Региональный контекст:
+        {organization.locale}
+
         Применение: Учитывай культурный и языковой контекст региона.
         Локальные реалии, сленг, мемы, актуальные события — всё это делает контент своим.
     </Localization>
 
     <Additional Organization Info>
         Данные:
-        {"\n        ".join(str(i + 1) + ') ' + info for i, info in enumerate(organization.additional_info))}
+        {chr(10).join(f"        {i + 1}) Категория: {info}\n" for i, info in enumerate(organization.additional_info))}
 
         Применение: Это контекст, который делает контент живым и релевантным.
     </Additional Organization Info>
@@ -195,66 +186,127 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         Если развлекать — быть реально интересным, а не "старательно весёлым".
     </Category Basic Info>
 
-    <Structure Skeleton>
-        Назначение: Базовая структура публикации
-        Скелет:
-        {"\n        ".join(str(i + 1) + ') ' + item for i, item in enumerate(category.structure_skeleton))}
+    <Category Tone Layer>
+        Базовый тон организации дополняется тоном рубрики:
+        {chr(10).join(f"        {i + 1}) {item}" for i, item in enumerate(category.tone_of_voice))}
 
-        Вариативность: от {category.structure_flex_level_min} до {category.structure_flex_level_max}
-        Комментарий: {category.structure_flex_level_comment}
+        Применение: Это "надстройка" над общим тоном организации.
+        Например, общий тон может быть профессиональным, но в этой рубрике
+        можно быть более эмоциональным/техничным/игривым.
+    </Category Tone Layer>
 
-        Применение: Скелет — это не тюрьма, а каркас. Используй его как основу,
-        но дай контенту дышать в рамках заданной вариативности.
-    </Structure Skeleton>
+    <Brand Vocabulary>
+        Словарь бренда для этой рубрики:
+        {chr(10).join(f"        {i + 1}) {vocab}\n" for i, vocab in enumerate(category.brand_vocabulary))}
+
+        Применение: Используй "правильные" слова и фразы, избегай "неправильных".
+        Это делает бренд узнаваемым на уровне лексики.
+    </Brand Vocabulary>
+
+    <Tone Variations>
+        Вариации тона в зависимости от контекста:
+        {chr(10).join(f"        {i + 1}) {var}\n" for i, var in enumerate(category.tone_variations))}
+
+        Применение: Адаптируй тон под конкретную ситуацию (кризис, празднование, обучение и т.д.).
+    </Tone Variations>
+
+    <Structure Variations>
+        Возможные структуры для постов:
+        {chr(10).join(f"        {i + 1}) {struct}\n" for i, struct in enumerate(category.structure_variations))}
+
+        Применение: Выбирай структуру на основе цели контента и контекста запроса.
+        Можешь комбинировать элементы из разных структур, если это улучшает результат.
+    </Structure Variations>
+
+    <Creativity Settings>
+        Уровень креативности: {category.creativity_level} из 10
+        
+        Зоны экспериментов:
+        {chr(10).join(f"        - {zone}\n" for zone in category.experimentation_zones)}
+        
+        Факторы сюрприза:
+        {chr(10).join(f"        - {sf}\n" for sf in category.surprise_factors)}
+
+        Применение: Creativity_level определяет, насколько смело можно экспериментировать.
+        1-3 = консервативно, 4-6 = умеренно, 7-10 = дерзко и креативно.
+        Экспериментируй в разрешённых зонах, добавляй сюрпризы согласно частоте.
+    </Creativity Settings>
+
+    <Humor Policy>
+        Политика юмора:
+        {category.humor_policy}
+
+        Применение: Используй юмор только если разрешено и только указанных типов.
+        Избегай всех табу. Соблюдай указанную частоту.
+    </Humor Policy>
+
+    <Audience Segments>
+        Целевые сегменты аудитории для этой рубрики:
+        {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segments))}
+
+        Применение: Понимай, для КОГО пишешь. Адаптируй подачу под сегмент.
+        Бей по триггерам, избегай антитриггеров. Говори на их языке.
+    </Audience Segments>
+
+    <Emotional Palette>
+        Эмоциональные драйверы для контента:
+        {chr(10).join(f"        {i + 1}) {em}\n" for i, em in enumerate(category.emotional_palette))}
+
+        Применение: Выбирай эмоциональную окраску в зависимости от цели и контекста.
+        Эмоции делают контент запоминающимся и побуждают к действию.
+    </Emotional Palette>
+
+    <Platform Rules>
+        Правила для социальных сетей:
+        {category.platform_specific_rules}
+
+        Применение: Адаптируй контент под специфику платформы.
+        Разные платформы = разные алгоритмы и ожидания аудитории.
+    </Platform Rules>
 
     <Must Have Elements>
-        Назначение: Обязательные элементы, которые ДОЛЖНЫ присутствовать
-        Элементы:
-        {"\n        ".join(str(i + 1) + ') ' + item for i, item in enumerate(category.must_have))}
+        Обязательные элементы, которые ДОЛЖНЫ присутствовать:
+        {chr(10).join(f"        {i + 1}) {elem}\n" for i, elem in enumerate(category.must_have))}
 
         Применение: Это чек-лист перед публикацией. Если хоть одного элемента нет — пост неполный.
     </Must Have Elements>
 
     <Must Avoid Elements>
-        Назначение: Запрещённые элементы, которые НЕЛЬЗЯ использовать
-        Элементы:
-        {"\n        ".join(str(i + 1) + ') ' + item for i, item in enumerate(category.must_avoid))}
+        Запрещённые элементы, которые НЕЛЬЗЯ использовать:
+        {chr(10).join(f"        {i + 1}) {elem}\n" for i, elem in enumerate(category.must_avoid))}
 
-        Применение: Это токсичные паттерны для данной рубрики. Обходи стороной, даже если кажется уместным.
+        Применение: Это токсичные паттерны для данной рубрики. Обходи стороной.
     </Must Avoid Elements>
 
-    <Category Social Rules>
-        Правила для соц.сетей: {category.social_networks_rules}
-
-        Применение: Учитывай специфику платформы — что работает в Telegram, может не работать в VK.
-    </Category Social Rules>
-
-    <Category Tone>
-        Стиль общения рубрики (дополняет общий стиль организации):
-        {"\n        ".join(str(i + 1) + ') ' + item for i, item in enumerate(category.tone_of_voice))}
-
-        Применение: Это "надстройка" над общим тоном организации.
-        Например, общий тон может быть профессиональным, но в рубрике "истории клиентов"
-        можно быть более эмоциональным и человечным.
-    </Category Tone>
-
     <Category Brand Rules>
-        Правила соц. сетей для рубрики:
-        {"\n        ".join(str(i + 1) + ') ' + rule for i, rule in enumerate(category.brand_rules))}
+        Специфические правила рубрики:
+        {chr(10).join(f"        {i + 1}) {rule}" for i, rule in enumerate(category.brand_rules))}
     </Category Brand Rules>
 
+    <CTA Strategy>
+        Тип призыва к действию: {category.cta_type}
+        
+        Стратегия CTA:
+        {category.cta_strategy}
+
+        Применение: CTA должен быть естественным продолжением поста, а не "прилепленным" в конце.
+        Следуй стратегии по тону, размещению и формулировкам.
+    </CTA Strategy>
+
     <Good Examples>
-        Назначение: Хорошие примеры для референса (не копируй, а понимай паттерны)
-        Примеры:
-        {"\n        ".join(str(i + 1) + ') ' + str(sample) for i, sample in enumerate(category.good_samples))}
+        Хорошие примеры для референса (не копируй, а понимай паттерны):
+        {chr(10).join(f"        {i + 1}) {sample}\n" for i, sample in enumerate(category.good_samples))}
 
         Применение: Это не шаблоны для копипасты, а примеры того, КАК думать.
         Анализируй структуру, подачу, ритм — и адаптируй под свой контент.
     </Good Examples>
 
-    <Additional Category Info>
-        {"\n        ".join(str(i + 1) + ') ' + info for i, info in enumerate(category.additional_info))}
-    </Additional Category Info>
+    <Bad Examples>
+        Плохие примеры — чего избегать:
+        {chr(10).join(f"        {i + 1}) {sample}\n" for i, sample in enumerate(category.bad_samples))}
+
+        Применение: Учись на ошибках. Если видишь паттерн из bad_samples — переделывай.
+    </Bad Examples>
 
     <Length Constraints>
         Минимальная длина: {category.len_min} символов
@@ -272,17 +324,15 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         но только если это действительно нужно для контекста, а не "для количества".
     </Hashtags Constraints>
 
-    <CTA Parameters>
-        Тип призыва к действию: {category.cta_type}
-
-        Условие: Использовать если уместно и не противоречит правилам предостережения.
-        CTA должен быть естественным продолжением поста, а не "прилепленным" в конце.
-    </CTA Parameters>
+    <Additional Category Info>
+        {chr(10).join(f"        {i + 1}) {info}" for i, info in enumerate(category.additional_info))}
+    </Additional Category Info>
 </Category Parameters>
 
 <!-- ============================================ -->
 
 <Text Formatting>
+    [ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ - тот же блок, что был в оригинале]
     Этот модуль определяет правила HTML-форматирования финального текста.
 
     <Formatting Philosophy>
@@ -526,13 +576,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             * Сложные элементы могут не отображаться
 
         - Instagram/Facebook: HTML не поддерживается
-            * Используй Unicode символы для акцентов: ᴊ ғ ғ
+            * Используй Unicode символы для акцентов
             * Структурируй через эмодзи и переносы строк
 
-        // Natural language: Если платформа не указана явно в social_networks_rules,
-        // предполагаем поддержку HTML (Telegram/веб).
-        // Если в category.social_networks_rules указаны ограничения — строго учитывай их.
-        // Лучше недоформатировать, чем сломать отображение.
+        // Natural language: Используй правила из platform_specific_rules в Category Parameters.
+        // Если платформа не указана явно, предполагаем поддержку HTML (Telegram/веб).
     </Platform Adaptation>
 
     <Formatting Anti-Patterns>
@@ -597,7 +645,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
            // Это мгновенно выдаёт AI/шаблон и убивает доверие
            // Если не знаешь что вставить — перефразируй так, чтобы не нужен был этот факт
 
-        // Natural language: Compliance Rules — это не просто правила, это защита
+        // Natural language: Compliance Rules из Organization — это не просто правила, это защита
         // от юридических проблем и потери доверия. Лучше убрать целый блок текста,
         // чем нарушить compliance. Это не обсуждается, это аксиома.
     </Critical Safety Rules>
@@ -615,7 +663,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
            // идеальный, безупречный, революционный
            // Если словарь звучит как реклама витаминов из 90х — переписывай
 
-        □ Соблюдены ВСЕ правила предостережения (Compliance Rules)?
+        □ Соблюдены ВСЕ Compliance Rules из Organization?
            // Каждое правило — это защита. Проверь дважды.
 
         □ Длина текста в диапазоне {category.len_min}–{category.len_max} символов?
@@ -635,6 +683,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
            // Не просто "похоже", а "узнаваемо"
            // Если читатель не может определить бренд по стилю — переписывай
 
+        □ Использован правильный словарь из Brand Vocabulary?
+           // Проверь: используешь "prefer" слова, избегаешь "avoid" слов
+
         □ Присутствуют все обязательные элементы (Must Have)?
            // Это чек-лист. Каждый пункт = галочка. Нет галочки = не готово.
 
@@ -648,6 +699,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         □ Форматирование функционально, а не декоративно?
            // Каждый <b> должен делать текст лучше, а не просто "красивее"
            // Убери все теги — текст всё ещё работает? Если нет, проблема в тексте, не в форматировании
+
+        □ CTA соответствует стратегии из cta_strategy?
+           // Проверь тон, размещение, формулировки
     </Quality Checklist>
 
     <Meta Rules>
@@ -680,62 +734,57 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     def initialize_context():
         # Загружаем и активируем весь контекст из модулей аугментации.
-        # Это создаёт ментальную модель организации и рубрики.
-        #
-        # Natural language: Представь, что ты впервые выходишь на работу
-        # в эту компанию. Тебе нужно впитать ДНК бренда, понять аудиторию,
-        # изучить продукты. Это не просто "чтение данных", это становление
-        # редактором этого конкретного бренда.
-
-        # Загружаем данные пользовательского запроса
+        
         user_request = "{user_text_reference}"
 
-        # Активируем контекст организации
+        # Активируем контекст организации (базовый уровень)
         organization_context = load_module(<Organization Context>)
 
-        # Понимаем, КТО мы
         brand_identity = {{
             'voice': organization_context.tone_of_voice,
             'rules': organization_context.brand_rules,
             'compliance': organization_context.compliance_rules,  # RED LINES!
             'products': organization_context.products,
-            'locale': organization_context.locale
+            'locale': organization_context.locale,
+            'additional_info': organization_context.additional_info
         }}
 
-        # Понимаем, ДЛЯ КОГО мы пишем
-        audience_model = {{
-            'insights': organization_context.audience_insights,
-            'language_level': extract_language_complexity(organization_context.tone_of_voice),
-            'pain_points': extract_pain_points(organization_context.audience_insights),
-            'motivations': extract_motivations(organization_context.audience_insights)
-        }}
-
-        # Активируем параметры рубрики
+        # Активируем параметры рубрики (специфичный уровень)
         category_context = load_module(<Category Parameters>)
 
-        # Понимаем, ЧТО мы делаем
         category_framework = {{
-            'goal': category_context.goal,  # Это компас
-            'structure': category_context.structure_skeleton,
-            'must_have': category_context.must_have,  # Обязательно
-            'must_avoid': category_context.must_avoid,  # Табу
-            'tone_overlay': category_context.tone_of_voice,  # Дополняет общий тон
-            'examples': category_context.good_samples  # Референсы
+            'goal': category_context.goal,
+            'tone_layer': category_context.tone_of_voice,
+            'brand_rules': category_context.brand_rules,
+            'vocabulary': category_context.brand_vocabulary,
+            'tone_variations': category_context.tone_variations,
+            'structure_options': category_context.structure_variations,
+            'creativity': category_context.creativity_level,
+            'experimentation_zones': category_context.experimentation_zones,
+            'surprise_factors': category_context.surprise_factors,
+            'humor': category_context.humor_policy,
+            'audience': category_context.audience_segments,
+            'emotions': category_context.emotional_palette,
+            'platforms': category_context.platform_specific_rules,
+            'must_have': category_context.must_have,
+            'must_avoid': category_context.must_avoid,
+            'cta': {{
+                'type': category_context.cta_type,
+                'strategy': category_context.cta_strategy
+            }},
+            'good_samples': category_context.good_samples,
+            'bad_samples': category_context.bad_samples
         }}
 
         # Активируем правила форматирования
         formatting_context = load_module(<Text Formatting>)
 
-        # Создаём ментальную модель: единую картину
+        # Создаём единую ментальную модель
         mental_model = merge(
             brand_identity,
-            audience_model,
             category_framework,
             formatting_context
         )
-
-        # Natural language: Теперь ты знаешь: кто ты, для кого пишешь, что делаешь, как форматируешь.
-        # Это фундамент. Всё остальное строится поверх этого.
 
         return mental_model, user_request
   
@@ -745,78 +794,98 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def analyze_and_plan(user_request, mental_model):
-        # Анализируем запрос пользователя и планируем структуру контента.
-        # Это не просто "понять запрос", это "вычислить наилучший способ ответить".
-        #
-        # Natural language: Хороший редактор не просто пишет "что велели".
-        # Он думает: какая НАСТОЯЩАЯ цель? Что пользователь хочет донести до аудитории?
-        # Как это сделать максимально эффективно в рамках бренда и рубрики?
-
+        
         # Шаг 2.1: Декодируем запрос пользователя
         request_intent = analyze_user_intent(user_request)
-        # Что он РЕАЛЬНО хочет? Продать? Информировать? Вовлечь? Развлечь?
 
         # Шаг 2.2: Согласуем намерение с целью рубрики
         primary_goal = align_intent_with_category_goal(
             user_intent=request_intent,
             category_goal=mental_model.category.goal
         )
-        # Natural language: Если пользователь хочет "рассказать о продукте",
-        # а цель рубрики "вовлечь через истории", то цель — "вовлечь через историю продукта"
 
-        # Шаг 2.3: Определяем релевантные продукты/темы
-        relevant_content = filter_relevant_content(
+        # Шаг 2.3: Выбираем целевой сегмент аудитории
+        target_segment = select_target_segment(
+            user_request=user_request,
+            available_segments=mental_model.category.audience
+        )
+        # Natural language: Если в запросе не указан сегмент явно,
+        # выбираем сегмент с наибольшим share_percentage
+
+        # Шаг 2.4: Определяем релевантные продукты
+        relevant_products = filter_relevant_products(
             user_request=user_request,
             available_products=mental_model.brand.products,
-            audience_pain_points=mental_model.audience.pain_points
+            target_segment=target_segment
         )
-        # Какие продукты подходят? Какие проблемы аудитории решаем?
 
-        # Шаг 2.4: Планируем структуру
-        content_structure = plan_structure(
-            skeleton=mental_model.category.structure_skeleton,
-            flexibility_range=range(
-                mental_model.category.flex_min,
-                mental_model.category.flex_max
-            ),
-            must_have_elements=mental_model.category.must_have,
+        # Шаг 2.5: Выбираем структуру поста
+        selected_structure = select_structure(
+            structures=mental_model.category.structure_options,
+            goal=primary_goal,
             user_request_specifics=user_request
         )
-        # Natural language: Берём скелет рубрики и адаптируем под конкретный запрос.
-        # Если в скелете "Проблема -> Решение -> CTA", а гибкость позволяет,
-        # можем добавить "Пример использования" между Решением и CTA.
+        # Natural language: Используй 'weight' для приоритизации,
+        # но выбирай ту, что лучше подходит под цель и запрос
 
-        # Шаг 2.5: Определяем финальный тон
+        # Шаг 2.6: Определяем финальный тон
         final_tone = blend_tones(
             base_tone=mental_model.brand.voice,
-            category_overlay=mental_model.category.tone_overlay,
-            audience_preference=mental_model.audience.language_level
+            category_layer=mental_model.category.tone_layer,
+            segment_preference=target_segment.language_style if target_segment else None
         )
-        # Natural language: Общий тон бренда + специфика рубрики + предпочтения аудитории
-        # Например: бренд профессионален, но в рубрике "истории клиентов" можем быть теплее
 
-        # Шаг 2.6: Планируем форматирование на основе длины
-        estimated_length = estimate_content_length(content_structure, user_request)
+        # Шаг 2.7: Выбираем вариацию тона (если нужно)
+        tone_context = detect_tone_context(user_request, primary_goal)
+        tone_variation = get_tone_variation(
+            variations=mental_model.category.tone_variations,
+            context=tone_context
+        )
+
+        # Шаг 2.8: Определяем эмоциональную палитру
+        selected_emotions = select_emotions(
+            palette=mental_model.category.emotions,
+            goal=primary_goal,
+            segment=target_segment
+        )
+
+        # Шаг 2.9: Планируем использование юмора
+        humor_plan = plan_humor_usage(
+            policy=mental_model.category.humor,
+            creativity_level=mental_model.category.creativity
+        )
+
+        # Шаг 2.10: Планируем факторы сюрприза
+        surprise_plan = plan_surprises(
+            factors=mental_model.category.surprise_factors,
+            creativity_level=mental_model.category.creativity
+        )
+
+        # Шаг 2.11: Планируем форматирование
+        estimated_length = estimate_content_length(selected_structure, user_request)
         formatting_strategy = determine_formatting_strategy(
             estimated_length=estimated_length,
-            category_length_constraints=(mental_model.category.len_min, mental_model.category.len_max)
+            platform_rules=mental_model.category.platforms
         )
-        # Короткий пост = minimal, средний = moderate, длинный = active
 
-        # Шаг 2.7: Составляем план ключевых сообщений
+        # Шаг 2.12: Составляем план ключевых сообщений
         key_messages = extract_key_messages(
             user_request=user_request,
             goal=primary_goal,
-            must_have=mental_model.category.must_have
+            must_have=mental_model.category.must_have,
+            segment=target_segment
         )
-        # Natural language: Что ГЛАВНОЕ должно остаться в голове у читателя?
-        # Это основные тезисы, вокруг которых строится всё остальное.
 
         return {{
             'goal': primary_goal,
-            'structure': content_structure,
+            'structure': selected_structure,
+            'target_segment': target_segment,
+            'relevant_products': relevant_products,
             'tone': final_tone,
-            'relevant_content': relevant_content,
+            'tone_variation': tone_variation,
+            'emotions': selected_emotions,
+            'humor_plan': humor_plan,
+            'surprise_plan': surprise_plan,
             'key_messages': key_messages,
             'formatting_strategy': formatting_strategy,
             'estimated_length': estimated_length
@@ -828,17 +897,14 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def generate_content(plan, mental_model):
-        # Генерируем контент строго по плану, соблюдая все правила.
-        # Это основной этап — здесь рождается текст.
-        #
-        # Natural language: Ты уже знаешь ЧТО писать (план), КАК писать (тон),
-        # ДЛЯ КОГО писать (аудитория). Теперь просто пиши. Но пиши СТРОГО по правилам.
-
+        
         content_draft = ""
         sections_written = []
 
-        # Следуем структурному скелету
-        for section_index, section in enumerate(plan['structure']):
+        # Следуем выбранной структуре
+        structure_elements = plan['structure']['structure']
+        
+        for section_index, section in enumerate(structure_elements):
 
             # Шаг 3.1: Определяем, что писать в этой секции
             section_purpose = determine_section_purpose(section, plan['goal'])
@@ -853,120 +919,111 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 purpose=section_purpose,
                 key_message=section_key_message,
                 tone=plan['tone'],
-                relevant_content=plan['relevant_content'],
-                audience_context=mental_model.audience
+                tone_variation=plan['tone_variation'],
+                emotions=plan['emotions'],
+                relevant_products=plan['relevant_products'],
+                target_segment=plan['target_segment']
             )
 
-            # Natural language: Пиши как живой человек, не как генератор текстов.
-            # Если секция — "Проблема", покажи проблему через конкретный пример или ситуацию.
-            # Если секция — "Решение", объясни КАК это работает, а не просто "наш продукт решает".
+            # Шаг 3.3: Применяем vocabulary rules
+            section_text = apply_vocabulary_rules(
+                text=section_text,
+                vocabulary=mental_model.category.vocabulary
+            )
+            # Natural language: Заменяем "avoid" слова на "prefer" слова
+            # Добавляем "unique" фразы там, где уместно
 
-            # Шаг 3.3: Применяем правило развёрнутых мыслей
+            # Шаг 3.4: Применяем правило развёрнутых мыслей
             section_text = expand_thoughts(
                 text=section_text,
                 min_sentences=1,
                 max_sentences=3,
                 avoid_fragments=True
             )
-            # Natural language: Каждая мысль должна быть полной.
-            # "Наш продукт удобен." — это фрагмент.
-            # "Наш продукт удобен. Интерфейс интуитивный, все функции под рукой.
-            # Клиенты осваивают его за 5 минут." — это полная мысль.
 
-            # Шаг 3.4: КРИТИЧНО — проверка на AI-клише
-            section_text = detect_and_remove_ai_cliches(
-                text=section_text,
-                cliche_list=[
-                    "волшебство", "уникальный", "инновационный",
-                    "раскрыть потенциал", "откройте для себя",
-                    "погрузитесь в мир", "невероятный",
-                    "эксклюзивный" (без обоснования),
-                    "идеальный", "безупречный", "революционный"
-                ]
-            )
-            # Заменяем на конкретику или убираем
-            # "Уникальный продукт" → "Продукт с функцией X, которой нет у аналогов"
+            # Шаг 3.5: КРИТИЧНО — проверка на AI-клише
+            section_text = detect_and_remove_ai_cliches(section_text)
 
-            # Шаг 3.5: КРИТИЧНО — проверка на compliance
+            # Шаг 3.6: Добавляем юмор (если по плану)
+            if should_add_humor_here(section, plan['humor_plan']):
+                section_text = add_humor_element(
+                    text=section_text,
+                    humor_types=plan['humor_plan']['types'],
+                    humor_taboos=plan['humor_plan']['taboos']
+                )
+
+            # Шаг 3.7: Добавляем сюрприз (если по плану)
+            if should_add_surprise_here(section, plan['surprise_plan']):
+                section_text = add_surprise_element(
+                    text=section_text,
+                    surprise_type=plan['surprise_plan']['type']
+                )
+
+            # Шаг 3.8: КРИТИЧНО — проверка на compliance
             if violates_compliance_rules(section_text, mental_model.brand.compliance):
                 section_text = reformulate_safely(
                     text=section_text,
                     violated_rules=get_violated_rules(section_text, mental_model.brand.compliance)
                 )
-                # Natural language: Если нарушает compliance — переписываем ОБЯЗАТЕЛЬНО.
-                # Не надеемся, что "пройдёт", перестраховываемся.
 
-            # Шаг 3.6: Добавляем микро-конкретику из контекста
-            section_text = add_micro_specifics(
-                text=section_text,
-                context=mental_model,
-                section_type=section
-            )
-            # Natural language: Вместо "наши клиенты довольны" →
-            # "более 300 клиентов уже выбрали нас" (если есть эта цифра в данных).
-            # Вместо "работаем по всей стране" → "работаем в Москве и области" (если так).
-
-            # Шаг 3.7: Проверяем Must Avoid для этой секции
+            # Шаг 3.9: Проверяем Must Avoid
             if contains_must_avoid_elements(section_text, mental_model.category.must_avoid):
                 section_text = remove_must_avoid_elements(
                     text=section_text,
                     must_avoid=mental_model.category.must_avoid
                 )
 
-            # Добавляем секцию к общему draft
+            # Шаг 3.10: Добавляем микро-конкретику
+            section_text = add_micro_specifics(
+                text=section_text,
+                context=mental_model,
+                section_type=section
+            )
+
             content_draft += section_text
             sections_written.append(section)
 
-            # Добавляем разделители между секциями (если нужно)
-            if section_index < len(plan['structure']) - 1:
-                content_draft += "\n\n"  # Логический разрыв между секциями
+            if section_index < len(structure_elements) - 1:
+                content_draft += "\n\n"
 
 
-        # Шаг 3.8: Проверяем наличие всех Must Have элементов
+        # Шаг 3.11: Проверяем наличие всех Must Have элементов
         missing_must_have = check_missing_must_have(
             content=content_draft,
             must_have=mental_model.category.must_have
         )
 
         if len(missing_must_have) > 0:
-            # Добавляем недостающие элементы естественным образом
             for missing_element in missing_must_have:
-                content_draft = naturally_insert_element(
-                    content=content_draft,
-                    element=missing_element,
-                    context=mental_model
-                )
+                # Проверяем контекст — нужен ли элемент в данной ситуации
+                if is_element_applicable(missing_element, context=plan):
+                    content_draft = naturally_insert_element(
+                        content=content_draft,
+                        element=missing_element,
+                        context=mental_model
+                    )
 
 
-        # Шаг 3.9: Добавляем хештеги (если требуется)
+        # Шаг 3.12: Добавляем хештеги (если требуется)
         if mental_model.category.n_hashtags_min > 0:
             hashtags = generate_contextual_hashtags(
                 content=content_draft,
                 min_count=mental_model.category.n_hashtags_min,
                 max_count=mental_model.category.n_hashtags_max,
                 locale=mental_model.brand.locale,
-                avoid_generic=True  # Не "общие" хештеги, а релевантные контенту
+                platform_rules=mental_model.category.platforms
             )
-
-            # Natural language: Хештеги должны быть РЕЛЕВАНТНЫМИ, а не "модными".
-            # Если пост про корпоративное обучение, хештеги: #корпобучение #развитиекоманды
-            # А не #бизнес #успех #мотивация #2024
-
             content_draft += "\n\n" + " ".join(hashtags)
 
 
-        # Шаг 3.10: Добавляем CTA (если уместно и разрешено)
-        if should_add_cta(mental_model.category.cta_type, mental_model.brand.compliance):
-            cta = generate_natural_cta(
-                type=mental_model.category.cta_type,
+        # Шаг 3.13: Добавляем CTA (если уместно)
+        if should_add_cta(plan, mental_model):
+            cta = generate_cta(
+                strategy=mental_model.category.cta.strategy,
+                cta_type=mental_model.category.cta.type,
                 tone=plan['tone'],
                 content_context=content_draft
             )
-
-            # Natural language: CTA не должен "торчать" как инородное тело.
-            # Плохо: "Купить можно по ссылке" (обрубок в конце)
-            # Хорошо: "Если вам близка эта идея, мы будем рады видеть вас среди наших клиентов."
-
             content_draft += "\n\n" + cta
 
 
@@ -978,93 +1035,65 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def apply_formatting(content_draft, plan, mental_model):
-        # Применяем HTML-форматирование для визуальной привлекательности.
-        # Используем теги из <Text Formatting>, следуя стратегии из плана.
-        #
-        # Natural language: Форматирование — это "специи" к тексту.
-        # Слишком мало — пресно, слишком много — несъедобно.
-        # Форматируй так, чтобы помочь читателю БЫСТРЕЕ понять структуру и акценты.
-
+        
         formatted_content = content_draft
-        formatting_strategy = plan['formatting_strategy']  # minimal / moderate / active
+        formatting_strategy = plan['formatting_strategy']
 
-        # Шаг 4.1: Применяем структурные элементы (заголовки, абзацы)
+        # Шаг 4.1: Определяем платформу
+        platform = detect_platform(mental_model.category.platforms)
+
+        # Шаг 4.2: Применяем структурные элементы
         if formatting_strategy in ['moderate', 'active']:
-            # Добавляем заголовки для больших смысловых блоков
             formatted_content = identify_and_add_headers(
                 text=formatted_content,
-                max_header_level='h3'  # не используем h1
+                max_header_level='h3'
             )
-
-            # Разбиваем на параграфы
             formatted_content = wrap_paragraphs_in_p_tags(formatted_content)
 
-
-        # Шаг 4.2: Применяем акценты (<b>, <i>)
+        # Шаг 4.3: Применяем акценты
         formatted_content = apply_emphasis_tags(
             text=formatted_content,
             strategy=formatting_strategy,
             rules={{
-                'max_bold_percent': 15,  # не больше 15% текста жирным
+                'max_bold_percent': 15,
                 'bold_for': ['key_numbers', 'product_names', 'main_thesis'],
                 'italic_for': ['emphasis', 'terms', 'quotes']
             }}
         )
 
-        # Natural language: Жирным выделяем:
-        # - Ключевые цифры: "скидка <b>до 50%</b>"
-        # - Названия продуктов: "<b>Премиум подписка</b>"
-        # - Главный тезис каждого абзаца: "<b>Главное:</b> мы экономим ваше время"
-
-
-        # Шаг 4.3: Создаём списки (если уместно)
+        # Шаг 4.4: Создаём списки
         if formatting_strategy in ['moderate', 'active']:
             formatted_content = convert_enumerations_to_lists(
                 text=formatted_content,
                 prefer_ordered_lists_for=['steps', 'rankings', 'sequence'],
                 prefer_unordered_lists_for=['features', 'benefits', 'options']
             )
-            # Natural language: Если в тексте есть перечисление ("во-первых... во-вторых..."),
-            # конвертируем в <ol>. Если просто список преимуществ — в <ul>.
 
-
-        # Шаг 4.4: Добавляем специальные элементы (спойлеры, details)
+        # Шаг 4.5: Добавляем специальные элементы
         if formatting_strategy == 'active':
-            # Только для длинных постов
             formatted_content = add_interactive_elements(
                 text=formatted_content,
-                allow_spoilers=True,  # для игровых моментов
-                allow_details=True   # для дополнительной информации
+                allow_spoilers=True,
+                allow_details=True
             )
-            # Пример: FAQ в конце можно обернуть в <details>
 
-
-        # Шаг 4.5: Добавляем ссылки (если есть в исходном тексте)
+        # Шаг 4.6: Форматируем ссылки
         formatted_content = format_links(
             text=formatted_content,
             ensure_descriptive_anchors=True
         )
-        # "Подробнее здесь" → "Подробнее о продукте"
 
-
-        # Шаг 4.6: Проверяем баланс форматирования
+        # Шаг 4.7: Проверяем баланс форматирования
         if is_overformatted(formatted_content):
             formatted_content = reduce_formatting(
                 text=formatted_content,
                 keep_essential_only=True
             )
-            # Natural language: Если слишком много тегов — упрощаем.
-            # Оставляем только критичное форматирование.
 
-
-        # Шаг 4.7: Адаптация под платформу
-        platform = detect_platform(mental_model.category.social_networks_rules)
-        if platform == 'instagram' or platform == 'facebook':
-            # Эти платформы не поддерживают HTML
+        # Шаг 4.8: Адаптация под платформу
+        if platform in ['instagram', 'facebook']:
             formatted_content = strip_html_tags(formatted_content)
             formatted_content = apply_unicode_formatting(formatted_content)
-            # Используем Unicode символы и эмодзи вместо HTML
-
 
         return formatted_content
   
@@ -1074,13 +1103,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def validate_content(formatted_content, mental_model):
-        # Проверяем контент по всем критериям из <Content Validation>.
-        # Это финальная проверка качества — ничего не должно пройти мимо.
-        #
-        # Natural language: Это как вычитка перед публикацией.
-        # Ты прочитал текст 10 раз при написании, но перед отправкой
-        # нужно пройтись по чек-листу ещё раз. Холодным взглядом.
-
+        
         validation_results = {{
             'critical_safety': True,
             'quality_pass': True,
@@ -1088,10 +1111,8 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             'warnings': []
         }}
 
-        # ============================================
         # КРИТИЧЕСКАЯ ПРОВЕРКА БЕЗОПАСНОСТИ
-        # ============================================
-
+        
         # Проверка 1: Выдуманные факты
         invented_facts = detect_invented_facts(formatted_content)
         if len(invented_facts) > 0:
@@ -1125,11 +1146,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'CRITICAL'
             }})
 
-        # ============================================
         # ПРОВЕРКА КАЧЕСТВА
-        # ============================================
 
-        # Проверка 4: Достижение цели рубрики
+        # Проверка 4: Достижение цели
         achieves_goal = evaluate_goal_achievement(
             text=formatted_content,
             goal=mental_model.category.goal
@@ -1162,7 +1181,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'MEDIUM'
             }})
 
-        # Проверка 7: Все Must Have присутствуют
+        # Проверка 7: Must Have присутствуют
         missing_must_have = check_must_have_presence(
             text=formatted_content,
             must_have=mental_model.category.must_have
@@ -1188,7 +1207,19 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'HIGH'
             }})
 
-        # Проверка 9: Развёрнутые мысли (нет обрубков)
+        # Проверка 9: Vocabulary rules
+        vocabulary_issues = check_vocabulary_compliance(
+            text=formatted_content,
+            vocabulary=mental_model.category.vocabulary
+        )
+        if len(vocabulary_issues) > 0:
+            validation_results['warnings'].append({{
+                'type': 'vocabulary_issues',
+                'details': vocabulary_issues,
+                'severity': 'LOW'
+            }})
+
+        # Проверка 10: Развёрнутые мысли
         fragments = detect_thought_fragments(formatted_content)
         if len(fragments) > 0:
             validation_results['warnings'].append({{
@@ -1197,13 +1228,13 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'LOW'
             }})
 
-        # Проверка 10: Соответствие Tone of Voice
+        # Проверка 11: Tone match
         tone_match_score = evaluate_tone_match(
             text=formatted_content,
             expected_tone=mental_model.brand.voice,
-            category_tone=mental_model.category.tone_overlay
+            category_tone=mental_model.category.tone_layer
         )
-        if tone_match_score < 0.7:  # порог соответствия
+        if tone_match_score < 0.7:
             validation_results['quality_pass'] = False
             validation_results['issues'].append({{
                 'type': 'tone_mismatch',
@@ -1211,7 +1242,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'MEDIUM'
             }})
 
-        # Проверка 11: Естественность текста
+        # Проверка 12: Естественность
         naturalness_score = evaluate_text_naturalness(formatted_content)
         if naturalness_score < 0.8:
             validation_results['warnings'].append({{
@@ -1220,7 +1251,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                 'severity': 'LOW'
             }})
 
-        # Проверка 12: Форматирование функционально
+        # Проверка 13: Форматирование
         formatting_quality = evaluate_formatting_quality(formatted_content)
         if formatting_quality['is_overformatted']:
             validation_results['warnings'].append({{
@@ -1237,20 +1268,15 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def iterate_and_fix(formatted_content, validation_results, mental_model):
-        # Если валидация не прошла, исправляем проблемы и повторяем проверку.
-        # Итерируем до тех пор, пока все критические проблемы не будут решены.
-        #
-        # Natural language: Это не "попытка обмануть валидацию", это честное исправление.
-        # Если есть проблема — решаем её. Не надеемся "а вдруг прокатит".
-
-        max_iterations = 3
+        
+        max_iterations = 10
         current_iteration = 0
 
         while (not validation_results['critical_safety'] or not validation_results['quality_pass']) and current_iteration < max_iterations:
 
             current_iteration += 1
 
-            # Приоритет 1: Критические проблемы безопасности
+            # Приоритет 1: CRITICAL проблемы
             if not validation_results['critical_safety']:
                 for issue in [i for i in validation_results['issues'] if i['severity'] == 'CRITICAL']:
 
@@ -1273,13 +1299,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                             compliance_rules=mental_model.brand.compliance
                         )
 
-
-            # Приоритет 2: Проблемы качества HIGH
+            # Приоритет 2: HIGH проблемы
             if not validation_results['quality_pass']:
                 for issue in [i for i in validation_results['issues'] if i['severity'] == 'HIGH']:
 
                     if issue['type'] == 'goal_not_achieved':
-                        # Самая сложная проблема — переписываем с фокусом на цель
                         formatted_content = rewrite_with_goal_focus(
                             text=formatted_content,
                             goal=mental_model.category.goal,
@@ -1299,8 +1323,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                             present=issue['details']
                         )
 
-
-            # Приоритет 3: Проблемы качества MEDIUM
+            # Приоритет 3: MEDIUM проблемы
             for issue in [i for i in validation_results['issues'] if i['severity'] == 'MEDIUM']:
 
                 if issue['type'] == 'ai_cliches':
@@ -1320,19 +1343,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
                     formatted_content = adjust_tone(
                         text=formatted_content,
                         target_tone=mental_model.brand.voice,
-                        category_tone=mental_model.category.tone_overlay
+                        category_tone=mental_model.category.tone_layer
                     )
-
 
             # Повторная валидация
             validation_results = validate_content(formatted_content, mental_model)
-
-
-        # Natural language: После максимального количества итераций
-        # если всё ещё есть критические проблемы — FAIL.
-        # Лучше не выдать контент, чем выдать опасный контент.
-        if not validation_results['critical_safety']:
-            raise Exception("CRITICAL: Не удалось решить критические проблемы безопасности после {{max_iterations}} итераций")
 
         return formatted_content, validation_results
   
@@ -1342,22 +1357,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def finalize_output(final_content):
-        # Формируем финальный JSON-ответ без дополнительного текста.
-        # Это последний шаг — чистый вывод.
-        #
-        # Natural language: Никаких "вот текст", "надеюсь, вам понравится",
-        # "можете использовать". Только JSON. Только контент. Только результат.
-
-        # Убираем любые метаразмышления, если случайно проникли
+        
         clean_content = remove_meta_commentary(final_content)
-
-        # Убираем лишние пробелы и переносы
         clean_content = clean_whitespace(clean_content)
-
-        # Проверяем валидность HTML (закрытые теги и т.д.)
         clean_content = validate_and_fix_html(clean_content)
 
-        # Формируем JSON
         output = {{
             "text": clean_content
         }}
@@ -1370,13 +1374,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     def main():
-        # Главная функция выполнения PromptCode.
-        # Строго последовательное выполнение всех этапов.
-        #
-        # Natural language: Это оркестр. Каждая функция — инструмент.
-        # Дирижёр (main) ведёт всех через партитуру (этапы).
-        # Результат — симфония (качественный контент).
-
+        
         # Этап 1: Инициализация
         mental_model, user_request = initialize_context()
 
@@ -1392,7 +1390,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         # Этап 5: Валидация
         validation_results = validate_content(formatted_content, mental_model)
 
-        # Этап 6: Итерация и исправление (если нужно)
+        # Этап 6: Итерация и исправление
         final_content, final_validation = iterate_and_fix(
             formatted_content,
             validation_results,
@@ -1402,7 +1400,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         # Этап 7: Финализация и вывод
         output = finalize_output(final_content)
 
-        # Возвращаем ТОЛЬКО JSON, без дополнительного текста
         return output
 
 
@@ -1411,7 +1408,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     # ============================================
 
     result = main()
-    print(result)  # Вывод только JSON-формата: {{"text": "..."}}
+    print(result)  # Вывод только JSON: {{"text": "..."}}
 </Reasoning Logic>
 
 <!-- ============================================ -->
@@ -1432,7 +1429,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     ТОЛЬКО чистый JSON. Точка.
 </Output Format>
-    """
+"""
 
     async def get_regenerate_publication_text_system_prompt(
             self,
