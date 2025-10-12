@@ -61,6 +61,7 @@ class PublicationService(interface.IPublicationService):
             raise common.ErrInsufficientBalance()
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
+            text_reference,
             category,
             organization
         )
@@ -69,7 +70,7 @@ class PublicationService(interface.IPublicationService):
             history=[
                 {
                     "role": "user",
-                    "content": f"Создай пост для социальной сети, вот мой запрос: {text_reference}"
+                    "content": f"Создай пост для социальной сети"
                 }
             ],
             system_prompt=text_system_prompt,
