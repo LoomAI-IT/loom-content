@@ -907,11 +907,14 @@ class PublicationService(interface.IPublicationService):
             operation: str
     ) -> bool:
         if operation == "generate_text":
-            return float(organization.rub_balance) < organization_cost_multiplier.generate_text_cost_multiplier * self.avg_generate_text_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_text_cost_multiplier * self.avg_generate_text_rub_cost
         elif operation == "generate_image":
-            return float(organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
         elif operation == "transcribe_audio":
-            return float(organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
         return True
 
     async def _debit_organization_balance(self, organization_id: int, usd_cost: float):
