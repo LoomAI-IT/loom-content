@@ -502,32 +502,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             2. Акценты (жирный, курсив для ключевых мыслей) — это мышцы
             3. Специальные элементы (спойлеры, details) — это "вишенка" только если уместно
 
-        - Баланс форматирования (PromptCode логика):
-            if len(text) < 500:
-                // Короткий текст: минимум форматирования, 1-2 акцента максимум
-                // Слишком много тегов в коротком тексте выглядят нелепо
-                use_formatting = "minimal"
-                max_bold_fragments = 2
-                use_lists = False
-
-            elif 500 <= len(text) <= 1500:
-                // Средний текст: умеренное использование
-                // Заголовки + жирные акценты + возможно один список
-                use_formatting = "moderate"
-                max_bold_fragments = 4
-                use_lists = True
-                max_lists = 1
-
-            else:  # длинный текст > 1500
-                // Длинный текст: активное форматирование для навигации
-                // Заголовки + списки + цитаты + возможно details
-                use_formatting = "active"
-                max_bold_fragments = 7
-                use_lists = True
-                max_lists = 2
-                use_headers = True
-                consider_details_blocks = True
-
         - Правило "не перегружай":
             * Жирный текст не должен превышать 15% от общего объёма
             * Используй 1 тип списка на блок (или <ul>, или <ol>, не микс)
