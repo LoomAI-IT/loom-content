@@ -510,11 +510,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             # Шаг 4.3: Проверка доступности фактов
             draft_content_raw = compliance_guard.fact_availability_check(
                 content=draft_content_raw,
-                available_facts={
+                available_facts={{
                     'products': organization.products,
                     'additional_info': organization.additional_info,
                     'category_info': category.additional_info
-                }
+                }}
             )
             
             # Natural language: Если в тексте упомянуты факты, которых нет
@@ -695,9 +695,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             # ═══════════════════════════════════════════════════════
             
             # Формируем JSON-ответ
-            response = {
+            response = {{
                 "text": final_content
-            }
+            }}
             
             # Natural language: Возвращаем ТОЛЬКО JSON без дополнительного текста.
             # Никаких пояснений, комментариев или служебной информации.
