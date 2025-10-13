@@ -45,7 +45,6 @@ class CreateCategoryBody(BaseModel):
     humor_policy: dict
     audience_segments: list[dict]
     emotional_palette: list[dict]
-    platform_specific_rules: dict
 
     must_have: list[dict]
     must_avoid: list[dict]
@@ -81,7 +80,6 @@ class UpdateCategoryBody(BaseModel):
     humor_policy: dict = None
     audience_segments: list[dict] = None
     emotional_palette: list[dict] = None
-    platform_specific_rules: dict = None
 
     must_have: list[dict] = None
     must_avoid: list[dict] = None

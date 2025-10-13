@@ -30,7 +30,6 @@ class Category:
     humor_policy: dict
     audience_segments: list[dict]
     emotional_palette: list[dict]
-    platform_specific_rules: dict
 
     must_have: list[dict]
     must_avoid: list[dict]
@@ -71,7 +70,6 @@ class Category:
                 humor_policy=row.humor_policy,
                 audience_segments=row.audience_segments,
                 emotional_palette=row.emotional_palette,
-                platform_specific_rules=row.platform_specific_rules,
                 must_have=row.must_have,
                 must_avoid=row.must_avoid,
                 len_min=row.len_min,
@@ -106,7 +104,6 @@ class Category:
             "humor_policy": self.humor_policy,
             "audience_segments": self.audience_segments,
             "emotional_palette": self.emotional_palette,
-            "platform_specific_rules": self.platform_specific_rules,
             "must_have": self.must_have,
             "must_avoid": self.must_avoid,
             "len_min": self.len_min,

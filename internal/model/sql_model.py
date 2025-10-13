@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS categories (
     humor_policy JSONB DEFAULT '{}',
     audience_segments JSONB[] DEFAULT '{}',
     emotional_palette JSONB[] DEFAULT '{}',
-    platform_specific_rules JSONB DEFAULT '{}',
 
     must_have JSONB[] DEFAULT '{}',
     must_avoid JSONB[] DEFAULT '{}',

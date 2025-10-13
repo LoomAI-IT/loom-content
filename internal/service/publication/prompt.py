@@ -256,14 +256,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         Эмоции делают контент запоминающимся и побуждают к действию.
     </Emotional Palette>
 
-    <Platform Rules>
-        Правила для социальных сетей:
-        {category.platform_specific_rules}
-
-        Применение: Адаптируй контент под специфику платформы.
-        Разные платформы = разные алгоритмы и ожидания аудитории.
-    </Platform Rules>
-
     <Must Have Elements>
         Обязательные элементы, которые ДОЛЖНЫ присутствовать:
         {chr(10).join(f"        {i + 1}) {elem}\n" for i, elem in enumerate(category.must_have))}
@@ -563,25 +555,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             # Если всё жирное — ничего не жирное. Если всё в списках — нет акцентов.
             # Оставляй "воздух" — обычный текст между форматированными элементами.
     </Formatting Strategy>
-  
-    <Platform Adaptation>
-        (Адаптация под платформу)
-
-        - Telegram: поддерживает все указанные теги + tg-spoiler
-            * Самая богатая поддержка HTML-форматирования
-            * Можно смело использовать весь арсенал
-
-        - VK: ограниченная поддержка, проверяй совместимость
-            * Базовые теги работают: <b>, <i>, <a>
-            * Сложные элементы могут не отображаться
-
-        - Instagram/Facebook: HTML не поддерживается
-            * Используй Unicode символы для акцентов
-            * Структурируй через эмодзи и переносы строк
-
-        // Natural language: Используй правила из platform_specific_rules в Category Parameters.
-        // Если платформа не указана явно, предполагаем поддержку HTML (Telegram/веб).
-    </Platform Adaptation>
 
     <Formatting Anti-Patterns>
         (Чего избегать — типичные ошибки)
@@ -765,7 +738,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             'humor': category_context.humor_policy,
             'audience': category_context.audience_segments,
             'emotions': category_context.emotional_palette,
-            'platforms': category_context.platform_specific_rules,
             'must_have': category_context.must_have,
             'must_avoid': category_context.must_avoid,
             'cta': {{
