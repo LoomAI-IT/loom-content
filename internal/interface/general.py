@@ -149,6 +149,12 @@ class IOpenAIClient(Protocol):
     ) -> tuple[dict, dict]: pass
 
     @abstractmethod
+    async def web_search(
+            self,
+            query: str,
+    ) -> str: pass
+
+    @abstractmethod
     async def transcribe_audio(
             self,
             audio_file: bytes,

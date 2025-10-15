@@ -757,17 +757,18 @@ class IPublicationRepo(Protocol):
 
 class IPublicationPromptGenerator(Protocol):
     @abstractmethod
-    async def get_generate_publication_text_system_prompt(
+    async def get_search_intelligence_prompt(
             self,
+            user_text_reference: str,
             category: model.Category,
             organization: model.Organization,
-    ) -> str:
-        pass
+    ) -> str: pass
 
     @abstractmethod
     async def get_generate_publication_text_system_prompt_INoT(
             self,
             user_text_reference: str,
+            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
     ) -> str:

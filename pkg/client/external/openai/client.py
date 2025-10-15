@@ -59,6 +59,22 @@ class OpenAIClient(interface.IOpenAIClient):
 
         return llm_response, generate_cost
 
+    @traced_method(SpanKind.CLIENT)
+    async def web_search(
+            self,
+            query: str,
+    ) -> str:
+
+        response = await self.client.responses.create(
+            model="gpt-5",
+            tools=[{"type": "web_search"}],
+            input=query
+        )
+
+        llm_response = response.output_text
+
+        return llm_response
+
     @traced_method()
     async def generate_json(
             self,
