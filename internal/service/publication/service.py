@@ -60,32 +60,32 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        generate_search_query_system_prompt = await self.prompt_generator.get_search_intelligence_prompt(
-            text_reference,
-            category,
-            organization,
-        )
-
-        web_search_query, generate_cost = await self.openai_client.generate_json(
-            history=[
-                {
-                    "role": "user",
-                    "content": "Создай детальный план поиска"
-                }
-            ],
-            system_prompt=generate_search_query_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
-        )
-
-        self.logger.info("План поиска", {"web_search_query": web_search_query})
-
+        # generate_search_query_system_prompt = await self.prompt_generator.get_search_intelligence_prompt(
+        #     text_reference,
+        #     category,
+        #     organization,
+        # )
+        #
+        # web_search_query, generate_cost = await self.openai_client.generate_json(
+        #     history=[
+        #         {
+        #             "role": "user",
+        #             "content": "Создай детальный план поиска"
+        #         }
+        #     ],
+        #     system_prompt=generate_search_query_system_prompt,
+        #     temperature=1,
+        #     llm_model="gpt-5"
+        # )
+        #
+        # self.logger.info("План поиска", {"web_search_query": web_search_query})
+        #
         web_search_result = ""
-        if web_search_query["search_needed"]:
-            web_search_prompt = await self.prompt_generator.get_search_executor_prompt(web_search_query)
-            web_search_result = await self.openai_client.web_search(web_search_prompt)
-
-        self.logger.info("Результат поиска", {"web_search_result": web_search_result})
+        # if web_search_query["search_needed"]:
+        #     web_search_prompt = await self.prompt_generator.get_search_executor_prompt(web_search_query)
+        #     web_search_result = await self.openai_client.web_search(web_search_prompt)
+        #
+        # self.logger.info("Результат поиска", {"web_search_result": web_search_result})
 
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
