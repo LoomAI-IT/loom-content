@@ -82,7 +82,8 @@ class PublicationService(interface.IPublicationService):
 
         web_search_result = ""
         if web_search_query["search_needed"]:
-            web_search_result = await self.openai_client.web_search(str(web_search_query))
+            web_search_prompt = await self.prompt_generator.get_search_executor_prompt(web_search_query)
+            web_search_result = await self.openai_client.web_search(web_search_prompt)
 
         self.logger.info("Результат поиска", {"web_search_result": web_search_result})
 

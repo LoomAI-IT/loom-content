@@ -25,9 +25,37 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         {user_text_reference}
     </User Request>
     
-    {self._organization_to_xml(organization)}
+    <Organization Context>
+        Информация о региональных особенностях организации для которой ищется информация
+        <Localization>
+            Региональный контекст:
+            {organization.locale}
     
-    {self._category_to_xml(category)}
+            Применение: Учитывай культурный и языковой контекст региона.
+            Локальные реалии, актуальные события — всё это делает контент релевантным.
+        </Localization>
+    </Organization Context>
+    
+    <Category Parameters>
+        Под эту рубрику ищется информаци, на основе найденной информации и  <User Request> будет сгенерирован текст публикации
+    
+        <Category Basic Info>
+            Название: {category.name}
+            Цель: {category.goal}
+    
+            Примечание: Контент должен РЕАЛЬНО выполнять эту цель, а не просто декларировать её.
+            Если цель — продать, контент должен мотивировать к покупке. Если информировать — предоставлять ценную информацию.
+            Если повышать узнаваемость — быть запоминающимся и отражать идентичность бренда.
+        </Category Basic Info>
+    
+        <Audience Segments>
+            Целевые сегменты аудитории для этой рубрики:
+            {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segments))}
+    
+            Применение: Понимай, для КОГО создаёшь контент. Адаптируй подачу под сегмент.
+            Обращайся к их потребностям, говори на их языке.
+        </Audience Segments>
+    </Category Parameters>
     
 </Context>
 
@@ -327,9 +355,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             "Актуальная статистика внедрения облачных решений в бизнесе",
             "Конкретные показатели ROI и экономии",
             "Реальные кейсы внедрения для социального доказательства"
-        ],
-        "usage_guidelines_for_generator": "Используй найденную статистику для обоснования актуальности темы. Кейсы внедрения интегрируй как социальное доказательство. Ценовую информацию используй для контекста, но не делай прямых сравнений с конкурентами. Формулируй выводы на основе данных, избегая необоснованных утверждений."
-    }}
+        ]}}
 
     ЕСЛИ search_needed = false, то:
     {{
@@ -482,13 +508,14 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 ВАЖНО: Проводи глубокий анализ, но выдавай только JSON. Никаких дополнительных комментариев или объяснений.
 """
 
-    async def get_search_executor_prompt(
-            self,
-            search_plan: dict,
-    ) -> str:
+    async def get_search_executor_prompt(self, web_search_plan: dict) -> str:
         return f"""
+Вот тебе план поиска. Тебе необходимо мне вернуть текст, который четко определит все факты вокрруг темы, 
+скажет все точные данные
 
-    """
+{web_search_plan}
+"""
+
 
     async def get_generate_publication_text_system_prompt_INoT(
             self,

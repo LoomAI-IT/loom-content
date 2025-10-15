@@ -775,6 +775,9 @@ class IPublicationPromptGenerator(Protocol):
         pass
 
     @abstractmethod
+    async def get_search_executor_prompt(self, web_search_plan: dict) -> str: pass
+
+    @abstractmethod
     async def get_regenerate_publication_text_system_prompt(
             self,
             category: model.Category,
