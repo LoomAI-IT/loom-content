@@ -214,6 +214,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         COMPETITIVE_QUERIES — только если релевантно
         - Сравнения, альтернативы, рейтинги
 
+
         TREND_QUERIES — только для trend-driven контента
         - Статистика спроса, "растущая популярность", "динамика рынка"
     </Query Types>
