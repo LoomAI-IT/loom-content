@@ -1745,14 +1745,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             Рубрика может добавить свои нюансы, но этот тон — фундамент.
         </Tone of Voice>
     
-        <Brand Rules>
-            Назначение: Общие правила бренда для всех коммуникаций
-            Данные:
-            {chr(10).join(f"        {i + 1}) {rule}" for i, rule in enumerate(organization.brand_rules))}
-    
-            Применение: Это принципы, которые делают бренд узнаваемым во всех рубриках.
-        </Brand Rules>
-    
         <Compliance Rules>
             Назначение: КРИТИЧЕСКИ ВАЖНЫЕ правила, нарушение которых НЕДОПУСТИМО
             Данные:
