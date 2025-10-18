@@ -8,19 +8,10 @@ CREATE TABLE IF NOT EXISTS categories (
     goal TEXT NOT NULL,
     tone_of_voice TEXT[] DEFAULT '{}',
     brand_rules TEXT[] DEFAULT '{}',
-    brand_vocabulary JSONB[] DEFAULT '{}',
-    tone_variations JSONB[] DEFAULT '{}',
 
-    structure_variations JSONB[] DEFAULT '{}',
+    structure_variations JSONB DEFAULT '{}',
     creativity_level INTEGER DEFAULT 5,
-    experimentation_zones TEXT[] DEFAULT '{}',
-    surprise_factors JSONB[] DEFAULT '{}',
-    humor_policy JSONB DEFAULT '{}',
     audience_segments JSONB[] DEFAULT '{}',
-    emotional_palette JSONB[] DEFAULT '{}',
-
-    must_have JSONB[] DEFAULT '{}',
-    must_avoid JSONB[] DEFAULT '{}',
 
     len_min INTEGER NOT NULL,
     len_max INTEGER NOT NULL,

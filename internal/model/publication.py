@@ -20,19 +20,10 @@ class Category:
     goal: str
     tone_of_voice: list[str]
     brand_rules: list[str]
-    brand_vocabulary: list[dict]
-    tone_variations: list[dict]
 
-    structure_variations: list[dict]
+    structure_variations: dict
     creativity_level: int
-    experimentation_zones: list[str]
-    surprise_factors: list[dict]
-    humor_policy: dict
     audience_segments: list[dict]
-    emotional_palette: list[dict]
-
-    must_have: list[dict]
-    must_avoid: list[dict]
 
     len_min: int
     len_max: int
@@ -61,17 +52,9 @@ class Category:
                 goal=row.goal,
                 tone_of_voice=row.tone_of_voice,
                 brand_rules=row.brand_rules,
-                brand_vocabulary=row.brand_vocabulary,
-                tone_variations=row.tone_variations,
                 structure_variations=row.structure_variations,
                 creativity_level=row.creativity_level,
-                experimentation_zones=row.experimentation_zones,
-                surprise_factors=row.surprise_factors,
-                humor_policy=row.humor_policy,
                 audience_segments=row.audience_segments,
-                emotional_palette=row.emotional_palette,
-                must_have=row.must_have,
-                must_avoid=row.must_avoid,
                 len_min=row.len_min,
                 len_max=row.len_max,
                 n_hashtags_min=row.n_hashtags_min,
@@ -95,17 +78,9 @@ class Category:
             "goal": self.goal,
             "tone_of_voice": self.tone_of_voice,
             "brand_rules": self.brand_rules,
-            "brand_vocabulary": self.brand_vocabulary,
-            "tone_variations": self.tone_variations,
             "structure_variations": self.structure_variations,
             "creativity_level": self.creativity_level,
-            "experimentation_zones": self.experimentation_zones,
-            "surprise_factors": self.surprise_factors,
-            "humor_policy": self.humor_policy,
             "audience_segments": self.audience_segments,
-            "emotional_palette": self.emotional_palette,
-            "must_have": self.must_have,
-            "must_avoid": self.must_avoid,
             "len_min": self.len_min,
             "len_max": self.len_max,
             "n_hashtags_min": self.n_hashtags_min,

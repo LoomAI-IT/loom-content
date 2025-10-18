@@ -35,19 +35,10 @@ class CreateCategoryBody(BaseModel):
     goal: str
     tone_of_voice: list[str]
     brand_rules: list[str]
-    brand_vocabulary: list[dict]
-    tone_variations: list[dict]
 
-    structure_variations: list[dict]
+    structure_variations: dict
     creativity_level: int
-    experimentation_zones: list[str]
-    surprise_factors: list[dict]
-    humor_policy: dict
     audience_segments: list[dict]
-    emotional_palette: list[dict]
-
-    must_have: list[dict]
-    must_avoid: list[dict]
 
     len_min: int
     len_max: int
@@ -70,19 +61,10 @@ class UpdateCategoryBody(BaseModel):
     goal: str = None
     tone_of_voice: list[str] = None
     brand_rules: list[str] = None
-    brand_vocabulary: list[dict] = None
-    tone_variations: list[dict] = None
 
-    structure_variations: list[dict] = None
+    structure_variations: dict = None
     creativity_level: int = None
-    experimentation_zones: list[str] = None
-    surprise_factors: list[dict] = None
-    humor_policy: dict = None
     audience_segments: list[dict] = None
-    emotional_palette: list[dict] = None
-
-    must_have: list[dict] = None
-    must_avoid: list[dict] = None
 
     len_min: int = None
     len_max: int = None
