@@ -16,14 +16,14 @@ class Category:
     id: int
     organization_id: int
     name: str
+    hint: str
 
     goal: str
     tone_of_voice: list[str]
     brand_rules: list[str]
 
-    structure_variations: dict
     creativity_level: int
-    audience_segments: list[dict]
+    audience_segments: str
 
     len_min: int
     len_max: int
@@ -49,10 +49,10 @@ class Category:
                 id=row.id,
                 organization_id=row.organization_id,
                 name=row.name,
+                hint=row.hint,
                 goal=row.goal,
                 tone_of_voice=row.tone_of_voice,
                 brand_rules=row.brand_rules,
-                structure_variations=row.structure_variations,
                 creativity_level=row.creativity_level,
                 audience_segments=row.audience_segments,
                 len_min=row.len_min,
@@ -75,10 +75,10 @@ class Category:
             "id": self.id,
             "organization_id": self.organization_id,
             "name": self.name,
+            "hint": self.hint,
             "goal": self.goal,
             "tone_of_voice": self.tone_of_voice,
             "brand_rules": self.brand_rules,
-            "structure_variations": self.structure_variations,
             "creativity_level": self.creativity_level,
             "audience_segments": self.audience_segments,
             "len_min": self.len_min,

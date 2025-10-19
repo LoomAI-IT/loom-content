@@ -62,10 +62,10 @@ create_category = """
 INSERT INTO categories (
     organization_id,
     name,
+    hint,
     goal,
     tone_of_voice,
     brand_rules,
-    structure_variations,
     creativity_level,
     audience_segments,
     len_min,
@@ -82,10 +82,10 @@ INSERT INTO categories (
 VALUES (
     :organization_id,
     :name,
+    :hint,
     :goal,
     :tone_of_voice,
     :brand_rules,
-    :structure_variations,
     :creativity_level,
     :audience_segments,
     :len_min,
@@ -106,10 +106,10 @@ update_category = """
 UPDATE categories
 SET
     name = COALESCE(:name, name),
+    hint = COALESCE(:hint, hint),
     goal = COALESCE(:goal, goal),
     tone_of_voice = COALESCE(:tone_of_voice, tone_of_voice),
     brand_rules = COALESCE(:brand_rules, brand_rules),
-    structure_variations = COALESCE(:structure_variations, structure_variations),
     creativity_level = COALESCE(:creativity_level, creativity_level),
     audience_segments = COALESCE(:audience_segments, audience_segments),
     len_min = COALESCE(:len_min, len_min),

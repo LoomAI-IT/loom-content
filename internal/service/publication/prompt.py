@@ -1803,51 +1803,14 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             Например, общий тон может быть профессиональным, но в этой рубрике
             можно быть более экспертным/доступным/вдохновляющим.
         </Category Tone Layer>
-    
-        <Brand Vocabulary>
-            Словарь бренда для этой рубрики:
-            {chr(10).join(f"        {i + 1}) {vocab}\n" for i, vocab in enumerate(category.brand_vocabulary))}
-    
-            Применение: Используй предпочитаемые термины, избегай нерекомендованных.
-            Это делает бренд узнаваемым на уровне лексики.
-        </Brand Vocabulary>
-    
-        <Tone Variations>
-            Вариации тона в зависимости от контекста:
-            {chr(10).join(f"        {i + 1}) {var}\n" for i, var in enumerate(category.tone_variations))}
-    
-            Применение: Адаптируй тон под конкретную ситуацию (кризис, празднование, обучение и т.д.).
-        </Tone Variations>
-    
-        <Structure Variations>
-            Возможные структуры для постов:
-            {chr(10).join(f"        {i + 1}) {struct}\n" for i, struct in enumerate(category.structure_variations))}
-    
-            Применение: Выбирай структуру на основе цели контента и контекста запроса.
-            Можешь комбинировать элементы из разных структур, если это улучшает результат.
-        </Structure Variations>
-    
+        
         <Creativity Settings>
             Уровень креативности: {category.creativity_level} из 10
-            
-            Зоны экспериментов:
-            {chr(10).join(f"        - {zone}\n" for zone in category.experimentation_zones)}
-            
-            Факторы сюрприза:
-            {chr(10).join(f"        - {sf}\n" for sf in category.surprise_factors)}
     
             Применение: Creativity_level определяет, насколько смело можно экспериментировать.
             1-3 = консервативный подход, 4-6 = сбалансированный, 7-10 = инновационный и смелый.
             Экспериментируй в разрешённых зонах, добавляй элементы неожиданности согласно политике.
         </Creativity Settings>
-    
-        <Humor Policy>
-            Политика юмора:
-            {category.humor_policy}
-    
-            Применение: Используй юмор только если разрешено и только указанных типов.
-            Избегай всех запрещённых форм. Соблюдай указанную частоту.
-        </Humor Policy>
     
         <Audience Segments>
             Целевые сегменты аудитории для этой рубрики:
@@ -1856,28 +1819,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             Применение: Понимай, для КОГО создаёшь контент. Адаптируй подачу под сегмент.
             Обращайся к их потребностям, говори на их языке.
         </Audience Segments>
-    
-        <Emotional Palette>
-            Эмоциональные драйверы для контента:
-            {chr(10).join(f"        {i + 1}) {em}\n" for i, em in enumerate(category.emotional_palette))}
-    
-            Применение: Выбирай эмоциональную окраску в зависимости от цели и контекста.
-            Эмоции делают контент запоминающимся и побуждают к действию.
-        </Emotional Palette>
-    
-        <Must Have Elements>
-            Обязательные элементы, которые ДОЛЖНЫ присутствовать:
-            {chr(10).join(f"        {i + 1}) {elem}\n" for i, elem in enumerate(category.must_have))}
-    
-            Применение: Это чек-лист перед публикацией. Если хоть одного элемента нет — пост неполный.
-        </Must Have Elements>
-    
-        <Must Avoid Elements>
-            Запрещённые элементы, которые НЕЛЬЗЯ использовать:
-            {chr(10).join(f"        {i + 1}) {elem}\n" for i, elem in enumerate(category.must_avoid))}
-    
-            Применение: Это неприемлемые паттерны для данной рубрики. Избегай их.
-        </Must Avoid Elements>
     
         <Category Brand Rules>
             Специфические правила рубрики:

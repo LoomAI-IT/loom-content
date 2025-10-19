@@ -4,14 +4,14 @@ CREATE TABLE IF NOT EXISTS categories (
     organization_id INTEGER NOT NULL,
 
     name TEXT NOT NULL,
+    hint TEXT NOT NULL,
 
     goal TEXT NOT NULL,
     tone_of_voice TEXT[] DEFAULT '{}',
     brand_rules TEXT[] DEFAULT '{}',
 
-    structure_variations JSONB DEFAULT '{}',
     creativity_level INTEGER DEFAULT 5,
-    audience_segments JSONB[] DEFAULT '{}',
+    audience_segments TEXT NOT NULL,
 
     len_min INTEGER NOT NULL,
     len_max INTEGER NOT NULL,

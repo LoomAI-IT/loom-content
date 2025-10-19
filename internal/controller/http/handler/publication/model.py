@@ -31,14 +31,14 @@ class ModeratePublicationBody(BaseModel):
 class CreateCategoryBody(BaseModel):
     organization_id: int
     name: str
+    hint: str
 
     goal: str
     tone_of_voice: list[str]
     brand_rules: list[str]
 
-    structure_variations: dict
     creativity_level: int
-    audience_segments: list[dict]
+    audience_segments: str
 
     len_min: int
     len_max: int
@@ -58,13 +58,13 @@ class CreateCategoryBody(BaseModel):
 
 class UpdateCategoryBody(BaseModel):
     name: str = None
+    hint: str = None
     goal: str = None
     tone_of_voice: list[str] = None
     brand_rules: list[str] = None
 
-    structure_variations: dict = None
     creativity_level: int = None
-    audience_segments: list[dict] = None
+    audience_segments: str = None
 
     len_min: int = None
     len_max: int = None

@@ -304,10 +304,10 @@ class PublicationController(interface.IPublicationController):
         category_id = await self.publication_service.create_category(
             organization_id=body.organization_id,
             name=body.name,
+            hint=body.hint,
             goal=body.goal,
             tone_of_voice=body.tone_of_voice,
             brand_rules=body.brand_rules,
-            structure_variations=body.structure_variations,
             creativity_level=body.creativity_level,
             audience_segments=body.audience_segments,
             len_min=body.len_min,
@@ -356,10 +356,10 @@ class PublicationController(interface.IPublicationController):
         await self.publication_service.update_category(
             category_id=category_id,
             name=body.name,
+            hint=body.hint,
             goal=body.goal,
             tone_of_voice=body.tone_of_voice,
             brand_rules=body.brand_rules,
-            structure_variations=body.structure_variations,
             creativity_level=body.creativity_level,
             audience_segments=body.audience_segments,
             len_min=body.len_min,
