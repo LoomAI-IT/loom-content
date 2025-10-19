@@ -51,7 +51,7 @@ class OpenAIClient(interface.IOpenAIClient):
             model=llm_model,
             messages=messages,
             temperature=temperature,
-            reasoning_effort="low"
+            reasoning_effort="high"
         )
 
         generate_cost = self._calculate_llm_cost(completion_response)
