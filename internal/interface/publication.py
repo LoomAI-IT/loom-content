@@ -22,6 +22,13 @@ class IPublicationController(Protocol):
         pass
 
     @abstractmethod
+    async def test_generate_publication_text(
+            self,
+            body: TestGeneratePublicationTextBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
     async def regenerate_publication_text(
             self,
             body: RegeneratePublicationTextBody,
@@ -199,6 +206,30 @@ class IPublicationService(Protocol):
             self,
             category_id: int,
             text_reference: str
+    ) -> dict: pass
+
+    @abstractmethod
+    async def test_generate_publication_text(
+            self,
+            text_reference: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segments: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
     ) -> dict: pass
 
     @abstractmethod

@@ -99,7 +99,7 @@ class PublicationService(interface.IPublicationService):
             history=[
                 {
                     "role": "user",
-                    "content": f"Создай пост для социальной сети"
+                    "content": f"Создай текст для поста"
                 }
             ],
             system_prompt=text_system_prompt,
@@ -111,6 +111,79 @@ class PublicationService(interface.IPublicationService):
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
+        return publication_data
+
+    @traced_method()
+    async def test_generate_publication_text(
+            self,
+            text_reference: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segments: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
+    ) -> dict:
+        # Создаем объект Category в памяти (не сохраняя в базу)
+        category = model.Category(
+            id=-1,
+            organization_id=organization_id,
+            name=name,
+            hint=hint,
+            goal=goal,
+            tone_of_voice=tone_of_voice,
+            brand_rules=brand_rules,
+            creativity_level=creativity_level,
+            audience_segments=audience_segments,
+            len_min=len_min,
+            len_max=len_max,
+            n_hashtags_min=n_hashtags_min,
+            n_hashtags_max=n_hashtags_max,
+            cta_type=cta_type,
+            cta_strategy=cta_strategy,
+            good_samples=good_samples,
+            bad_samples=bad_samples,
+            additional_info=additional_info,
+            prompt_for_image_style=prompt_for_image_style,
+            created_at=datetime.now()
+        )
+
+        organization = await self.organization_client.get_organization_by_id(category.organization_id)
+
+
+        web_search_result = ""
+
+        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
+            text_reference,
+            web_search_result,
+            category,
+            organization
+        )
+
+        publication_data, generate_cost = await self.openai_client.generate_json(
+            history=[
+                {
+                    "role": "user",
+                    "content": f"Создай текст для поста"
+                }
+            ],
+            system_prompt=text_system_prompt,
+            temperature=1,
+            llm_model="gpt-5"
+        )
+
         return publication_data
 
     @traced_method()

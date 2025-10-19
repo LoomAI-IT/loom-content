@@ -50,6 +50,14 @@ def include_publication_handlers(
         tags=["Publication"],
     )
 
+    # Тестовая генерация публикации (без сохранения категории в БД)
+    app.add_api_route(
+        prefix + "/publication/text/test-generate",
+        publication_controller.test_generate_publication_text,
+        methods=["POST"],
+        tags=["Publication"],
+    )
+
     # Регенерация изображения публикации
     app.add_api_route(
         prefix + "/publication/text/regenerate",

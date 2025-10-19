@@ -7,6 +7,35 @@ class GeneratePublicationTextBody(BaseModel):
     text_reference: str
 
 
+class TestGeneratePublicationTextBody(BaseModel):
+    text_reference: str
+    organization_id: int
+    name: str
+    hint: str
+
+    goal: str
+    tone_of_voice: list[str]
+    brand_rules: list[str]
+
+    creativity_level: int
+    audience_segments: str
+
+    len_min: int
+    len_max: int
+
+    n_hashtags_min: int
+    n_hashtags_max: int
+
+    cta_type: str
+    cta_strategy: dict
+
+    good_samples: list[dict]
+    bad_samples: list[dict]
+    additional_info: list[dict]
+
+    prompt_for_image_style: str
+
+
 class RegeneratePublicationTextBody(BaseModel):
     category_id: int
     publication_text: str
