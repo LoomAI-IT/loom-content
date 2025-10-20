@@ -133,9 +133,11 @@ class IAnthropicClient(Protocol):
             history: list,
             system_prompt: str,
             temperature: float = 0.5,
-            llm_model: str = "claude-sonnet-4-5",
+            llm_model: str = "claude-haiku-4-5",
             max_tokens: int = 4096,
             thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
     ) -> tuple[str, dict]: pass
 
     @abstractmethod
@@ -144,9 +146,11 @@ class IAnthropicClient(Protocol):
             history: list,
             system_prompt: str,
             temperature: float = 0.5,
-            llm_model: str = "claude-sonnet-4-5",
+            llm_model: str = "claude-haiku-4-5",
             max_tokens: int = 4096,
             thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
     ) -> tuple[dict, dict]: pass
 
 

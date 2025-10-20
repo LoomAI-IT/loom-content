@@ -33,11 +33,13 @@ class AnthropicClient(interface.IAnthropicClient):
             history: list,
             system_prompt: str,
             temperature: float = 0.5,
-            llm_model: str = "claude-sonnet-4-5",
+            llm_model: str = "claude-haiku-4-5",
             max_tokens: int = 4096,
             thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
     ) -> tuple[str, dict]:
-        messages = self._prepare_messages(history)
+        messages = self._prepare_messages(history, enable_caching=enable_caching)
 
         api_params: dict = {
             "model": llm_model,
@@ -47,7 +49,16 @@ class AnthropicClient(interface.IAnthropicClient):
         }
 
         if system_prompt:
-            api_params["system"] = system_prompt
+            if enable_caching:
+                api_params["system"] = [
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": {"type": "ephemeral", "ttl": cache_ttl}
+                    }
+                ]
+            else:
+                api_params["system"] = system_prompt
 
         if thinking_tokens is not None and thinking_tokens > 0:
             api_params["thinking"] = {
@@ -56,6 +67,22 @@ class AnthropicClient(interface.IAnthropicClient):
             }
 
         completion_response = await self.client.messages.create(**api_params)
+
+        # Логируем эффективность кэширования
+        usage = completion_response.usage
+        if enable_caching:
+            cache_read = getattr(usage, 'cache_read_input_tokens', 0)
+            cache_created = getattr(usage, 'cache_creation_input_tokens', 0)
+            total_input = usage.input_tokens
+
+            cache_hit_rate = (cache_read / total_input * 100) if total_input > 0 else 0
+
+            self.logger.info("Cache metrics", {
+                "cache_read_tokens": cache_read,
+                "cache_created_tokens": cache_created,
+                "total_input_tokens": total_input,
+                "cache_hit_rate": f"{cache_hit_rate:.1f}%"
+            })
 
         generate_cost = self._calculate_llm_cost(completion_response, llm_model)
 
@@ -74,13 +101,15 @@ class AnthropicClient(interface.IAnthropicClient):
             history: list,
             system_prompt: str,
             temperature: float = 0.5,
-            llm_model: str = "claude-sonnet-4-5",
+            llm_model: str = "claude-haiku-4-5",
             max_tokens: int = 4096,
             thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
     ) -> tuple[dict, dict]:
 
         llm_response_str, initial_generate_cost = await self.generate_str(
-            history, system_prompt, temperature, llm_model, max_tokens, thinking_tokens
+            history, system_prompt, temperature, llm_model, max_tokens, thinking_tokens, enable_caching, cache_ttl
         )
 
         generate_cost = initial_generate_cost
@@ -89,7 +118,7 @@ class AnthropicClient(interface.IAnthropicClient):
             llm_response_json = self._extract_and_parse_json(llm_response_str)
         except Exception:
             llm_response_json, retry_generate_cost = await self._retry_llm_generate(
-                history, llm_model, temperature, llm_response_str, system_prompt
+                history, llm_model, temperature, llm_response_str, system_prompt, enable_caching
             )
             generate_cost = {
                 'total_cost': round(generate_cost["total_cost"] + retry_generate_cost["total_cost"], 6),
@@ -129,14 +158,43 @@ class AnthropicClient(interface.IAnthropicClient):
         self.logger.info("Ответ от LLM", {"llm_response_str": llm_response_str})
         return llm_response_json, generate_cost
 
-    def _prepare_messages(self, history: list) -> list:
+    def _prepare_messages(self, history: list, enable_caching: bool = True, cache_ttl: str = "5m") -> list:
+        if not history:
+            return []
+
         messages = []
 
-        for message in history:
-            messages.append({
-                "role": message["role"],
-                "content": message["content"]
-            })
+        # Находим индекс последнего сообщения ассистента
+        last_assistant_idx = None
+        for i in range(len(history) - 1, -1, -1):
+            if history[i]["role"] == "assistant":
+                last_assistant_idx = i
+                break
+
+        for i, message in enumerate(history):
+            # Кэшируем последнее сообщение ассистента
+            should_cache = (
+                    enable_caching
+                    and last_assistant_idx is not None
+                    and i == last_assistant_idx
+            )
+
+            if should_cache:
+                messages.append({
+                    "role": message["role"],
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": message["content"],
+                            "cache_control": {"type": "ephemeral", "ttl": cache_ttl}
+                        }
+                    ]
+                })
+            else:
+                messages.append({
+                    "role": message["role"],
+                    "content": message["content"]
+                })
 
         return messages
 
@@ -218,24 +276,40 @@ class AnthropicClient(interface.IAnthropicClient):
             llm_model: str,
             temperature: float,
             llm_response_str: str,
-            system_prompt: str
+            system_prompt: str,
+            enable_caching: bool = True
     ) -> tuple[dict, dict]:
         self.logger.warning("LLM потребовался retry", {"llm_response": llm_response_str})
 
-        retry_messages = [
-            *[{"role": msg["role"], "content": msg["content"]} for msg in history],
+        retry_history = [
+            *history,
             {"role": "assistant", "content": llm_response_str},
             {"role": "user",
              "content": "Я же просил JSON формат, как в системном промпте, дай ответ в JSON формате или твой JSON не валидный, проверь его на валидность"},
         ]
 
-        completion_response = await self.client.messages.create(
-            model=llm_model,
-            max_tokens=4096,
-            temperature=temperature,
-            system=system_prompt if system_prompt else None,
-            messages=retry_messages
-        )
+        retry_messages = self._prepare_messages(retry_history, enable_caching=enable_caching)
+
+        api_params = {
+            "model": llm_model,
+            "max_tokens": 4096,
+            "temperature": temperature,
+            "messages": retry_messages
+        }
+
+        if system_prompt:
+            if enable_caching:
+                api_params["system"] = [
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ]
+            else:
+                api_params["system"] = system_prompt
+
+        completion_response = await self.client.messages.create(**api_params)
 
         generate_cost = self._calculate_llm_cost(completion_response, llm_model)
 
