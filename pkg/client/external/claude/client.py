@@ -100,7 +100,7 @@ class AnthropicClient(interface.IAnthropicClient):
             self,
             history: list,
             system_prompt: str,
-            temperature: float = 0.5,
+            temperature: float = 1.0,
             llm_model: str = "claude-haiku-4-5",
             max_tokens: int = 4096,
             thinking_tokens: int = None,

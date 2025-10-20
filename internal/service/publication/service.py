@@ -105,6 +105,8 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
+            thinking_tokens=2048,
+            llm_model="claude-sonnet-4-5",
         )
 
         await self._debit_organization_balance(
