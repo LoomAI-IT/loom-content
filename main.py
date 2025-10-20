@@ -10,6 +10,7 @@ from aiogram.client.telegram import TelegramAPIServer
 from infrastructure.pg.pg import PG
 from infrastructure.telemetry.telemetry import Telemetry, AlertManager
 from infrastructure.weedfs.weedfs import AsyncWeed
+from pkg.client.external.claude.client import AnthropicClient
 from pkg.client.external.telegram.client import LTelegramClient
 
 from pkg.client.external.vizard.client import VizardClient
@@ -118,6 +119,7 @@ openai_client = OpenAIClient(
     tel=tel,
     api_key=cfg.openai_api_key
 )
+anthropic_client = AnthropicClient(tel, cfg.anthropic_api_key)
 vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
 )
@@ -142,6 +144,7 @@ publication_service = PublicationService(
     tel=tel,
     repo=publication_repo,
     social_network_repo=social_network_repo,
+    anthropic_client=anthropic_client,
     openai_client=openai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,

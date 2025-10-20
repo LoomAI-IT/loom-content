@@ -47,6 +47,7 @@ class Config:
 
         # OpenAI configuration
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
 
         # Loom Authorization service
         self.loom_authorization_host = os.getenv("LOOM_AUTHORIZATION_CONTAINER_NAME", "localhost")

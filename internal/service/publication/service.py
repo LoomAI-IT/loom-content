@@ -18,6 +18,7 @@ class PublicationService(interface.IPublicationService):
             repo: interface.IPublicationRepo,
             social_network_repo: interface.ISocialNetworkRepo,
             openai_client: interface.IOpenAIClient,
+            anthropic_client: interface.IAnthropicClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.ILoomOrganizationClient,
@@ -32,6 +33,7 @@ class PublicationService(interface.IPublicationService):
         self.repo = repo
         self.social_network_repo = social_network_repo
         self.openai_client = openai_client
+        self.anthropic_client = anthropic_client
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
@@ -95,7 +97,7 @@ class PublicationService(interface.IPublicationService):
             organization
         )
 
-        publication_data, generate_cost = await self.openai_client.generate_json(
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
             history=[
                 {
                     "role": "user",
@@ -103,8 +105,6 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
         )
 
         await self._debit_organization_balance(
@@ -172,7 +172,7 @@ class PublicationService(interface.IPublicationService):
             organization
         )
 
-        publication_data, generate_cost = await self.openai_client.generate_json(
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
             history=[
                 {
                     "role": "user",
@@ -180,8 +180,6 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
         )
 
         return publication_data

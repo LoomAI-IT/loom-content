@@ -54,7 +54,6 @@ class IHttpMiddleware(Protocol):
     def authorization_middleware03(self, app: FastAPI): pass
 
 
-
 class IRedis(Protocol):
     @abstractmethod
     async def set(self, key: str, value: Any, ttl: int = None) -> bool: pass
@@ -125,6 +124,30 @@ class IVizardClient(Protocol):
             project_name: str = None,
             webhook_url: str = None
     ) -> dict: pass
+
+
+class IAnthropicClient(Protocol):
+    @abstractmethod
+    async def generate_str(
+            self,
+            history: list,
+            system_prompt: str,
+            temperature: float = 0.5,
+            llm_model: str = "claude-sonnet-4-5",
+            max_tokens: int = 4096,
+            thinking_tokens: int = None,
+    ) -> tuple[str, dict]: pass
+
+    @abstractmethod
+    async def generate_json(
+            self,
+            history: list,
+            system_prompt: str,
+            temperature: float = 0.5,
+            llm_model: str = "claude-sonnet-4-5",
+            max_tokens: int = 4096,
+            thinking_tokens: int = None,
+    ) -> tuple[dict, dict]: pass
 
 
 class IOpenAIClient(Protocol):
