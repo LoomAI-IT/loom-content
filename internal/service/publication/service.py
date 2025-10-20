@@ -182,7 +182,7 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             llm_model="claude-sonnet-4-5",
-            thinking_tokens=4096,
+            thinking_tokens=2048,
             system_prompt=text_system_prompt,
         )
 
