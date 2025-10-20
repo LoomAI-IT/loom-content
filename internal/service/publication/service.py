@@ -181,6 +181,8 @@ class PublicationService(interface.IPublicationService):
                     "content": f"Создай текст для поста"
                 }
             ],
+            llm_model="claude-sonnet-4-5",
+            thinking_tokens=4096,
             system_prompt=text_system_prompt,
         )
 
