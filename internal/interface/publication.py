@@ -755,16 +755,9 @@ class IPublicationRepo(Protocol):
 
 
 class IPublicationPromptGenerator(Protocol):
-    @abstractmethod
-    async def get_search_intelligence_prompt(
-            self,
-            user_text_reference: str,
-            category: model.Category,
-            organization: model.Organization,
-    ) -> str: pass
 
     @abstractmethod
-    async def get_generate_publication_text_system_prompt_INoT(
+    async def get_generate_publication_text_system_prompt(
             self,
             user_text_reference: str,
             web_search_result: str,
@@ -774,16 +767,14 @@ class IPublicationPromptGenerator(Protocol):
         pass
 
     @abstractmethod
-    async def get_search_executor_prompt(self, web_search_plan: dict) -> str: pass
-
-    @abstractmethod
     async def get_regenerate_publication_text_system_prompt(
             self,
+            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
-            publication_text: str,
-    ) -> str:
-        pass
+            current_publication_text: str,
+            regeneration_instructions: str,
+    ) -> str: pass
 
     @abstractmethod
     async def get_generate_publication_image_system_prompt(
@@ -815,7 +806,8 @@ class IPublicationPromptGenerator(Protocol):
             self,
             autoposting_category: model.AutopostingCategory,
             organization: model.Organization,
-            source_post_text: str
+            source_post_text: str,
+            web_search_result: str
     ) -> str:
         pass
 

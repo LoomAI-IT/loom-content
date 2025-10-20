@@ -62,35 +62,9 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        # generate_search_query_system_prompt = await self.prompt_generator.get_search_intelligence_prompt(
-        #     text_reference,
-        #     category,
-        #     organization,
-        # )
-        #
-        # web_search_query, generate_cost = await self.openai_client.generate_json(
-        #     history=[
-        #         {
-        #             "role": "user",
-        #             "content": "Создай детальный план поиска"
-        #         }
-        #     ],
-        #     system_prompt=generate_search_query_system_prompt,
-        #     temperature=1,
-        #     llm_model="gpt-5"
-        # )
-        #
-        # self.logger.info("План поиска", {"web_search_query": web_search_query})
-        #
         web_search_result = ""
-        # if web_search_query["search_needed"]:
-        #     web_search_prompt = await self.prompt_generator.get_search_executor_prompt(web_search_query)
-        #     web_search_result = await self.openai_client.web_search(web_search_prompt)
-        #
-        # self.logger.info("Результат поиска", {"web_search_result": web_search_result})
 
-
-        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
+        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
             web_search_result,
             category,
@@ -139,7 +113,6 @@ class PublicationService(interface.IPublicationService):
             additional_info: list[dict],
             prompt_for_image_style: str
     ) -> dict:
-        # Создаем объект Category в памяти (не сохраняя в базу)
         category = model.Category(
             id=-1,
             organization_id=organization_id,
@@ -165,10 +138,9 @@ class PublicationService(interface.IPublicationService):
 
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
 
-
         web_search_result = ""
 
-        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt_INoT(
+        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
             web_search_result,
             category,
@@ -205,32 +177,38 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
+        web_search_result = ""
         if prompt:
             self.logger.info("Регенерация текста публикации с промптом")
             text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
+                web_search_result,
                 category,
                 organization,
                 publication_text,
+                prompt,
             )
-            publication_data, generate_cost = await self.openai_client.generate_json(
+            publication_data, generate_cost = await self.anthropic_client.generate_json(
                 history=[
                     {
                         "role": "user",
-                        "content": f"Создай улучшенный пост для социальной сети c этими правками: {prompt}"
+                        "content": f"Создай улучшенный пост для социальной"
                     }
                 ],
                 system_prompt=text_system_prompt,
-                temperature=1,
-                llm_model="gpt-5"
+                llm_model="claude-sonnet-4-5",
+                max_tokens=15000,
+                thinking_tokens=10000,
             )
         else:
             self.logger.info("Регенерация текста публикации без промпта")
             text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
+                web_search_result,
                 category,
                 organization,
                 publication_text,
+                "",
             )
-            publication_data, generate_cost = await self.openai_client.generate_json(
+            publication_data, generate_cost = await self.anthropic_client.generate_json(
                 history=[
                     {
                         "role": "user",
@@ -238,8 +216,9 @@ class PublicationService(interface.IPublicationService):
                     }
                 ],
                 system_prompt=text_system_prompt,
-                temperature=1,
-                llm_model="gpt-5"
+                llm_model="claude-sonnet-4-5",
+                max_tokens=15000,
+                thinking_tokens=10000,
             )
 
         await self._debit_organization_balance(
@@ -776,13 +755,15 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
+        web_search_result = ""
         text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
             autoposting_category,
             organization,
-            source_post_text
+            source_post_text,
+            web_search_result
         )
 
-        publication_data, generate_cost = await self.openai_client.generate_json(
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
             history=[
                 {
                     "role": "user",
@@ -790,8 +771,9 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
+            llm_model="claude-sonnet-4-5",
+            max_tokens=15000,
+            thinking_tokens=10000,
         )
         await self._debit_organization_balance(
             autoposting_category.organization_id,
