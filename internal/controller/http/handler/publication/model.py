@@ -18,7 +18,7 @@ class TestGeneratePublicationTextBody(BaseModel):
     brand_rules: list[str]
 
     creativity_level: int
-    audience_segments: str
+    audience_segment: str
 
     len_min: int
     len_max: int
@@ -67,7 +67,7 @@ class CreateCategoryBody(BaseModel):
     brand_rules: list[str]
 
     creativity_level: int
-    audience_segments: str
+    audience_segment: str
 
     len_min: int
     len_max: int
@@ -93,7 +93,7 @@ class UpdateCategoryBody(BaseModel):
     brand_rules: list[str] = None
 
     creativity_level: int = None
-    audience_segments: str = None
+    audience_segment: str = None
 
     len_min: int = None
     len_max: int = None

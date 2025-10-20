@@ -105,7 +105,8 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
-            thinking_tokens=2048,
+            max_tokens=15000,
+            thinking_tokens=10000,
             llm_model="claude-sonnet-4-5",
         )
 
@@ -126,7 +127,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice: list[str],
             brand_rules: list[str],
             creativity_level: int,
-            audience_segments: str,
+            audience_segment: str,
             len_min: int,
             len_max: int,
             n_hashtags_min: int,
@@ -148,7 +149,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice=tone_of_voice,
             brand_rules=brand_rules,
             creativity_level=creativity_level,
-            audience_segments=audience_segments,
+            audience_segment=audience_segment,
             len_min=len_min,
             len_max=len_max,
             n_hashtags_min=n_hashtags_min,
@@ -182,7 +183,8 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             llm_model="claude-sonnet-4-5",
-            thinking_tokens=2048,
+            max_tokens=15000,
+            thinking_tokens=10000,
             system_prompt=text_system_prompt,
         )
 
@@ -562,7 +564,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice: list[str],
             brand_rules: list[str],
             creativity_level: int,
-            audience_segments: str,
+            audience_segment: str,
             len_min: int,
             len_max: int,
             n_hashtags_min: int,
@@ -582,7 +584,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice=tone_of_voice,
             brand_rules=brand_rules,
             creativity_level=creativity_level,
-            audience_segments=audience_segments,
+            audience_segment=audience_segment,
             len_min=len_min,
             len_max=len_max,
             n_hashtags_min=n_hashtags_min,
@@ -616,7 +618,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice: list[str] = None,
             brand_rules: list[str] = None,
             creativity_level: int = None,
-            audience_segments: str = None,
+            audience_segment: str = None,
             len_min: int = None,
             len_max: int = None,
             n_hashtags_min: int = None,
@@ -636,7 +638,7 @@ class PublicationService(interface.IPublicationService):
             tone_of_voice=tone_of_voice,
             brand_rules=brand_rules,
             creativity_level=creativity_level,
-            audience_segments=audience_segments,
+            audience_segment=audience_segment,
             len_min=len_min,
             len_max=len_max,
             n_hashtags_min=n_hashtags_min,

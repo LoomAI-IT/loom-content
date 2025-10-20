@@ -50,7 +50,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     
         <Audience Segments>
             Целевые сегменты аудитории для этой рубрики:
-            {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segments))}
+            {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segment))}
     
             Применение: Понимай, для КОГО создаёшь контент. Адаптируй подачу под сегмент.
             Обращайся к их потребностям, говори на их языке.
@@ -547,7 +547,7 @@ Compliance Rules (обязательные правила): {organization.compli
 Tone of Voice рубрики: {category.tone_of_voice}
 Брендовые правила: {category.brand_rules}
 Уровень креативности (1-10): {category.creativity_level}
-Целевая аудитория: {category.audience_segments}
+Целевая аудитория: {category.audience_segment}
 
 Технические требования:
 - Длина текста: строго от {category.len_min} до {category.len_max} символов (включая пробелы и HTML-теги)
@@ -1039,7 +1039,7 @@ Call-to-Action:
     
         <Audience Segments>
             Целевые сегменты аудитории для этой рубрики:
-            {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segments))}
+            {chr(10).join(f"        {i + 1}) {seg}\n" for i, seg in enumerate(category.audience_segment))}
     
             Применение: Понимай, для КОГО создаёшь контент. Адаптируй подачу под сегмент.
             Обращайся к их потребностям, говори на их языке.

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS categories (
     brand_rules TEXT[] DEFAULT '{}',
 
     creativity_level INTEGER DEFAULT 5,
-    audience_segments TEXT NOT NULL,
+    audience_segment TEXT NOT NULL,
 
     len_min INTEGER NOT NULL,
     len_max INTEGER NOT NULL,

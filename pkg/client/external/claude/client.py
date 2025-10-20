@@ -68,22 +68,6 @@ class AnthropicClient(interface.IAnthropicClient):
 
         completion_response = await self.client.messages.create(**api_params)
 
-        # Логируем эффективность кэширования
-        usage = completion_response.usage
-        if enable_caching:
-            cache_read = getattr(usage, 'cache_read_input_tokens', 0)
-            cache_created = getattr(usage, 'cache_creation_input_tokens', 0)
-            total_input = usage.input_tokens
-
-            cache_hit_rate = (cache_read / total_input * 100) if total_input > 0 else 0
-
-            self.logger.info("Cache metrics", {
-                "cache_read_tokens": cache_read,
-                "cache_created_tokens": cache_created,
-                "total_input_tokens": total_input,
-                "cache_hit_rate": f"{cache_hit_rate:.1f}%"
-            })
-
         generate_cost = self._calculate_llm_cost(completion_response, llm_model)
 
         llm_response = ""

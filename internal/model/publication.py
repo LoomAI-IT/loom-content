@@ -23,7 +23,7 @@ class Category:
     brand_rules: list[str]
 
     creativity_level: int
-    audience_segments: str
+    audience_segment: str
 
     len_min: int
     len_max: int
@@ -54,7 +54,7 @@ class Category:
                 tone_of_voice=row.tone_of_voice,
                 brand_rules=row.brand_rules,
                 creativity_level=row.creativity_level,
-                audience_segments=row.audience_segments,
+                audience_segment=row.audience_segment,
                 len_min=row.len_min,
                 len_max=row.len_max,
                 n_hashtags_min=row.n_hashtags_min,
@@ -80,7 +80,7 @@ class Category:
             "tone_of_voice": self.tone_of_voice,
             "brand_rules": self.brand_rules,
             "creativity_level": self.creativity_level,
-            "audience_segments": self.audience_segments,
+            "audience_segment": self.audience_segment,
             "len_min": self.len_min,
             "len_max": self.len_max,
             "n_hashtags_min": self.n_hashtags_min,
