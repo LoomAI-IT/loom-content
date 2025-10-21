@@ -100,6 +100,7 @@ ultrathink
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
         return publication_data
 
     @traced_method()
@@ -183,7 +184,7 @@ ultrathink
             thinking_tokens=15000,
             llm_model="claude-sonnet-4-5",
         )
-
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
         return publication_data
 
     @traced_method()
@@ -273,6 +274,7 @@ ultrathink
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
         return publication_data
 
     @traced_method()
