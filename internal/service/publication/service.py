@@ -81,7 +81,7 @@ class PublicationService(interface.IPublicationService):
             system_prompt=text_system_prompt,
             # max_tokens=15000,
             # thinking_tokens=10000,
-            # llm_model="claude-sonnet-4-5",
+            llm_model="claude-sonnet-4-5",
         )
 
         await self._debit_organization_balance(
@@ -154,7 +154,7 @@ class PublicationService(interface.IPublicationService):
                     "content": f"Создай текст для поста"
                 }
             ],
-            # llm_model="claude-sonnet-4-5",
+            llm_model="claude-sonnet-4-5",
             # max_tokens=15000,
             # thinking_tokens=10000,
             system_prompt=text_system_prompt,
@@ -195,7 +195,7 @@ class PublicationService(interface.IPublicationService):
                     }
                 ],
                 system_prompt=text_system_prompt,
-                # llm_model="claude-sonnet-4-5",
+                llm_model="claude-sonnet-4-5",
                 # max_tokens=15000,
                 # thinking_tokens=10000,
             )
@@ -216,7 +216,7 @@ class PublicationService(interface.IPublicationService):
                     }
                 ],
                 system_prompt=text_system_prompt,
-                # llm_model="claude-sonnet-4-5",
+                llm_model="claude-sonnet-4-5",
                 # max_tokens=15000,
                 # thinking_tokens=10000,
             )
