@@ -24,6 +24,12 @@ CLAUDE_PRICING_TABLE = {
         cached_input_price=0.30
     ),
 
+    "claude-haiku-4-5": ModelPricing(
+        input_price=1.00,
+        output_price=5.00,
+        cached_input_price=0.30
+    ),
+
     # Claude Sonnet 4
     "claude-sonnet-4-20250514": ModelPricing(
         input_price=3.00,
