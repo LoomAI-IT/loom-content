@@ -131,7 +131,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <parameter>length_max</parameter>
         <location>category_parameters.technical_requirements</location>
         <requirement>НИКОГДА не превышай максимальную длину текста</requirement>
-        <measurement>Считай ВСЕ символы включая пробелы, знаки препинания и HTML-теги (&lt;b&gt;, &lt;i&gt;, &lt;br&gt;)</measurement>
         <consequence>Превышение length_max делает пост непригодным для публикации</consequence>
     </rule>
     
@@ -139,28 +138,16 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <parameter>length_min</parameter>
         <location>category_parameters.technical_requirements</location>
         <requirement>НИКОГДА не создавай текст короче минимальной длины</requirement>
-        <measurement>Считай ВСЕ символы включая пробелы, знаки препинания и HTML-теги (&lt;b&gt;, &lt;i&gt;, &lt;br&gt;)</measurement>
         <consequence>Текст короче length_min не соответствует требованиям рубрики и будет отклонен</consequence>
     </rule>
     
     <rule priority="4">
-        <parameter>cta_type и cta_strategy</parameter>
-        <location>category_parameters.call_to_action</location>
-        <requirement>ОБЯЗАТЕЛЬНО включай призыв к действию (CTA) согласно указанным type и strategy</requirement>
-        <condition>Если cta_type задан и не пустой, CTA должен присутствовать в тексте</condition>
-        <implementation>Интегрируй CTA естественно в текст поста согласно указанной стратегии</implementation>
-        <consequence>Отсутствие CTA снижает эффективность поста и нарушает требования рубрики</consequence>
-    </rule>
-    
-    <rule priority="5">
         <parameter>brand_rules</parameter>
         <location>category_parameters.basic_info</location>
-        <requirement>НЕ используй информацию, формулировки или подходы, противоречащие brand_rules</requirement>
-        <scope>Проверяй соответствие brand_rules на уровне фактов, формулировок, tone и стилистики</scope>
         <consequence>Нарушение brand_rules вредит репутации бренда и делает контент непригодным</consequence>
     </rule>
     
-    <rule priority="6">
+    <rule priority="5">
         <parameter>hashtags_min и hashtags_max</parameter>
         <location>category_parameters.technical_requirements</location>
         <requirement>ОБЯЗАТЕЛЬНО включай количество хештегов строго в указанных пределах</requirement>
@@ -168,35 +155,8 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <relevance>Каждый хештег должен быть релевантен теме поста и рубрике</relevance>
         <consequence>Неправильное количество хештегов нарушает техническое требование и снижает эффективность</consequence>
     </rule>
-    
-    <rule priority="7">
-        <parameter>JSON структура ответа</parameter>
-        <location>response_format</location>
-        <requirement>ПРОВЕРЯЙ валидность JSON перед возвратом ответа</requirement>
-        <checks>
-            <check>Правильные кавычки (двойные, не одинарные)</check>
-            <check>Экранирование спецсимволов внутри строк</check>
-            <check>Отсутствие trailing commas</check>
-            <check>Правильная структура с полем "text"</check>
-        </checks>
-        <consequence>Невалидный JSON приведет к ошибке парсинга и невозможности использовать контент</consequence>
-    </rule>
-    
-    <rule priority="8">
-        <parameter>Формат ответа</parameter>
-        <location>response_format</location>
-        <requirement>НЕ добавляй НИКАКОЙ текст вне JSON структуры</requirement>
-        <forbidden>
-            <item>Пояснения перед JSON</item>
-            <item>Комментарии после JSON</item>
-            <item>Markdown code blocks (```json)</item>
-            <item>Любой текст до или после JSON объекта</item>
-        </forbidden>
-        <correct_format>Ответ должен начинаться с {{ и заканчиваться на }}</correct_format>
-        <consequence>Любой текст вне JSON сломает автоматический парсинг ответа</consequence>
-    </rule>
-    
-    <rule priority="9">
+
+    <rule priority="6">
         <parameter>tone_of_voice</parameter>
         <location>category_parameters.basic_info и organization_context</location>
         <requirement>СТРОГО соблюдай указанный tone_of_voice при создании контента</requirement>
@@ -207,7 +167,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <consequence>Несоответствие tone_of_voice разрушает единство бренда и снижает доверие аудитории</consequence>
     </rule>
     
-    <rule priority="10">
+    <rule priority="7">
         <parameter>creativity_level</parameter>
         <location>category_parameters.basic_info</location>
         <requirement>Адаптируй уровень креативности контента согласно указанному значению (1-10)</requirement>
@@ -219,7 +179,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <consequence>Неправильный уровень креативности может оттолкнуть целевую аудиторию или сделать контент скучным</consequence>
     </rule>
     
-    <rule priority="11">
+    <rule priority="8">
         <parameter>audience_segment</parameter>
         <location>category_parameters.basic_info</location>
         <requirement>Создавай контент специально для указанного сегмента аудитории</requirement>
@@ -231,7 +191,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <consequence>Игнорирование целевой аудитории снижает engagement и эффективность поста</consequence>
     </rule>
     
-    <rule priority="12">
+    <rule priority="9">
         <parameter>good_samples и bad_samples</parameter>
         <location>category_parameters.quality_references</location>
         <requirement>Используй good_samples как образцы качества, активно избегай паттернов из bad_samples</requirement>
