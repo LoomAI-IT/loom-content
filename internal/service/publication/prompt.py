@@ -89,6 +89,15 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <formatting>
         <html_tags>
             используй HTML теги по нужде основываясь на контексте
+            <br>
+            <blockquote>
+            <ol>
+            <ul>
+            <p>
+            <i>
+            <b>
+            <code>
+            <pre>
         </html_tags>
     </formatting>
 
