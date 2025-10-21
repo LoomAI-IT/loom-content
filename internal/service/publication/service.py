@@ -161,13 +161,23 @@ ultrathink
             history=[
                 {
                     "role": "user",
-                    "content": f"Создай текст для поста"
+                    "content": """
+<system>
+Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+
+ultrathink
+<system/>
+
+<user>
+Создай текст для поста
+</user>
+        """
                 }
             ],
-            llm_model="claude-sonnet-4-5",
-            # max_tokens=15000,
-            # thinking_tokens=10000,
             system_prompt=text_system_prompt,
+            max_tokens=15000,
+            thinking_tokens=10000,
+            llm_model="claude-sonnet-4-5",
         )
 
         return publication_data
