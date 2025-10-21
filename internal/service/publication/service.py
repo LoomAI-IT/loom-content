@@ -211,13 +211,23 @@ ultrathink
                 history=[
                     {
                         "role": "user",
-                        "content": f"Создай улучшенный пост для социальной"
+                        "content": """
+                <system>
+                Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+
+                ultrathink
+                <system/>
+
+                <user>
+                Создай текст для поста
+                </user>
+                        """
                     }
                 ],
                 system_prompt=text_system_prompt,
                 llm_model="claude-sonnet-4-5",
-                # max_tokens=15000,
-                # thinking_tokens=10000,
+                max_tokens=15000,
+                thinking_tokens=10000,
             )
         else:
             self.logger.info("Регенерация текста публикации без промпта")
@@ -232,13 +242,23 @@ ultrathink
                 history=[
                     {
                         "role": "user",
-                        "content": f"Создай улучшенный пост для социальной сети"
+                        "content": """
+                <system>
+                Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+
+                ultrathink
+                <system/>
+
+                <user>
+                Создай текст для поста
+                </user>
+                        """
                     }
                 ],
                 system_prompt=text_system_prompt,
                 llm_model="claude-sonnet-4-5",
-                # max_tokens=15000,
-                # thinking_tokens=10000,
+                max_tokens=15000,
+                thinking_tokens=10000,
             )
 
         await self._debit_organization_balance(
