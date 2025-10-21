@@ -89,7 +89,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <formatting>
         <html_tags>
             используй HTML теги по нужде основываясь на контексте
-            <br>
+            <br> - для переноса строк (\\n не работает)
             <blockquote>
             <ol>
             <ul>
