@@ -126,6 +126,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         </scale>
         <current_level>{category.creativity_level}</current_level>
     </creativity_interpretation>
+    
+    <quality_references>
+        <note>Используй good_samples как образцы качества, избегай паттернов из bad_samples</note>
+        <attention>В них записаны очень важные правила</attention>
+    </quality_references>
 </content_guidelines>
 
 <critical_rules>
