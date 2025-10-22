@@ -29,6 +29,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
 <organization_context>
     <name>{organization.name}</name>
+    <description>{organization.description}</description>
     <tone_of_voice>{organization.tone_of_voice}</tone_of_voice>
     <compliance_rules priority="absolute">
 {organization.compliance_rules}
