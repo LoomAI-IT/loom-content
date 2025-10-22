@@ -136,6 +136,7 @@ publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
 social_network_repo = SocialNetworkRepo(tel, db)
 
+
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
 
