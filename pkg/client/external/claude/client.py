@@ -342,10 +342,13 @@ class AnthropicClient(interface.IAnthropicClient):
         return llm_response_json, generate_cost
 
     def _extract_web_search_info(self, completion_response: Message) -> dict:
+        """Извлекает информацию о веб-поисках из ответа API"""
+
         web_search_info = {
             "used": False,
             "total_searches": 0,
-            "searches": []
+            "searches": [],
+            "citations": []  # Новое поле
         }
 
         # Проверяем usage для количества поисков
@@ -355,7 +358,7 @@ class AnthropicClient(interface.IAnthropicClient):
                 web_search_info["total_searches"] = server_tool_use.web_search_requests
                 web_search_info["used"] = server_tool_use.web_search_requests > 0
 
-        # Извлекаем детали каждого поиска
+        # Извлекаем детали каждого поиска и ЦИТАТЫ
         for i, content_block in enumerate(completion_response.content):
             # Поисковый запрос
             if content_block.type == "server_tool_use" and content_block.name == "web_search":
@@ -384,6 +387,18 @@ class AnthropicClient(interface.IAnthropicClient):
                         break
 
                 web_search_info["searches"].append(search_info)
+
+            # Извлекаем ЦИТАТЫ из текстовых блоков
+            if content_block.type == "text":
+                if hasattr(content_block, 'citations') and content_block.citations:
+                    for citation in content_block.citations:
+                        if citation.type == "web_search_result_location":
+                            web_search_info["citations"].append({
+                                "url": citation.url,
+                                "title": citation.title,
+                                "cited_text": citation.cited_text,  # ФРАГМЕНТ ТЕКСТА
+                                "encrypted_index": citation.encrypted_index
+                            })
 
         return web_search_info
 
