@@ -760,7 +760,6 @@ class IPublicationPromptGenerator(Protocol):
     async def get_generate_publication_text_system_prompt(
             self,
             user_text_reference: str,
-            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
     ) -> str:
@@ -769,7 +768,6 @@ class IPublicationPromptGenerator(Protocol):
     @abstractmethod
     async def get_regenerate_publication_text_system_prompt(
             self,
-            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
             current_publication_text: str,

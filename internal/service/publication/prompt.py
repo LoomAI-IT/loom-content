@@ -5,7 +5,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     async def get_generate_publication_text_system_prompt(
             self,
             user_text_reference: str,
-            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
     ) -> str:
@@ -81,10 +80,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 {user_text_reference}
 </user_request>
 
-<web_search_results>
-<instruction>Используй эти данные как источник фактов и актуальной информации. Интегрируй релевантные факты естественно в текст.</instruction>
-{web_search_result}
-</web_search_results>
+<web_search>
+<instruction>Используй поиск в интернете, если посчитаешь, что тебе нужна достоверная информация для улучшения контента в посте</instruction>
+</web_search>
 
 <content_guidelines>
     <formatting>
@@ -248,7 +246,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     async def get_regenerate_publication_text_system_prompt(
             self,
-            web_search_result: str,
             category: model.Category,
             organization: model.Organization,
             current_publication_text: str,
@@ -295,8 +292,6 @@ Call-to-Action:
 Дополнительная информация по рубрике: {category.additional_info}
 </Category_Parameters>
 
-Результаты веб-поиска (используй как источник фактов):
-{web_search_result}
 </Original_Context>
 
 <Current_Publication>

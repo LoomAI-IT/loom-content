@@ -66,7 +66,6 @@ class PublicationService(interface.IPublicationService):
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
-            web_search_result,
             category,
             organization
         )
@@ -155,7 +154,6 @@ ultrathink
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
-            web_search_result,
             category,
             organization
         )
@@ -206,7 +204,6 @@ ultrathink
         if prompt:
             self.logger.info("Регенерация текста публикации с промптом")
             text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
-                web_search_result,
                 category,
                 organization,
                 publication_text,
@@ -239,7 +236,6 @@ ultrathink
         else:
             self.logger.info("Регенерация текста публикации без промпта")
             text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
-                web_search_result,
                 category,
                 organization,
                 publication_text,
