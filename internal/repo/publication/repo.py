@@ -62,7 +62,7 @@ class PublicationRepo(interface.IPublicationRepo):
             'vk_link': vk_link,
             'tg_link': tg_link,
             'text': text,
-            'moderation_status': moderation_status if moderation_status else None,
+            'moderation_status': moderation_status if moderation_status is not None else None,
             'moderation_comment': moderation_comment,
             'publication_at': publication_at,
             'image_fid': image_fid,
@@ -181,10 +181,10 @@ class PublicationRepo(interface.IPublicationRepo):
             'n_hashtags_min': n_hashtags_min,
             'n_hashtags_max': n_hashtags_max,
             'cta_type': cta_type,
-            'cta_strategy': json.dumps(cta_strategy) if cta_strategy else None,
-            'good_samples': [json.dumps(item) for item in good_samples] if good_samples else None,
-            'bad_samples': [json.dumps(item) for item in bad_samples] if bad_samples else None,
-            'additional_info': [json.dumps(item) for item in additional_info] if additional_info else None,
+            'cta_strategy': json.dumps(cta_strategy) if cta_strategy is not None else None,
+            'good_samples': [json.dumps(item) for item in good_samples] if good_samples is not None else None,
+            'bad_samples': [json.dumps(item) for item in bad_samples] if bad_samples is not None else None,
+            'additional_info': [json.dumps(item) for item in additional_info] if additional_info is not None else None,
             'prompt_for_image_style': prompt_for_image_style,
         }
 
@@ -256,7 +256,7 @@ class PublicationRepo(interface.IPublicationRepo):
             'cta_type': cta_type,
             'tone_of_voice': tone_of_voice,
             'brand_rules': brand_rules,
-            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples is not None else None,
             'additional_info': additional_info
         }
 
@@ -306,7 +306,7 @@ class PublicationRepo(interface.IPublicationRepo):
             'cta_type': cta_type,
             'tone_of_voice': tone_of_voice,
             'brand_rules': brand_rules,
-            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples else None,
+            'good_samples': [json.dumps(good_sample) for good_sample in good_samples] if good_samples is not None else None,
             'additional_info': additional_info
         }
 
