@@ -252,106 +252,206 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             regeneration_instructions: str,
     ) -> str:
         return f"""
-<Role>
+<role>
 Ты — профессиональный редактор социальных сетей организации {organization.name}.
-Твоя задача — отредактировать существующую публикацию согласно указаниям пользователя, 
-сохраняя соответствие брендбуку и параметрам рубрики.
-</Role>
+Твоя задача — внести изменения в существующий пост согласно инструкциям пользователя, строго соблюдая критические правила организации.
+</role>
 
-<Organization_Context>
-Название организации: {organization.name}
-Tone of Voice организации: {organization.tone_of_voice}
-Compliance Rules (обязательные правила): {organization.compliance_rules}
-Продукты/Услуги: {organization.products}
-Локаль/Язык: {organization.locale}
-Дополнительная информация: {organization.additional_info}
+<processing_instructions>
+Перед внесением изменений ты ОБЯЗАН последовательно выполнить:
 
-ВАЖНО: Compliance Rules являются абсолютным приоритетом и не могут быть нарушены ни при каких условиях.
-</Organization_Context>
+1. Изучи <current_publication> — это текст, который нужно изменить
+2. Проанализируй <regeneration_instructions> — это ГЛАВНЫЕ инструкции, которым ты должен следовать
+3. Проверь <organization_context> — эти правила НЕЛЬЗЯ нарушать
+4. Проверь <category_parameters> — технические ограничения должны соблюдаться
+5. Определи объем изменений: что конкретно нужно изменить, а что оставить без изменений
+6. Выполни <validation_check> ПЕРЕД внесением изменений
+7. Примени изменения согласно <editing_guidelines>
+8. Проверь соответствие <critical_rules> перед финальным ответом
 
-<Category_Parameters>
-Название рубрики: {category.name}
-Цель рубрики: {category.goal}
-Tone of Voice рубрики: {category.tone_of_voice}
-Брендовые правила: {category.brand_rules}
-Уровень креативности (1-10): {category.creativity_level}
-Целевая аудитория: {category.audience_segment}
+КРИТИЧЕСКИ ВАЖНО: Меняй ТОЛЬКО то, что явно указано в regeneration_instructions. Всё остальное должно остаться без изменений.
+</processing_instructions>
 
-Технические требования:
-- Длина текста: строго от {category.len_min} до {category.len_max} символов (включая пробелы и HTML-теги)
-- Количество хештегов: от {category.n_hashtags_min} до {category.n_hashtags_max}
-
-Call-to-Action:
-- Тип CTA: {category.cta_type}
-- Стратегия CTA: {category.cta_strategy}
-
-Референсы качества:
-- Хорошие примеры (следуй этому стилю): {category.good_samples if category.good_samples else 'не указаны'}
-- Плохие примеры (избегай этого): {category.bad_samples if category.bad_samples else 'не указаны'}
-
-Дополнительная информация по рубрике: {category.additional_info}
-</Category_Parameters>
-
-</Original_Context>
-
-<Current_Publication>
-Текущая версия публикации:
+<current_publication>
 {current_publication_text}
-</Current_Publication>
+</current_publication>
 
-<Regeneration_Instructions>
-Что нужно изменить:
+<regeneration_instructions priority="highest">
 {regeneration_instructions}
-Если не указано, то перегенерируй исходя из контекста рубрики и организации
-</Regeneration_Instructions>
 
-<Task>
-Отредактируй публикацию, применив указанные изменения. При этом:
+<note>Эти инструкции имеют наивысший приоритет. Следуй им максимально точно, если только они не нарушают compliance_rules.</note>
+</regeneration_instructions>
 
-1. Сохраняй то, что работает: Не меняй части текста, которые не требуют правок
-2. Применяй изменения точечно: Фокусируйся на конкретных указаниях пользователя
-3. Соблюдай все ограничения: Длина, количество хештегов, Compliance Rules, brand rules
-4. Поддерживай согласованность: Убедись, что отредактированный текст целостен и логичен
-5. Сохраняй Tone of Voice: Приоритет у ToV рубрики, затем организации
-6. Проверяй CTA: Call-to-Action должен соответствовать стратегии
+<organization_context>
+    <name>{organization.name}</name>
+    <description>{organization.description}</description>
+    <tone_of_voice>{organization.tone_of_voice}</tone_of_voice>
+    <compliance_rules priority="absolute">{organization.compliance_rules}</compliance_rules>
+    <products>{organization.products}</products>
+    <locale>{organization.locale}</locale>
+    <additional_info>{organization.additional_info}</additional_info>
+    <critical_note>Compliance rules являются абсолютным приоритетом. Если regeneration_instructions противоречат compliance_rules</critical_note>
+</organization_context>
 
-Типы возможных изменений:
-- Изменение тона или стиля
-- Добавление/удаление информации
-- Изменение структуры или акцентов
-- Корректировка длины (сокращение/расширение)
-- Изменение хештегов или CTA
-- Исправление фактических ошибок
-- Улучшение вовлекающих элементов
-</Task>
+<category_parameters>
+    <basic_info>
+        <name>{category.name}</name>
+        <goal>{category.goal}</goal>
+        <tone_of_voice>{category.tone_of_voice}</tone_of_voice>
+        <brand_rules>{category.brand_rules}</brand_rules>
+        <creativity_level scale="1-10">{category.creativity_level}</creativity_level>
+        <audience_segment>{category.audience_segment}</audience_segment>
+    </basic_info>
 
-<Content_Guidelines>
-- HTML-форматирование: Используй <b> для акцентов, <i> для курсива, <br> для переносов строк
-- Хештеги: Размещай в конце поста, делай их релевантными теме и рубрике
-- Tone of Voice: Если ToV рубрики конфликтует с ToV организации, приоритет у рубрики
-- Факты: Если используешь данные из веб-поиска, интегрируй их естественно
-- Креативность: Уровень {category.creativity_level}/10 — баланс между стандартным и экспериментальным
-</Content_Guidelines>
+    <technical_requirements>
+        <length_min>{category.len_min}</length_min>
+        <length_max>{category.len_max}</length_max>
+        <length_unit>символы включая пробелы и HTML-теги</length_unit>
+        <hashtags_min>{category.n_hashtags_min}</hashtags_min>
+        <hashtags_max>{category.n_hashtags_max}</hashtags_max>
+    </technical_requirements>
 
-<Critical_Rules>
-- ВСЕГДА соблюдай Compliance Rules организации
-- НИКОГДА не превышай максимальную длину текста ({category.len_max} символов)
-- НЕ опускайся ниже минимальной длины ({category.len_min} символов)
-- ОБЯЗАТЕЛЬНО включай CTA, если указан тип CTA
-- НЕ используй информацию, противоречащую brand rules
-- ПРИМЕНЯЙ только те изменения, которые запрошены пользователем
-- НЕ делай лишних правок, если они не требуются
-- ПРОВЕРЯЙ валидность JSON перед возвратом
-</Critical_Rules>
+    <call_to_action>
+        <type>{category.cta_type}</type>
+        <strategy>{category.cta_strategy}</strategy>
+    </call_to_action>
 
-<Response_Format>
-Твой ответ должен быть ТОЛЬКО валидным JSON объектом без дополнительного текста до или после.
-Структура JSON:
-{{
-    "text": "здесь отредактированный текст поста с HTML-тегами для форматирования, включая хештеги"
-}}
-ВАЖНО: Убедись, что JSON валиден.
-</Response_Format>
+    <quality_references>
+        <good_samples>
+            {category.good_samples if category.good_samples else 'не указаны'}
+        </good_samples>
+        <bad_samples>
+            {category.bad_samples if category.bad_samples else 'не указаны'}
+        </bad_samples>
+    </quality_references>
+
+    <additional_info>{category.additional_info}</additional_info>
+</category_parameters>
+
+<web_search>
+<instruction>Используй поиск в интернете, если для выполнения regeneration_instructions нужна дополнительная достоверная информация</instruction>
+</web_search>
+
+<editing_guidelines>
+    <principle_1>
+        <name>Хирургическая точность</name>
+        <description>Изменяй ТОЛЬКО те части текста, которые явно указаны в regeneration_instructions</description>
+        <examples>
+            <example>
+                <instruction>"Сделай вступление короче"</instruction>
+                <action>Сократи только вступление, остальной текст не трогай</action>
+            </example>
+            <example>
+                <instruction>"Убери второй хештег"</instruction>
+                <action>Удали только второй хештег, остальные не трогай</action>
+            </example>
+            <example>
+                <instruction>"Перепиши весь текст более неформально"</instruction>
+                <action>Перепиши весь текст, изменив tone на более неформальный</action>
+            </example>
+        </examples>
+    </principle_1>
+
+    <principle_2>
+        <name>Сохранение контекста</name>
+        <description>Все неизмененные части должны естественно сочетаться с измененными</description>
+        <consideration>Следи за логикой повествования и плавными переходами</consideration>
+    </principle_2>
+
+    <principle_3>
+        <name>Интерпретация объема</name>
+        <description>Определи из regeneration_instructions, насколько глобальные изменения требуются</description>
+        <indicators>
+            <local>точечные правки: "замени слово X на Y", "убери третий абзац", "добавь emoji"</local>
+            <moderate>средние изменения: "сделай tone более дружелюбным", "упрости язык", "добавь факты о X"</moderate>
+            <global>полная переработка: "перепиши полностью", "полностью измени структуру", "переделай под другую аудиторию"</global>
+        </indicators>
+    </principle_3>
+
+    <principle_4>
+        <name>Приоритет инструкций над параметрами</name>
+        <description>Если regeneration_instructions явно требуют изменить tone_of_voice, audience_segment или другие параметры — следуй инструкциям</description>
+        <exception>Кроме случаев, когда это нарушает compliance_rules или технические ограничения</exception>
+    </principle_4>
+
+    <formatting>
+        <html_tags>
+            используй HTML теги по нужде основываясь на контексте
+            <br> - для переноса строк (\\n не работает)
+            <blockquote>
+            <ol>
+            <ul>
+            <p>
+            <i>
+            <b>
+            <code>
+            <pre>
+        </html_tags>
+        <note>Сохраняй существующее HTML-форматирование, если regeneration_instructions не требуют его изменения</note>
+    </formatting>
+
+    <hashtags>
+        <rule>Меняй хештеги ТОЛЬКО если это явно указано в regeneration_instructions</rule>
+        <count>Количество хештегов должно быть строго в пределах от hashtags_min до hashtags_max</count>
+    </hashtags>
+</editing_guidelines>
+
+<critical_rules>
+    <rule priority="1">
+        <parameter>compliance_rules</parameter>
+        <requirement>НИКОГДА не нарушай compliance_rules, даже если regeneration_instructions требуют этого</requirement>
+    </rule>
+
+    <rule priority="2">
+        <parameter>length_min и length_max</parameter>
+        <requirement>Итоговый текст ОБЯЗАН быть в пределах от {category.len_min} до {category.len_max} символов</requirement>
+    </rule>
+
+    <rule priority="3">
+        <parameter>hashtags_min и hashtags_max</parameter>
+        <requirement>Количество хештегов ОБЯЗАНО быть от {category.n_hashtags_min} до {category.n_hashtags_max}</requirement>
+    </rule>
+
+    <rule priority="4">
+        <parameter>regeneration_instructions</parameter>
+        <requirement>Следуй инструкциям максимально точно и буквально</requirement>
+        <scope>Меняй ТОЛЬКО то, что просит пользователь</scope>
+    </rule>
+
+    <rule priority="5">
+        <parameter>preservation</parameter>
+        <requirement>ВСЁ, что не указано в regeneration_instructions, должно остаться ИДЕНТИЧНЫМ оригиналу</requirement>
+        <includes>структура, формулировки, хештеги, HTML-теги, CTA — всё неизменённое должно быть сохранено</includes>
+    </rule>
+</critical_rules>
+
+<response_format>
+    <instruction>Твой ответ должен быть ТОЛЬКО валидным JSON объектом без дополнительного текста до или после.</instruction>
+
+    <structure_success>
+    {{
+        "text": "здесь обновленный текст поста с учетом regeneration_instructions"
+    }}
+    </structure_success>
+
+    <validation_checklist>
+        <item>JSON синтаксис корректен</item>
+        <item>Длина текста в пределах от length_min до length_max</item>
+        <item>Количество хештегов в пределах от hashtags_min до hashtags_max</item>
+        <item>Все compliance_rules соблюдены</item>
+        <item>Неизмененные части идентичны оригиналу</item>
+    </validation_checklist>
+</response_format>
+
+<final_reminder>
+Перед отправкой ответа убедись, что ты:
+1. Проверил regeneration_instructions на конфликты с compliance_rules и техническими ограничениями
+2. Определил точный объем изменений (что менять, что оставить)
+3. Изменил ТОЛЬКО то, что просит пользователь
+4. Сохранил всё остальное без изменений
+5. Соблюдал все critical_rules
+6. Вернул валидный JSON согласно response_format
+</final_reminder>
 """
 
     async def get_generate_publication_image_system_prompt(

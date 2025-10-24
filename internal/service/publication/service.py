@@ -200,7 +200,6 @@ ultrathink
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        web_search_result = ""
         if prompt:
             self.logger.info("Регенерация текста публикации с промптом")
             text_system_prompt = await self.prompt_generator.get_regenerate_publication_text_system_prompt(
@@ -223,7 +222,7 @@ ultrathink
 <system/>
 
 <user>
-Создай текст для поста
+Следуй инструкциям перегенерации
 </user>
                         """
                     }
@@ -255,7 +254,7 @@ ultrathink
 <system/>
 
 <user>
-Создай текст для поста
+Следуй инструкциям перегенерации
 </user>
                         """
                     }
