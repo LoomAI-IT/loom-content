@@ -636,12 +636,14 @@ class PublicationController(interface.IPublicationController):
     async def combine_images(
             self,
             organization_id: int = Form(...),
+            category_id: int = Form(...),
             prompt: str = Form(...),
             images_files: list[UploadFile] = File(...),
     ) -> JSONResponse:
         try:
             images_url = await self.publication_service.combine_images(
                 organization_id=organization_id,
+                category_id=category_id,
                 images_files=images_files,
                 prompt=prompt,
             )

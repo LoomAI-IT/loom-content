@@ -1033,10 +1033,12 @@ ultrathink
     async def combine_images(
             self,
             organization_id: int,
+            category_id: int,
             images_files: list[UploadFile],
             prompt: str,
     ) -> list[str]:
         organization = await self.organization_client.get_organization_by_id(organization_id)
+        category = (await self.repo.get_category_by_id(category_id))[0]
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
         if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
@@ -1049,7 +1051,9 @@ ultrathink
             images_data.append(image_content)
 
         upgrade_combine_prompt_system = await self.prompt_generator.get_upgrade_combine_prompt_system_prompt(
-            prompt
+            prompt,
+            category,
+            organization
         )
 
         upgraded_prompt, generate_cost = await self.anthropic_client.generate_str(

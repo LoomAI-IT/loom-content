@@ -210,6 +210,7 @@ class IPublicationController(Protocol):
     async def combine_images(
             self,
             organization_id: int = Form(...),
+            category_id: int = Form(...),
             prompt: str = Form(...),
             images_files: list[UploadFile] = File(...),
     ) -> JSONResponse:
@@ -556,6 +557,7 @@ class IPublicationService(Protocol):
     async def combine_images(
             self,
             organization_id: int,
+            category_id: int,
             images_files: list[UploadFile],
             prompt: str
     ) -> list[str]:
