@@ -1,5 +1,6 @@
 from io import BytesIO
 
+import httpx
 from PIL import Image
 import google.generativeai as genai
 from google.generativeai import GenerationConfig
@@ -18,7 +19,15 @@ class GoogleAIClient(interface.GoogleAIClient):
         self.logger = tel.logger()
         self.tracer = tel.tracer()
 
-        genai.configure(api_key=api_key)
+        # Настройка прокси
+        transport = httpx.HTTPTransport(proxy="http://user331580:52876b@163.5.189.163:2667")
+        http_client = httpx.Client(transport=transport)
+
+        genai.configure(
+            api_key=api_key,
+            transport="rest",
+            client_options={"http_client": http_client}
+        )
         self.model_name = "gemini-2.5-flash-image"
         self.model = genai.GenerativeModel(self.model_name)
 
