@@ -403,26 +403,26 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     </rule>
 
     <rule priority="2">
-        <parameter>length_min и length_max</parameter>
-        <requirement>Итоговый текст ОБЯЗАН быть в пределах от {category.len_min} до {category.len_max} символов</requirement>
-        <exception>Если просят сжать -- сжимай, значит так нужно, если просят больше -- значит делай больше</exception>
+        <parameter>preservation</parameter>
+        <requirement>ВСЁ, что не указано в regeneration_instructions, должно остаться ИДЕНТИЧНЫМ оригиналу</requirement>
+        <includes>структура, формулировки, хештеги, HTML-теги, CTA — всё неизменённое должно быть сохранено</includes>
     </rule>
-
+    
     <rule priority="3">
-        <parameter>hashtags_min и hashtags_max</parameter>
-        <requirement>Количество хештегов ОБЯЗАНО быть от {category.n_hashtags_min} до {category.n_hashtags_max}</requirement>
-    </rule>
-
-    <rule priority="4">
         <parameter>regeneration_instructions</parameter>
         <requirement>Следуй инструкциям максимально точно и буквально</requirement>
         <scope>Меняй ТОЛЬКО то, что просит пользователь</scope>
     </rule>
 
+    <rule priority="4">
+        <parameter>length_min и length_max</parameter>
+        <requirement>Итоговый текст ОБЯЗАН быть в пределах от {category.len_min} до {category.len_max} символов</requirement>
+        <exception>Если просят сжать -- сжимай, значит так нужно, если просят больше -- значит делай больше</exception>
+    </rule>
+    
     <rule priority="5">
-        <parameter>preservation</parameter>
-        <requirement>ВСЁ, что не указано в regeneration_instructions, должно остаться ИДЕНТИЧНЫМ оригиналу</requirement>
-        <includes>структура, формулировки, хештеги, HTML-теги, CTA — всё неизменённое должно быть сохранено</includes>
+        <parameter>hashtags_min и hashtags_max</parameter>
+        <requirement>Количество хештегов ОБЯЗАНО быть от {category.n_hashtags_min} до {category.n_hashtags_max}</requirement>
     </rule>
 </critical_rules>
 
