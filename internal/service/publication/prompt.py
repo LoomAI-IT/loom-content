@@ -405,7 +405,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <rule priority="2">
         <parameter>length_min и length_max</parameter>
         <requirement>Итоговый текст ОБЯЗАН быть в пределах от {category.len_min} до {category.len_max} символов</requirement>
-        <exception>Если просят сжать -- сжимай, значит так нужно</exception>
+        <exception>Если просят сжать -- сжимай, значит так нужно, если просят больше -- значит делай больше</exception>
     </rule>
 
     <rule priority="3">
@@ -437,7 +437,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     <validation_checklist>
         <item>JSON синтаксис корректен</item>
-        <item>Длина текста в пределах от length_min до length_max</item>
+        <item>Длина текста в пределах от length_min до length_max, только если не просили сжать или написать подробнее</item>
         <item>Количество хештегов в пределах от hashtags_min до hashtags_max</item>
         <item>Все compliance_rules соблюдены</item>
         <item>Неизмененные части идентичны оригиналу</item>
