@@ -1060,7 +1060,8 @@ ultrathink
             history=[{"role": "user", "content": f"Улучши промпт пользователя, который тебе дали"}],
             system_prompt=upgrade_combine_prompt_system,
             llm_model="claude-sonnet-4-5",
-            thinking_tokens=2000,
+            max_tokens=15000,
+            thinking_tokens=10000,
             images=images_data,
         )
         self.logger.debug("Улучшенный промпт для объединения", {"upgraded_combine_prompt": upgraded_prompt})
