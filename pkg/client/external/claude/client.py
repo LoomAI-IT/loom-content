@@ -1,6 +1,7 @@
 import re
 import json
 import ast
+import base64
 
 import httpx
 from anthropic import AsyncAnthropic
@@ -42,8 +43,9 @@ class AnthropicClient(interface.IAnthropicClient):
             cache_ttl: str = "5m",
             enable_web_search: bool = True,
             max_searches: int = 5,
+            images: list[bytes] = None,
     ) -> tuple[str, dict]:
-        messages = self._prepare_messages(history, enable_caching=enable_caching)
+        messages = self._prepare_messages(history, enable_caching=enable_caching, images=images)
 
         api_params: dict = {
             "model": llm_model,
@@ -107,6 +109,7 @@ class AnthropicClient(interface.IAnthropicClient):
             cache_ttl: str = "5m",
             enable_web_search: bool = True,
             max_searches: int = 5,
+            images: list[bytes] = None,
     ) -> tuple[dict, dict]:
 
         llm_response_str, initial_generate_cost = await self.generate_str(
@@ -117,7 +120,10 @@ class AnthropicClient(interface.IAnthropicClient):
             max_tokens,
             thinking_tokens,
             enable_caching,
-            cache_ttl
+            cache_ttl,
+            enable_web_search,
+            max_searches,
+            images
         )
 
         generate_cost = initial_generate_cost
@@ -131,7 +137,7 @@ class AnthropicClient(interface.IAnthropicClient):
                 temperature,
                 llm_response_str,
                 system_prompt,
-                enable_caching
+                enable_caching,
             )
             generate_cost = {
                 'total_cost': round(generate_cost["total_cost"] + retry_generate_cost["total_cost"], 6),
@@ -171,7 +177,13 @@ class AnthropicClient(interface.IAnthropicClient):
         self.logger.info("Ответ от LLM", {"llm_response": llm_response_json})
         return llm_response_json, generate_cost
 
-    def _prepare_messages(self, history: list, enable_caching: bool = True, cache_ttl: str = "5m") -> list:
+    def _prepare_messages(
+            self,
+            history: list,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
+            images: list[bytes] = None  # 🆕 Новый параметр
+    ) -> list:
         if not history:
             return []
 
@@ -192,6 +204,13 @@ class AnthropicClient(interface.IAnthropicClient):
                     and i == last_assistant_idx
             )
 
+            # 🆕 Добавляем изображения к последнему user сообщению
+            is_last_user_message = (
+                    i == len(history) - 1
+                    and message["role"] == "user"
+                    and images
+            )
+
             if should_cache:
                 messages.append({
                     "role": message["role"],
@@ -203,6 +222,34 @@ class AnthropicClient(interface.IAnthropicClient):
                         }
                     ]
                 })
+            elif is_last_user_message:
+                # 🆕 Формируем content с изображениями
+                content = []
+
+                # Добавляем все изображения
+                for img_bytes in images:
+                    media_type = self._detect_image_type(img_bytes)
+                    base64_image = base64.b64encode(img_bytes).decode('utf-8')
+
+                    content.append({
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": base64_image
+                        }
+                    })
+
+                # Добавляем текст после изображений
+                content.append({
+                    "type": "text",
+                    "text": message["content"]
+                })
+
+                messages.append({
+                    "role": message["role"],
+                    "content": content
+                })
             else:
                 messages.append({
                     "role": message["role"],
@@ -210,6 +257,23 @@ class AnthropicClient(interface.IAnthropicClient):
                 })
 
         return messages
+
+    def _detect_image_type(self, image_bytes: bytes) -> str:
+        """
+        Определяет тип изображения по magic numbers (первым байтам файла)
+        """
+        if image_bytes.startswith(b'\xff\xd8\xff'):
+            return "image/jpeg"
+        elif image_bytes.startswith(b'\x89PNG\r\n\x1a\n'):
+            return "image/png"
+        elif image_bytes.startswith(b'RIFF') and b'WEBP' in image_bytes[:12]:
+            return "image/webp"
+        elif image_bytes.startswith(b'GIF87a') or image_bytes.startswith(b'GIF89a'):
+            return "image/gif"
+        else:
+            # По умолчанию возвращаем JPEG
+            self.logger.warning("Не удалось определить тип изображения, используем image/jpeg")
+            return "image/jpeg"
 
     def _calculate_llm_cost(
             self,
@@ -301,7 +365,7 @@ class AnthropicClient(interface.IAnthropicClient):
             temperature: float,
             llm_response_str: str,
             system_prompt: str,
-            enable_caching: bool = True
+            enable_caching: bool = True,
     ) -> tuple[dict, dict]:
         self.logger.warning("LLM потребовался retry", {"llm_response": llm_response_str})
 
@@ -309,10 +373,11 @@ class AnthropicClient(interface.IAnthropicClient):
             *history,
             {"role": "assistant", "content": llm_response_str},
             {"role": "user",
-             "content": "Я же просил JSON формат, как в системном промпте, дай ответ в JSON формате или твой JSON не валидный, проверь его на валидность"},
+             "content": "Я же просил JSON формат, как в системном промпте, сохрани всю информацию дай ответ в JSON формате или твой JSON не валидный, проверь его на валидность"},
         ]
 
-        retry_messages = self._prepare_messages(retry_history, enable_caching=enable_caching)
+        # 🆕 В retry изображения НЕ передаём, так как они уже были в первом запросе
+        retry_messages = self._prepare_messages(retry_history, enable_caching=enable_caching, images=None)
 
         api_params = {
             "model": llm_model,
@@ -343,13 +408,10 @@ class AnthropicClient(interface.IAnthropicClient):
         return llm_response_json, generate_cost
 
     def _extract_web_search_info(self, completion_response: Message) -> dict:
-        """Извлекает информацию о веб-поисках из ответа API"""
-
         web_search_info = {
             "used": False,
             "total_searches": 0,
-            "searches": [],
-            "citations": []  # Новое поле
+            "searches": []
         }
 
         # Проверяем usage для количества поисков
@@ -359,7 +421,7 @@ class AnthropicClient(interface.IAnthropicClient):
                 web_search_info["total_searches"] = server_tool_use.web_search_requests
                 web_search_info["used"] = server_tool_use.web_search_requests > 0
 
-        # Извлекаем детали каждого поиска и ЦИТАТЫ
+        # Извлекаем детали каждого поиска
         for i, content_block in enumerate(completion_response.content):
             # Поисковый запрос
             if content_block.type == "server_tool_use" and content_block.name == "web_search":
@@ -388,18 +450,6 @@ class AnthropicClient(interface.IAnthropicClient):
                         break
 
                 web_search_info["searches"].append(search_info)
-
-            # Извлекаем ЦИТАТЫ из текстовых блоков
-            if content_block.type == "text":
-                if hasattr(content_block, 'citations') and content_block.citations:
-                    for citation in content_block.citations:
-                        if citation.type == "web_search_result_location":
-                            web_search_info["citations"].append({
-                                "url": citation.url,
-                                "title": citation.title,
-                                "cited_text": citation.cited_text,  # ФРАГМЕНТ ТЕКСТА
-                                "encrypted_index": citation.encrypted_index
-                            })
 
         return web_search_info
 
