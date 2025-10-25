@@ -812,6 +812,8 @@ class IPublicationPromptGenerator(Protocol):
     async def get_upgrade_combine_prompt_system_prompt(
             self,
             combine_prompt: str,
+            category: model.Category,
+            organization: model.Organization,
     ) -> str: pass
 
     @abstractmethod
