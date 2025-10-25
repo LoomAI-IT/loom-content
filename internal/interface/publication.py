@@ -809,6 +809,12 @@ class IPublicationPromptGenerator(Protocol):
     ) -> str: pass
 
     @abstractmethod
+    async def get_upgrade_combine_prompt_system_prompt(
+            self,
+            combine_prompt: str,
+    ) -> str: pass
+
+    @abstractmethod
     async def get_generate_publication_image_system_prompt(
             self,
             prompt_for_image_style: str,

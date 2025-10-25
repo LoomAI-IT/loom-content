@@ -1048,9 +1048,24 @@ ultrathink
             image_content = await image_file.read()
             images_data.append(image_content)
 
+        upgrade_combine_prompt_system = await self.prompt_generator.get_upgrade_combine_prompt_system_prompt(
+            prompt
+        )
+
+        upgraded_prompt, generate_cost = await self.anthropic_client.generate_str(
+            history=[{"role": "user", "content": f"Улучши этот промпт:\n{upgrade_combine_prompt_system}"}],
+            system_prompt=upgrade_combine_prompt_system,
+            llm_model="claude-sonnet-4-5",
+            thinking_tokens=2000
+        )
+        await self._debit_organization_balance(
+            organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
+
         result_image_data, result_text = await self.googleai_client.combine_images(
             images_data=images_data,
-            prompt=prompt,
+            prompt=upgraded_prompt,
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
