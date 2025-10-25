@@ -1053,7 +1053,7 @@ ultrathink
         )
 
         upgraded_prompt, generate_cost = await self.anthropic_client.generate_str(
-            history=[{"role": "user", "content": f"Улучши этот промпт:\n{upgrade_combine_prompt_system}"}],
+            history=[{"role": "user", "content": f"Улучши промпт пользователя, который тебе дали"}],
             system_prompt=upgrade_combine_prompt_system,
             llm_model="claude-sonnet-4-5",
             thinking_tokens=2000

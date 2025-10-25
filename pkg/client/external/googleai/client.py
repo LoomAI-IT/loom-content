@@ -222,6 +222,7 @@ class GoogleAIClient(interface.GoogleAIClient):
                             result_image_data = base64.b64decode(part['inlineData']['data'])
 
             if result_image_data is None:
+                self.logger.info("Ответ Gemini", result)
                 raise ValueError("No image data in response")
 
             return result_image_data, result_text
