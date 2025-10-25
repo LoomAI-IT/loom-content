@@ -263,6 +263,21 @@ def include_publication_handlers(
         tags=["Other"]
     )
 
+    # IMAGE EDITING
+    app.add_api_route(
+        prefix + "/image/edit",
+        publication_controller.edit_image,
+        methods=["POST"],
+        tags=["ImageEditing"]
+    )
+
+    app.add_api_route(
+        prefix + "/image/combine",
+        publication_controller.combine_images,
+        methods=["POST"],
+        tags=["ImageEditing"]
+    )
+
 
 def include_video_cut_handlers(
         app: FastAPI,

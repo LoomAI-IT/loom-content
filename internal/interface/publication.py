@@ -198,6 +198,22 @@ class IPublicationController(Protocol):
     ) -> JSONResponse:
         pass
 
+    @abstractmethod
+    async def edit_image(
+            self,
+            body: EditImageBody,
+            image_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            body: CombineImagesBody,
+            images_files: list[UploadFile] = File(...),
+    ) -> JSONResponse:
+        pass
+
 
 class IPublicationService(Protocol):
     # Публикация
@@ -524,6 +540,24 @@ class IPublicationService(Protocol):
             self,
             autoposting_category_id: int,
             publication_text: str
+    ) -> list[str]:
+        pass
+
+    @abstractmethod
+    async def edit_image(
+            self,
+            organization_id: int,
+            image_file: UploadFile,
+            prompt: str
+    ) -> list[str]:
+        pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            organization_id: int,
+            images_files: list[UploadFile],
+            prompt: str
     ) -> list[str]:
         pass
 

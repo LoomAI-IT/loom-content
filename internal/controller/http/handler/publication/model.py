@@ -194,3 +194,14 @@ class UpdateAutopostingBody(BaseModel):
     tg_channels: list[str] = None
     required_moderation: bool = None
     need_image: bool = None
+
+
+# IMAGE EDITING
+class EditImageBody(BaseModel):
+    organization_id: int
+    prompt: str
+
+
+class CombineImagesBody(BaseModel):
+    organization_id: int
+    prompt: str

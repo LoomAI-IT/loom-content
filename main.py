@@ -15,6 +15,7 @@ from pkg.client.external.telegram.client import LTelegramClient
 
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
+from pkg.client.external.googleai.client import GoogleAIClient
 
 from pkg.client.internal.loom_authorization.client import LoomAuthorizationClient
 from pkg.client.internal.loom_organization.client import LoomOrganizationClient
@@ -120,6 +121,10 @@ openai_client = OpenAIClient(
     api_key=cfg.openai_api_key
 )
 anthropic_client = AnthropicClient(tel, cfg.anthropic_api_key)
+googleai_client = GoogleAIClient(
+    tel=tel,
+    api_key=cfg.googleai_api_key
+)
 vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
 )
@@ -147,6 +152,7 @@ publication_service = PublicationService(
     social_network_repo=social_network_repo,
     anthropic_client=anthropic_client,
     openai_client=openai_client,
+    googleai_client=googleai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=loom_organization_client,

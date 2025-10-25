@@ -604,3 +604,55 @@ class PublicationController(interface.IPublicationController):
                     "status_code": common.StatusCode.InsufficientBalance,
                 }
             )
+
+    @auto_log()
+    @traced_method()
+    async def edit_image(
+            self,
+            body: EditImageBody,
+            image_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        try:
+            images_url = await self.publication_service.edit_image(
+                organization_id=body.organization_id,
+                image_file=image_file,
+                prompt=body.prompt,
+            )
+
+            return JSONResponse(
+                status_code=200,
+                content={"images_url": images_url}
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
+
+    @auto_log()
+    @traced_method()
+    async def combine_images(
+            self,
+            body: CombineImagesBody,
+            images_files: list[UploadFile] = File(...),
+    ) -> JSONResponse:
+        try:
+            images_url = await self.publication_service.combine_images(
+                organization_id=body.organization_id,
+                images_files=images_files,
+                prompt=body.prompt,
+            )
+
+            return JSONResponse(
+                status_code=200,
+                content={"images_url": images_url}
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )

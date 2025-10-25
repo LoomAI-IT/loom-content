@@ -19,6 +19,7 @@ class PublicationService(interface.IPublicationService):
             social_network_repo: interface.ISocialNetworkRepo,
             openai_client: interface.IOpenAIClient,
             anthropic_client: interface.IAnthropicClient,
+            googleai_client: interface.GoogleAIClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.ILoomOrganizationClient,
@@ -34,6 +35,7 @@ class PublicationService(interface.IPublicationService):
         self.social_network_repo = social_network_repo
         self.openai_client = openai_client
         self.anthropic_client = anthropic_client
+        self.googleai_client = googleai_client
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
@@ -994,6 +996,72 @@ ultrathink
         )
 
         return transcribed_text
+
+    @traced_method()
+    async def edit_image(
+            self,
+            organization_id: int,
+            image_file: UploadFile,
+            prompt: str,
+    ) -> list[str]:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+            self.logger.info("Недостаточно средств на балансе")
+            raise common.ErrInsufficientBalance()
+
+        self.logger.info("Редактирование изображения через GoogleAI")
+        image_content = await image_file.read()
+
+        result_image_data, result_text = await self.googleai_client.edit_image(
+            image_data=image_content,
+            prompt=prompt,
+        )
+
+        result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
+        images_url = await self._upload_images([result_image_base64])
+
+        await self._debit_organization_balance(
+            organization_id,
+            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+        )
+
+        return images_url
+
+    @traced_method()
+    async def combine_images(
+            self,
+            organization_id: int,
+            images_files: list[UploadFile],
+            prompt: str,
+    ) -> list[str]:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+            self.logger.info("Недостаточно средств на балансе")
+            raise common.ErrInsufficientBalance()
+
+        images_data = []
+        for image_file in images_files:
+            image_content = await image_file.read()
+            images_data.append(image_content)
+
+        result_image_data, result_text = await self.googleai_client.combine_images(
+            images_data=images_data,
+            prompt=prompt,
+        )
+
+        result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
+        images_url = await self._upload_images([result_image_base64])
+
+        await self._debit_organization_balance(
+            organization_id,
+            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+        )
+
+        return images_url
 
     async def _upload_images(self, images: list[str]) -> list[str]:
         images_url = []

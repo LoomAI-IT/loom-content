@@ -3,10 +3,8 @@ from abc import abstractmethod
 from typing import Protocol, Sequence, Any, Literal
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from opentelemetry.metrics import Meter
 from opentelemetry.trace import Tracer
-from starlette.responses import StreamingResponse
 
 from internal import model
 
@@ -92,6 +90,26 @@ class IDB(Protocol):
 
     @abstractmethod
     async def multi_query(self, queries: list[str]) -> None: pass
+
+
+class GoogleAIClient(Protocol):
+    @abstractmethod
+    async def edit_image(
+            self,
+            image_data: bytes,
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]: pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            images_data: list[bytes],
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]: pass
 
 
 class IVizardClient(Protocol):
