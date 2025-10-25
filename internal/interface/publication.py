@@ -209,7 +209,8 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def combine_images(
             self,
-            body: CombineImagesBody,
+            organization_id: int,
+            prompt: str,
             images_files: list[UploadFile] = File(...),
     ) -> JSONResponse:
         pass

@@ -635,14 +635,15 @@ class PublicationController(interface.IPublicationController):
     @traced_method()
     async def combine_images(
             self,
-            body: CombineImagesBody,
+            organization_id: int,
+            prompt: str,
             images_files: list[UploadFile] = File(...),
     ) -> JSONResponse:
         try:
             images_url = await self.publication_service.combine_images(
-                organization_id=body.organization_id,
+                organization_id=organization_id,
                 images_files=images_files,
-                prompt=body.prompt,
+                prompt=prompt,
             )
 
             return JSONResponse(

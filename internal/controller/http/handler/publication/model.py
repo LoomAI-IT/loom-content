@@ -200,8 +200,3 @@ class UpdateAutopostingBody(BaseModel):
 class EditImageBody(BaseModel):
     organization_id: int
     prompt: str
-
-
-class CombineImagesBody(BaseModel):
-    organization_id: int
-    prompt: str
