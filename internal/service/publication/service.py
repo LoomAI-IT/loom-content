@@ -1058,6 +1058,8 @@ ultrathink
             llm_model="claude-sonnet-4-5",
             thinking_tokens=2000
         )
+        self.logger.debug("Улучшенный промпт", {"upgraded_combine_prompt": upgraded_prompt})
+
         await self._debit_organization_balance(
             organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
