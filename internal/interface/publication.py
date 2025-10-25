@@ -215,7 +215,6 @@ class IPublicationController(Protocol):
     ) -> JSONResponse:
         pass
 
-
 class IPublicationService(Protocol):
     # Публикация
     @abstractmethod
