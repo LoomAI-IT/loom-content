@@ -405,6 +405,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <rule priority="2">
         <parameter>length_min и length_max</parameter>
         <requirement>Итоговый текст ОБЯЗАН быть в пределах от {category.len_min} до {category.len_max} символов</requirement>
+        <exception>Если просят сжать -- сжимай, значит так нужно</exception>
     </rule>
 
     <rule priority="3">
