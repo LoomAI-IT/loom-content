@@ -48,6 +48,7 @@ class Config:
 
         # OpenAI configuration
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.neuroapi_openai_api_key = os.getenv("NEUROAPI_OPENAI_API_KEY", "")
         self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
         self.googleai_api_key = os.getenv("GOOGLE_AI_API_KEY", "")
 

@@ -119,6 +119,7 @@ loom_tg_bot_client = LoomTgBotClient(
 openai_client = OpenAIClient(
     tel=tel,
     api_key=cfg.openai_api_key,
+    neuroapi_api_key=cfg.neuroapi_openai_api_key,
     proxy=cfg.proxy
 )
 anthropic_client = AnthropicClient(

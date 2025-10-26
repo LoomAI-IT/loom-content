@@ -26,11 +26,13 @@ class OpenAIClient(interface.IOpenAIClient):
             self,
             tel: interface.ITelemetry,
             api_key: str,
+            neuroapi_api_key: str,
             proxy: str = None,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self._encoders = {}
+
 
         if proxy:
             self.client = openai.AsyncOpenAI(
@@ -40,6 +42,11 @@ class OpenAIClient(interface.IOpenAIClient):
         else:
             self.client = openai.AsyncOpenAI(
                 api_key=api_key
+            )
+
+        self.neuroapi_client = self.client = openai.AsyncOpenAI(
+                api_key=neuroapi_api_key,
+                base_url="https://neuroapi.host/v1",
             )
 
     @traced_method(SpanKind.CLIENT)
@@ -272,7 +279,7 @@ class OpenAIClient(interface.IOpenAIClient):
             if style:
                 self.logger.warning("gpt-image-1 не поддерживает параметр style, игнорируется")
 
-        response: ImagesResponse = await self.client.images.generate(**params)
+        response: ImagesResponse = await self.neuroapi_client.images.generate(**params)
 
         images = []
         for img_data in response.data:
