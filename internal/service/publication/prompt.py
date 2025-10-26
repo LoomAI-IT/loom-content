@@ -2099,6 +2099,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 </reminder>
         """
 
+
     async def get_regenerate_publication_image_system_prompt(
             self,
             prompt_for_image_style: str,
