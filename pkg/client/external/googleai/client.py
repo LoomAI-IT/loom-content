@@ -140,8 +140,8 @@ class GoogleAIClient(interface.GoogleAIClient):
                             result_image_data = base64.b64decode(part['inlineData']['data'])
 
             if result_image_data is None:
-                self.logger.info("Ответ Gemini", result)
-                raise ValueError("No image data in response")
+                self.logger.warning("Ответ Gemini", result)
+                result_image_data = image_data
 
             return result_image_data, result_text
 
@@ -222,8 +222,8 @@ class GoogleAIClient(interface.GoogleAIClient):
                             result_image_data = base64.b64decode(part['inlineData']['data'])
 
             if result_image_data is None:
-                self.logger.info("Ответ Gemini", result)
-                raise ValueError("No image data in response")
+                self.logger.warning("Ответ Gemini", result)
+                result_image_data = images_data[0]
 
             return result_image_data, result_text
 
