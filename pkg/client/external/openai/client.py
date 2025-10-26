@@ -33,7 +33,6 @@ class OpenAIClient(interface.IOpenAIClient):
         self.logger = tel.logger()
         self._encoders = {}
 
-
         if proxy:
             self.client = openai.AsyncOpenAI(
                 api_key=api_key,
