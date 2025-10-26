@@ -609,14 +609,15 @@ class PublicationController(interface.IPublicationController):
     @traced_method()
     async def edit_image(
             self,
-            body: EditImageBody,
+            organization_id: int = Form(...),
+            prompt: str = Form(...),
             image_file: UploadFile = File(...),
     ) -> JSONResponse:
         try:
             images_url = await self.publication_service.edit_image(
-                organization_id=body.organization_id,
+                organization_id=organization_id,
                 image_file=image_file,
-                prompt=body.prompt,
+                prompt=prompt,
             )
 
             return JSONResponse(

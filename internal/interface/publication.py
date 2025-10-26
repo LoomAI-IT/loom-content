@@ -201,7 +201,8 @@ class IPublicationController(Protocol):
     @abstractmethod
     async def edit_image(
             self,
-            body: EditImageBody,
+            organization_id: int = Form(...),
+            prompt: str = Form(...),
             image_file: UploadFile = File(...),
     ) -> JSONResponse:
         pass
