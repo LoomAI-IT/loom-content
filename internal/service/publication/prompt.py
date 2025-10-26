@@ -784,12 +784,12 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     """
 
     async def get_upgrade_combine_prompt_system_prompt2(
-                self,
-                combine_prompt: str,
-                category: model.Category,
-                organization: model.Organization,
-        ) -> str:
-            return f"""
+            self,
+            combine_prompt: str,
+            category: model.Category,
+            organization: model.Organization,
+    ) -> str:
+        return f"""
     <role>
     Ты — эксперт по улучшению промптов для генерации изображений в контексте социальных сетей организации {organization.name}.
     Твоя задача — взять пользовательский запрос на комбинирование изображений и улучшить его для NanoBanana API, соблюдая брендбук организации и параметры рубрики.
@@ -2296,4 +2296,3 @@ Call-to-Action:
 - Стиль должен быть узнаваемым и соответствовать бренду
 
 Создай детальное описание изображения, которое визуально дополнит и усилит воздействие текстового контента."""
-
