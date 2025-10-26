@@ -1598,7 +1598,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             - camera: параметры камеры (angle, distance, focus)
             - props: реквизит и детали сцены
             - text_elements: текстовые элементы на изображении
-            - technical_specs: технические параметры (resolution, aspect_ratio)
+            - technical_specs: технические параметры (resolution)
             - atmosphere: атмосфера и окружение
             - effects: специальные эффекты (blur, bokeh, light rays)
         </description>
@@ -1737,44 +1737,43 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
             <organization>Кофейня "Уютный уголок", brand_colors: ["#8B4513", "#FFA500", "#FFFAF0"]</organization>
         </inputs>
         <output>
-    {
+    {{
         "scene": "cozy coffee shop corner on an autumn afternoon, warm and inviting atmosphere",
       "subjects": [
-        {
+        {{
         "type": "beverage",
           "description": "tall glass of pumpkin spice latte with cinnamon dusting on foam, topped with whipped cream",
           "position": "center foreground",
           "details": "visible layers of espresso and steamed milk, decorative cinnamon stick garnish"
-        }
+        }}
       ],
       "style": "lifestyle food photography, professional but approachable",
       "lighting": "soft natural window light from the left, creating gentle highlights on the glass and foam",
       "mood": "warm, cozy, and inviting",
-      "background": {
+      "background": {{
         "elements": ["blurred coffee shop interior", "warm wooden surfaces", "soft-focus autumn decorations", "orange fairy lights"],
         "depth_of_field": "shallow focus, heavily blurred background"
-      },
+      }},
       "composition": "rule of thirds, product positioned slightly off-center with negative space on the right",
-      "camera": {
+      "camera": {{
         "angle": "slightly elevated, 30-degree angle",
         "distance": "close-up product shot",
         "focus": "sharp focus on the beverage and foam texture"
-      },
+      }},
       "color_palette": ["saddle brown", "warm orange", "cream white", "cinnamon brown", "soft amber"],
       "props": ["rustic wooden table", "scattered autumn leaves", "cinnamon sticks", "small pumpkin decoration", "open book in soft focus"],
       "atmosphere": "steam gently rising from the beverage, suggesting warmth",
       "text_elements": [
-        {
+        {{
         "text": "Тыквенный латте",
           "position": "subtle text overlay in bottom left corner",
           "style": "elegant handwritten font, warm brown color"
-        }
+        }}
       ],
-      "technical_specs": {
+      "technical_specs": {{
         "resolution": "4K",
-        "aspect_ratio": "4:5 (Instagram optimized)"
-      }
-    }
+      }}
+    }}
     </output>
     <reasoning>
         - Стиль "крупный план, тёплые тона" → lifestyle food photography с мягким освещением
@@ -1795,40 +1794,39 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <organization>Tech Solutions Inc., индустрия: IT/Software, brand_colors: ["#0066FF", "#00FFCC"]</organization>
     </inputs>
     <output>
-    {
+    {{
         "scene": "modern tech office open space during an intense collaborative work session at night",
       "subjects": [
-        {
+        {{
         "type": "team of professionals",
           "description": "diverse group of 4 people (2 women, 2 men) in casual-smart attire, mixed ethnicities, ages 25-40",
           "pose": "gathered around a large interactive screen, some standing, some sitting on modern office chairs",
           "position": "center and left of frame",
           "expression": "focused, energized, collaborative",
           "action": "actively discussing, pointing at screen, taking notes on laptops"
-        }
+        }}
       ],
       "style": "cinematic corporate photography with tech aesthetic",
       "lighting": "dramatic mix of cool blue screen glow and warm overhead ambient lights, creating dynamic contrast",
       "mood": "energetic, determined, innovative, after-hours dedication",
-      "background": {
+      "background": {{
         "elements": ["large windows showing city lights at night", "modern office furniture", "glass walls with visible project boards", "tech equipment"],
         "depth_of_field": "medium depth, background slightly softened but recognizable"
-      },
+      }},
       "composition": "dynamic diagonal composition from lower left to upper right, creating sense of movement and progress",
-      "camera": {
+      "camera": {{
         "angle": "slightly low angle to convey ambition and achievement",
         "distance": "medium shot capturing the group and immediate environment",
         "focus": "focus on the team with slight blur on distant background"
-      },
+      }},
       "color_palette": ["electric blue", "cyan turquoise", "dark navy", "warm orange accents", "cool gray"],
       "props": ["multiple laptops with glowing screens", "coffee cups", "notebooks", "large interactive display showing code or data", "post-it notes on glass board"],
       "atmosphere": "intensity and focus, sense of urgency but positive energy",
       "effects": ["screen light casting blue glow on faces", "slight motion blur on one person's hand gesture to show action"],
-      "technical_specs": {
+      "technical_specs": {{
         "resolution": "4K",
-        "aspect_ratio": "16:9 (professional/corporate standard)"
-      }
-    }
+      }}
+    }}
     </output>
     <reasoning>
         - Стиль "современный, профессиональный" → cinematic corporate photography
@@ -1849,31 +1847,31 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <organization>Школа "SpeakEasy", brand_colors: ["#FFD700", "#4169E1"]</organization>
     </inputs>
     <output>
-    {
+    {{
         "scene": "bright minimalist study space with a creative learning concept visualization",
       "subjects": [
-        {
+        {{
         "type": "young person",
           "description": "person in their 20s, casual comfortable clothing, sitting cross-legged",
           "pose": "relaxed seated position, looking up thoughtfully",
           "position": "right side of frame",
           "expression": "contemplative, having an 'aha moment'"
-        }
+        }}
       ],
       "style": "modern flat illustration blended with photographic elements",
       "mood": "encouraging, optimistic, light-hearted and accessible",
       "visual_concept": "thought bubbles or floating speech elements around the person's head showing English words and phrases",
       "lighting": "bright even lighting, soft shadows, cheerful and energizing",
-      "background": {
+      "background": {{
         "elements": ["clean white wall", "wooden floor", "small potted plant", "minimalist bookshelf with colorful books"],
         "depth_of_field": "all elements clear but simple"
-      },
+      }},
       "composition": "asymmetric balance with subject on right, visual elements floating on left creating movement toward subject",
-      "camera": {
+      "camera": {{
         "angle": "straight-on eye level",
         "distance": "medium shot",
         "focus": "equal focus throughout, maintaining clarity"
-      },
+      }},
       "color_palette": ["golden yellow", "royal blue", "white", "light coral", "mint green"],
       "props": ["open notebook with English notes", "colorful sticky notes on wall with English words", "tea or coffee mug", "smartphone showing language app"],
       "floating_elements": [
@@ -1881,18 +1879,17 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         "small illustrated icons (light bulb, books, speech bubble, brain)"
       ],
       "text_elements": [
-        {
+        {{
         "text": "Думай на английском!",
           "position": "top center as a title element",
           "style": "bold friendly sans-serif, gradient from yellow to blue"
-        }
+        }}
       ],
       "effects": ["soft drop shadows on floating elements", "subtle gradient background from white to light cream"],
-      "technical_specs": {
+      "technical_specs": {{
         "resolution": "4K",
-        "aspect_ratio": "1:1 (square for social media)"
-      }
-    }
+      }}
+    }}
     </output>
     <reasoning>
         - Стиль "минималистичный, яркий" → чистая композиция с акцентами
@@ -1914,43 +1911,43 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         <organization>FinFlow, индустрия: Fintech, brand_colors: ["#00C9A7", "#845EC2"]</organization>
     </inputs>
     <output>
-    {
+    {{
         "scene": "abstract digital space representing interconnected financial ecosystem",
       "concept": "visualization of human-centric technology through organic and digital fusion",
       "style": "3D render with particle effects, futuristic but warm",
       "mood": "innovative, trustworthy, forward-thinking, humanized technology",
       "primary_elements": [
-        {
+        {{
         "element": "central sphere or node",
           "description": "glowing translucent sphere with internal network of connections, representing the financial ecosystem",
           "properties": "pulsing with light, containing flowing data streams",
           "color": "gradient from turquoise to purple"
-        },
-        {
+        }},
+        {{
         "element": "surrounding particles",
           "description": "thousands of small light particles forming orbital paths around the central sphere",
           "properties": "some particles cluster to form abstract human silhouettes",
           "symbolism": "individual users within the ecosystem"
-        },
-        {
+        }},
+        {{
         "element": "connection lines",
           "description": "glowing lines connecting various points",
           "properties": "dynamic, flowing like neural networks",
           "color": "turquoise and purple gradients"
-        }
+        }}
       ],
       "lighting": "self-illuminated objects in dark space, creating dramatic contrast and depth",
-      "background": {
+      "background": {{
         "type": "deep space gradient",
         "colors": ["deep navy", "black", "hints of purple"],
         "elements": ["subtle grid lines suggesting digital space", "distant glow points"]
-      },
+      }},
       "composition": "central focus with radial symmetry, elements flowing outward creating sense of expansion",
-      "camera": {
+      "camera": {{
         "angle": "slightly tilted orbital view",
         "distance": "medium distance to show full ecosystem",
         "movement": "subtle rotation suggested by motion blur on particles"
-      },
+      }},
       "color_palette": ["turquoise cyan", "vibrant purple", "deep navy", "white glow", "soft pink accents"],
       "visual_metaphor": "organic network structure (like neurons or mycelium) rendered in digital aesthetic to represent human-centered technology",
       "effects": [
@@ -1960,12 +1957,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         "subtle lens flare from central sphere"
       ],
       "atmosphere": "sense of vast interconnected system that feels both technological and human",
-      "technical_specs": {
+      "technical_specs": {{
         "resolution": "4K",
-        "aspect_ratio": "16:9",
         "rendering_style": "high-quality 3D with ray tracing"
-      }
-    }
+      }}
+    }}
         </output>
         <reasoning>
             - Стиль "футуристичный, цифровой" → 3D render с tech эстетикой
@@ -1997,11 +1993,11 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         - Брендовый контекст из organization
 
         ФОРМАТ ОТВЕТА:
-        {
+        {{
         "scene": "...",
         "style": "...",
         ... остальные поля ...
-        }
+        }}
 
         ВАЖНО: НЕ используйте markdown форматирование типа ```json
         Просто вернуте чистый JSON, который можно напрямую распарсить.
