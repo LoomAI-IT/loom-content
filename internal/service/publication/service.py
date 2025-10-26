@@ -295,8 +295,10 @@ ultrathink
             size = "1536x1024"
             quality = "high"
         else:
-            size = "1024x1024"
-            quality = "low"
+            # size = "1024x1024"
+            # quality = "low"
+            size = "1536x1024"
+            quality = "high"
 
         if prompt:
             if image_file:
