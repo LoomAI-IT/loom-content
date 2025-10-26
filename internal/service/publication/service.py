@@ -334,13 +334,41 @@ ultrathink
 
         else:
             self.logger.info("Генерация изображения без промпта")
-            image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
+            generate_image_system_prompt = await self.prompt_generator.get_generate_image_prompt_system(
                 category.prompt_for_image_style,
-                publication_text
+                publication_text,
+                category,
+                organization
+            )
+
+            generate_image_prompt, generate_cost = await self.anthropic_client.generate_json(
+                history=[
+                    {
+                        "role": "user",
+                        "content": """
+<system>
+ultrathink
+<system/>
+
+<user>
+Сделай JSON-промпт для генерации картинки
+</user>
+"""
+                    }
+                ],
+                system_prompt=generate_image_system_prompt,
+                llm_model="claude-sonnet-4-5",
+                max_tokens=20000,
+                thinking_tokens=15000,
+            )
+
+            await self._debit_organization_balance(
+                category.organization_id,
+                generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
             )
 
             images, generate_cost = await self.openai_client.generate_image(
-                prompt=image_system_prompt,
+                prompt=str(generate_image_prompt),
                 image_model="gpt-image-1",
                 size=size,
                 quality=quality,
