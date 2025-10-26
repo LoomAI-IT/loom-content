@@ -17,6 +17,7 @@ class Config:
         self.tg_api_hash: str = os.environ.get('LOOM_TG_API_HASH')
         self.tg_session_string: str = os.environ.get('LOOM_TG_SESSION_STRING')
         self.domain: str = os.environ.get("LOOM_DOMAIN")
+        self.proxy: str = os.environ.get("PROXY")
 
         self.interserver_secret_key = os.getenv("LOOM_INTERSERVER_SECRET_KEY")
 

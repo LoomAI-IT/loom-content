@@ -15,20 +15,28 @@ class GoogleAIClient(interface.GoogleAIClient):
             self,
             tel: interface.ITelemetry,
             api_key: str,
+            proxy: str = None,
     ):
         self.logger = tel.logger()
         self.tracer = tel.tracer()
         self.api_key = api_key
 
-        # Настройка прокси
-        transport = httpx.AsyncHTTPTransport(proxy="http://user331580:52876b@163.5.189.163:2667")
-        self.http_client = httpx.AsyncClient(
-            transport=transport,
-            timeout=120.0,
-            headers={
-                "Content-Type": "application/json"
-            }
-        )
+        if proxy:
+            transport = httpx.AsyncHTTPTransport(proxy=proxy)
+            self.http_client = httpx.AsyncClient(
+                transport=transport,
+                timeout=900,
+                headers={
+                    "Content-Type": "application/json"
+                }
+            )
+        else:
+            self.http_client = httpx.AsyncClient(
+                timeout=900,
+                headers={
+                    "Content-Type": "application/json"
+                }
+            )
 
         self.model_name = "gemini-2.5-flash-image"
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"

@@ -25,16 +25,22 @@ class OpenAIClient(interface.IOpenAIClient):
     def __init__(
             self,
             tel: interface.ITelemetry,
-            api_key: str
+            api_key: str,
+            proxy: str = None,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self._encoders = {}
 
-        self.client = openai.AsyncOpenAI(
-            api_key=api_key,
-            http_client=httpx.AsyncClient(proxy="http://user331580:52876b@163.5.189.163:2667")
-        )
+        if proxy:
+            self.client = openai.AsyncOpenAI(
+                api_key=api_key,
+                http_client=httpx.AsyncClient(proxy=proxy)
+            )
+        else:
+            self.client = openai.AsyncOpenAI(
+                api_key=api_key
+            )
 
     @traced_method(SpanKind.CLIENT)
     async def generate_str(

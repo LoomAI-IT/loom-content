@@ -118,12 +118,18 @@ loom_tg_bot_client = LoomTgBotClient(
 
 openai_client = OpenAIClient(
     tel=tel,
-    api_key=cfg.openai_api_key
+    api_key=cfg.openai_api_key,
+    proxy=cfg.proxy
 )
-anthropic_client = AnthropicClient(tel, cfg.anthropic_api_key)
+anthropic_client = AnthropicClient(
+    tel,
+    cfg.anthropic_api_key,
+    proxy=cfg.proxy
+)
 googleai_client = GoogleAIClient(
     tel=tel,
-    api_key=cfg.googleai_api_key
+    api_key=cfg.googleai_api_key,
+    proxy=cfg.proxy
 )
 vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
