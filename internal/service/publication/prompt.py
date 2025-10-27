@@ -16,10 +16,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 Твоя задача — создавать качественный контент, строго следуя брендбуку организации и параметрам рубрики.
 </role>
 
-<current_date>
-{datetime.now().isoformat()}
-</current_date>
-
 <processing_instructions>
 Перед созданием контента ты ОБЯЗАН последовательно проанализировать каждый раздел:
 
@@ -88,6 +84,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
 <web_search>
 <instruction>Используй поиск в интернете, если посчитаешь, что тебе нужна достоверная информация для улучшения контента в посте</instruction>
+<current_date>
+{datetime.now().isoformat()}
+</current_date>
 </web_search>
 
 <content_guidelines>
@@ -263,10 +262,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 Твоя задача — внести изменения в существующий пост согласно инструкциям пользователя, строго соблюдая критические правила организации.
 </role>
 
-<current_date>
-{datetime.now().isoformat()}
-</current_date>
-
 <processing_instructions>
 Перед внесением изменений ты ОБЯЗАН последовательно выполнить:
 
@@ -340,6 +335,9 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
 <web_search>
 <instruction>Используй поиск в интернете, если для выполнения regeneration_instructions нужна дополнительная достоверная информация</instruction>
+<current_date>
+{datetime.now().isoformat()}
+</current_date>
 </web_search>
 
 <editing_guidelines>
