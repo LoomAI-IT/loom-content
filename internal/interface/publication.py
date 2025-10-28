@@ -830,13 +830,15 @@ class IPublicationPromptGenerator(Protocol):
         pass
 
     @abstractmethod
-    async def get_regenerate_publication_image_system_prompt(
+    async def get_generate_image_with_user_prompt_system(
             self,
+            user_prompt: str,
             prompt_for_image_style: str,
             publication_text: str,
-            changes: str
-    ) -> str:
-        pass
+            category: model.Category,
+            organization: model.Organization,
+            has_reference_image: bool = False,
+    ) -> str: pass
 
     @abstractmethod
     async def get_filter_post_system_prompt(
