@@ -43,7 +43,7 @@ class OpenAIClient(interface.IOpenAIClient):
                 api_key=api_key
             )
 
-        self.neuroapi_client = self.client = openai.AsyncOpenAI(
+        self.neuroapi_client = openai.AsyncOpenAI(
                 api_key=neuroapi_api_key,
                 base_url="https://neuroapi.host/v1",
             )
