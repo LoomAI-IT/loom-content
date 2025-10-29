@@ -7,6 +7,7 @@ from PIL import Image
 from opentelemetry.trace import SpanKind
 
 from internal import interface
+from internal.common.error import ErrNoImageData
 from pkg.trace_wrapper import traced_method
 
 
@@ -149,7 +150,7 @@ class GoogleAIClient(interface.GoogleAIClient):
 
             if result_image_data is None:
                 self.logger.warning("Ответ Gemini", result)
-                result_image_data = image_data
+                raise ErrNoImageData()
 
             return result_image_data, result_text
 
@@ -231,7 +232,7 @@ class GoogleAIClient(interface.GoogleAIClient):
 
             if result_image_data is None:
                 self.logger.warning("Ответ Gemini", result)
-                result_image_data = images_data[0]
+                raise ErrNoImageData()
 
             return result_image_data, result_text
 

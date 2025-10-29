@@ -344,7 +344,7 @@ class OpenAIClient(interface.IOpenAIClient):
         else:
             params["size"] = "1024x1024"
 
-        response: ImagesResponse = await self.client.images.edit(**params)
+        response: ImagesResponse = await self.neuroapi_client.images.edit(**params)
 
         images = []
         for img_data in response.data:

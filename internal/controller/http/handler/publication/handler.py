@@ -631,6 +631,13 @@ class PublicationController(interface.IPublicationController):
                     "status_code": common.StatusCode.InsufficientBalance,
                 }
             )
+        except common.ErrNoImageData:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "no_image_data": True
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -658,5 +665,12 @@ class PublicationController(interface.IPublicationController):
                 status_code=400,
                 content={
                     "status_code": common.StatusCode.InsufficientBalance,
+                }
+            )
+        except common.ErrNoImageData:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "no_image_data": True
                 }
             )
