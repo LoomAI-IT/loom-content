@@ -39,7 +39,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -79,7 +79,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -104,7 +104,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -135,7 +135,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -601,7 +601,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -628,7 +628,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
         except common.ErrNoImageData:
@@ -664,7 +664,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
         except common.ErrNoImageData:

@@ -46,6 +46,7 @@ class PublicationService(interface.IPublicationService):
         self.environment = environment
         self.avg_generate_text_rub_cost = 3
         self.avg_generate_image_rub_cost = 25
+        self.avg_edit_image_rub_cost = 5
         self.avg_transcribe_audio_rub_cost = 1
 
     # ПУБЛИКАЦИИ
@@ -311,7 +312,7 @@ ultrathink
                     organization,
                 )
                 image_content = await image_file.read()
-                generate_image_prompt, generate_cost = await self.anthropic_client.generate_json(
+                generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
                     history=[
                         {
                             "role": "user",
@@ -333,11 +334,6 @@ ultrathink
                     images=[image_content]
                 )
 
-                await self._debit_organization_balance(
-                    category.organization_id,
-                    generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-                )
-
                 images, generate_cost = await self.openai_client.edit_image(
                     image=image_content,
                     prompt=str(generate_image_prompt),
@@ -357,7 +353,7 @@ ultrathink
                     True
                 )
 
-                generate_image_prompt, generate_cost = await self.anthropic_client.generate_json(
+                generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
                     history=[
                         {
                             "role": "user",
@@ -378,11 +374,6 @@ ultrathink
                     thinking_tokens=15000,
                 )
 
-                await self._debit_organization_balance(
-                    category.organization_id,
-                    generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-                )
-
                 images, generate_cost = await self.openai_client.generate_image(
                     prompt=str(generate_image_prompt),
                     image_model="gpt-image-1",
@@ -400,7 +391,7 @@ ultrathink
                 organization
             )
 
-            generate_image_prompt, generate_cost = await self.anthropic_client.generate_json(
+            generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
                 history=[
                     {
                         "role": "user",
@@ -421,10 +412,7 @@ ultrathink
                 thinking_tokens=15000,
             )
 
-            await self._debit_organization_balance(
-                category.organization_id,
-                generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-            )
+
 
             images, generate_cost = await self.openai_client.generate_image(
                 prompt=str(generate_image_prompt),
@@ -435,6 +423,11 @@ ultrathink
             )
 
         images_url = await self._upload_images(images)
+
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
 
         await self._debit_organization_balance(
             category.organization_id,
@@ -1096,7 +1089,7 @@ ultrathink
         organization = await self.organization_client.get_organization_by_id(organization_id)
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
-        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+        if self._check_balance(organization, organization_cost_multiplier, "edit_image"):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
@@ -1127,10 +1120,9 @@ ultrathink
             prompt: str,
     ) -> list[str]:
         organization = await self.organization_client.get_organization_by_id(organization_id)
-        category = (await self.repo.get_category_by_id(category_id))[0]
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
-        if self._check_balance(organization, organization_cost_multiplier, "generate_image"):
+        if self._check_balance(organization, organization_cost_multiplier, "edit_image"):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
@@ -1138,24 +1130,6 @@ ultrathink
         for image_file in images_files:
             image_content = await image_file.read()
             images_data.append(image_content)
-
-        # upgrade_combine_prompt_system = await self.prompt_generator.get_upgrade_combine_prompt_system_prompt(
-        #     prompt,
-        #     category,
-        #     organization
-        # )
-        #
-        # upgraded_prompt, generate_cost = await self.anthropic_client.generate_str(
-        #     history=[{"role": "user", "content": f"Улучши промпт пользователя, который тебе дали"}],
-        #     system_prompt=upgrade_combine_prompt_system,
-        #     llm_model="claude-sonnet-4-5",
-        # )
-        # self.logger.debug("Улучшенный промпт для объединения", {"upgraded_combine_prompt": upgraded_prompt})
-        #
-        # await self._debit_organization_balance(
-        #     organization_id,
-        #     generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-        # )
 
         result_image_data, result_text = await self.googleai_client.combine_images(
             images_data=images_data,
@@ -1167,7 +1141,7 @@ ultrathink
 
         await self._debit_organization_balance(
             organization_id,
-            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+            0.04 * len(images_files) * organization_cost_multiplier.generate_image_cost_multiplier
         )
 
         return images_url
@@ -1196,6 +1170,9 @@ ultrathink
         elif operation == "generate_image":
             return float(
                 organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
+        elif operation == "edit_image":
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_edit_image_rub_cost
         elif operation == "transcribe_audio":
             return float(
                 organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
