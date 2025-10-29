@@ -154,11 +154,7 @@ class GoogleAIClient(interface.GoogleAIClient):
 
             return result_image_data, result_text
 
-        except httpx.HTTPStatusError as e:
-            self.logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
-            raise
         except Exception as e:
-            self.logger.error(f"Error in edit_image: {str(e)}")
             raise
 
     @traced_method(SpanKind.CLIENT)
@@ -235,10 +231,5 @@ class GoogleAIClient(interface.GoogleAIClient):
                 raise ErrNoImageData()
 
             return result_image_data, result_text
-
-        except httpx.HTTPStatusError as e:
-            self.logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
-            raise
         except Exception as e:
-            self.logger.error(f"Error in combine_images: {str(e)}")
             raise
