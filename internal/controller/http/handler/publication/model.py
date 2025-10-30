@@ -7,6 +7,35 @@ class GeneratePublicationTextBody(BaseModel):
     text_reference: str
 
 
+class TestGeneratePublicationTextBody(BaseModel):
+    text_reference: str
+    organization_id: int
+    name: str
+    hint: str
+
+    goal: str
+    tone_of_voice: list[str]
+    brand_rules: list[str]
+
+    creativity_level: int
+    audience_segment: str
+
+    len_min: int
+    len_max: int
+
+    n_hashtags_min: int
+    n_hashtags_max: int
+
+    cta_type: str
+    cta_strategy: dict
+
+    good_samples: list[dict]
+    bad_samples: list[dict]
+    additional_info: list[dict]
+
+    prompt_for_image_style: str
+
+
 class RegeneratePublicationTextBody(BaseModel):
     category_id: int
     publication_text: str
@@ -31,19 +60,14 @@ class ModeratePublicationBody(BaseModel):
 class CreateCategoryBody(BaseModel):
     organization_id: int
     name: str
-    prompt_for_image_style: str
+    hint: str
 
     goal: str
+    tone_of_voice: list[str]
+    brand_rules: list[str]
 
-    structure_skeleton: list[str]
-    structure_flex_level_min: int
-    structure_flex_level_max: int
-    structure_flex_level_comment: str
-
-    must_have: list[str]
-    must_avoid: list[str]
-
-    social_networks_rules: str
+    creativity_level: int
+    audience_segment: str
 
     len_min: int
     len_max: int
@@ -52,29 +76,24 @@ class CreateCategoryBody(BaseModel):
     n_hashtags_max: int
 
     cta_type: str
-    tone_of_voice: list[str] = []
+    cta_strategy: dict
 
-    brand_rules: list[str] = []
-    good_samples: list[dict] = []
+    good_samples: list[dict]
+    bad_samples: list[dict]
+    additional_info: list[dict]
 
-    additional_info: list[str] = []
+    prompt_for_image_style: str
 
 
 class UpdateCategoryBody(BaseModel):
     name: str = None
-    prompt_for_image_style: str = None
-
+    hint: str = None
     goal: str = None
+    tone_of_voice: list[str] = None
+    brand_rules: list[str] = None
 
-    structure_skeleton: list[str] = None
-    structure_flex_level_min: int = None
-    structure_flex_level_max: int = None
-    structure_flex_level_comment: str = None
-
-    must_have: list[str] = None
-    must_avoid: list[str] = None
-
-    social_networks_rules: str = None
+    creativity_level: int = None
+    audience_segment: str = None
 
     len_min: int = None
     len_max: int = None
@@ -83,12 +102,13 @@ class UpdateCategoryBody(BaseModel):
     n_hashtags_max: int = None
 
     cta_type: str = None
-    tone_of_voice: list[str] = None
+    cta_strategy: dict = None
 
-    brand_rules: list[str] = None
     good_samples: list[dict] = None
+    bad_samples: list[dict] = None
+    additional_info: list[dict] = None
 
-    additional_info: list[str] = None
+    prompt_for_image_style: str = None
 
 
 # РУБРИКИ ДЛЯ АВТОПОСТИНГА

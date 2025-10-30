@@ -17,6 +17,7 @@ class Config:
         self.tg_api_hash: str = os.environ.get('LOOM_TG_API_HASH')
         self.tg_session_string: str = os.environ.get('LOOM_TG_SESSION_STRING')
         self.domain: str = os.environ.get("LOOM_DOMAIN")
+        self.proxy: str = os.environ.get("PROXY")
 
         self.interserver_secret_key = os.getenv("LOOM_INTERSERVER_SECRET_KEY")
 
@@ -47,6 +48,9 @@ class Config:
 
         # OpenAI configuration
         self.openai_api_key = os.getenv("OPENAI_API_KEY", "")
+        self.neuroapi_openai_api_key = os.getenv("NEUROAPI_OPENAI_API_KEY", "")
+        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        self.googleai_api_key = os.getenv("GOOGLE_AI_API_KEY", "")
 
         # Loom Authorization service
         self.loom_authorization_host = os.getenv("LOOM_AUTHORIZATION_CONTAINER_NAME", "localhost")

@@ -25,16 +25,28 @@ class OpenAIClient(interface.IOpenAIClient):
     def __init__(
             self,
             tel: interface.ITelemetry,
-            api_key: str
+            api_key: str,
+            neuroapi_api_key: str,
+            proxy: str = None,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self._encoders = {}
 
-        self.client = openai.AsyncOpenAI(
-            api_key=api_key,
-            http_client=httpx.AsyncClient(proxy="http://32uLYMeQ:jLaDv4WK@193.160.72.227:62940")
-        )
+        if proxy:
+            self.client = openai.AsyncOpenAI(
+                api_key=api_key,
+                http_client=httpx.AsyncClient(proxy=proxy)
+            )
+        else:
+            self.client = openai.AsyncOpenAI(
+                api_key=api_key
+            )
+
+        self.neuroapi_client = openai.AsyncOpenAI(
+                api_key=neuroapi_api_key,
+                base_url="https://neuroapi.host/v1",
+            )
 
     @traced_method(SpanKind.CLIENT)
     async def generate_str(
@@ -51,13 +63,29 @@ class OpenAIClient(interface.IOpenAIClient):
             model=llm_model,
             messages=messages,
             temperature=temperature,
-            reasoning_effort="low"
+            reasoning_effort="high"
         )
 
         generate_cost = self._calculate_llm_cost(completion_response)
         llm_response = completion_response.choices[0].message.content
 
         return llm_response, generate_cost
+
+    @traced_method(SpanKind.CLIENT)
+    async def web_search(
+            self,
+            query: str,
+    ) -> str:
+
+        response = await self.client.responses.create(
+            model="gpt-5",
+            tools=[{"type": "web_search"}],
+            input=query
+        )
+
+        llm_response = response.output_text
+
+        return llm_response
 
     @traced_method()
     async def generate_json(
@@ -250,7 +278,7 @@ class OpenAIClient(interface.IOpenAIClient):
             if style:
                 self.logger.warning("gpt-image-1 не поддерживает параметр style, игнорируется")
 
-        response: ImagesResponse = await self.client.images.generate(**params)
+        response: ImagesResponse = await self.neuroapi_client.images.generate(**params)
 
         images = []
         for img_data in response.data:
@@ -316,7 +344,7 @@ class OpenAIClient(interface.IOpenAIClient):
         else:
             params["size"] = "1024x1024"
 
-        response: ImagesResponse = await self.client.images.edit(**params)
+        response: ImagesResponse = await self.neuroapi_client.images.edit(**params)
 
         images = []
         for img_data in response.data:

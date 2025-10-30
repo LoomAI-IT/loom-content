@@ -50,6 +50,14 @@ def include_publication_handlers(
         tags=["Publication"],
     )
 
+    # Тестовая генерация публикации (без сохранения категории в БД)
+    app.add_api_route(
+        prefix + "/publication/text/test-generate",
+        publication_controller.test_generate_publication_text,
+        methods=["POST"],
+        tags=["Publication"],
+    )
+
     # Регенерация изображения публикации
     app.add_api_route(
         prefix + "/publication/text/regenerate",
@@ -253,6 +261,21 @@ def include_publication_handlers(
         publication_controller.transcribe_audio,
         methods=["GET"],
         tags=["Other"]
+    )
+
+    # IMAGE EDITING
+    app.add_api_route(
+        prefix + "/image/edit",
+        publication_controller.edit_image,
+        methods=["POST"],
+        tags=["ImageEditing"]
+    )
+
+    app.add_api_route(
+        prefix + "/image/combine",
+        publication_controller.combine_images,
+        methods=["POST"],
+        tags=["ImageEditing"]
     )
 
 

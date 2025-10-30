@@ -39,7 +39,47 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
+                }
+            )
+
+    @auto_log()
+    @traced_method()
+    async def test_generate_publication_text(
+            self,
+            body: TestGeneratePublicationTextBody,
+    ) -> JSONResponse:
+        try:
+            text_data = await self.publication_service.test_generate_publication_text(
+                text_reference=body.text_reference,
+                organization_id=body.organization_id,
+                name=body.name,
+                hint=body.hint,
+                goal=body.goal,
+                tone_of_voice=body.tone_of_voice,
+                brand_rules=body.brand_rules,
+                creativity_level=body.creativity_level,
+                audience_segment=body.audience_segment,
+                len_min=body.len_min,
+                len_max=body.len_max,
+                n_hashtags_min=body.n_hashtags_min,
+                n_hashtags_max=body.n_hashtags_max,
+                cta_type=body.cta_type,
+                cta_strategy=body.cta_strategy,
+                good_samples=body.good_samples,
+                bad_samples=body.bad_samples,
+                additional_info=body.additional_info,
+                prompt_for_image_style=body.prompt_for_image_style
+            )
+            return JSONResponse(
+                status_code=200,
+                content=text_data
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "insufficient_balance": True,
                 }
             )
 
@@ -64,7 +104,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -95,7 +135,7 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
                 }
             )
 
@@ -304,24 +344,22 @@ class PublicationController(interface.IPublicationController):
         category_id = await self.publication_service.create_category(
             organization_id=body.organization_id,
             name=body.name,
-            prompt_for_image_style=body.prompt_for_image_style,
+            hint=body.hint,
             goal=body.goal,
-            structure_skeleton=body.structure_skeleton,
-            structure_flex_level_min=body.structure_flex_level_min,
-            structure_flex_level_max=body.structure_flex_level_max,
-            structure_flex_level_comment=body.structure_flex_level_comment,
-            must_have=body.must_have,
-            must_avoid=body.must_avoid,
-            social_networks_rules=body.social_networks_rules,
+            tone_of_voice=body.tone_of_voice,
+            brand_rules=body.brand_rules,
+            creativity_level=body.creativity_level,
+            audience_segment=body.audience_segment,
             len_min=body.len_min,
             len_max=body.len_max,
             n_hashtags_min=body.n_hashtags_min,
             n_hashtags_max=body.n_hashtags_max,
             cta_type=body.cta_type,
-            tone_of_voice=body.tone_of_voice,
-            brand_rules=body.brand_rules,
+            cta_strategy=body.cta_strategy,
             good_samples=body.good_samples,
-            additional_info=body.additional_info
+            bad_samples=body.bad_samples,
+            additional_info=body.additional_info,
+            prompt_for_image_style=body.prompt_for_image_style
         )
         return JSONResponse(
             status_code=201,
@@ -358,24 +396,22 @@ class PublicationController(interface.IPublicationController):
         await self.publication_service.update_category(
             category_id=category_id,
             name=body.name,
-            prompt_for_image_style=body.prompt_for_image_style,
+            hint=body.hint,
             goal=body.goal,
-            structure_skeleton=body.structure_skeleton,
-            structure_flex_level_min=body.structure_flex_level_min,
-            structure_flex_level_max=body.structure_flex_level_max,
-            structure_flex_level_comment=body.structure_flex_level_comment,
-            must_have=body.must_have,
-            must_avoid=body.must_avoid,
-            social_networks_rules=body.social_networks_rules,
+            tone_of_voice=body.tone_of_voice,
+            brand_rules=body.brand_rules,
+            creativity_level=body.creativity_level,
+            audience_segment=body.audience_segment,
             len_min=body.len_min,
             len_max=body.len_max,
             n_hashtags_min=body.n_hashtags_min,
             n_hashtags_max=body.n_hashtags_max,
             cta_type=body.cta_type,
-            tone_of_voice=body.tone_of_voice,
-            brand_rules=body.brand_rules,
+            cta_strategy=body.cta_strategy,
             good_samples=body.good_samples,
-            additional_info=body.additional_info
+            bad_samples=body.bad_samples,
+            additional_info=body.additional_info,
+            prompt_for_image_style=body.prompt_for_image_style
         )
         return JSONResponse(
             status_code=200,
@@ -565,6 +601,76 @@ class PublicationController(interface.IPublicationController):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "status_code": common.StatusCode.InsufficientBalance,
+                    "insufficient_balance": True,
+                }
+            )
+
+    @auto_log()
+    @traced_method()
+    async def edit_image(
+            self,
+            organization_id: int = Form(...),
+            prompt: str = Form(...),
+            image_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        try:
+            images_url = await self.publication_service.edit_image(
+                organization_id=organization_id,
+                image_file=image_file,
+                prompt=prompt,
+            )
+
+            return JSONResponse(
+                status_code=200,
+                content={"images_url": images_url}
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "insufficient_balance": True,
+                }
+            )
+        except common.ErrNoImageData:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "no_image_data": True
+                }
+            )
+
+    @auto_log()
+    @traced_method()
+    async def combine_images(
+            self,
+            organization_id: int = Form(...),
+            category_id: int = Form(...),
+            prompt: str = Form(...),
+            images_files: list[UploadFile] = File(...),
+    ) -> JSONResponse:
+        try:
+            images_url = await self.publication_service.combine_images(
+                organization_id=organization_id,
+                category_id=category_id,
+                images_files=images_files,
+                prompt=prompt,
+            )
+
+            return JSONResponse(
+                status_code=200,
+                content={"images_url": images_url}
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "insufficient_balance": True,
+                }
+            )
+        except common.ErrNoImageData:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "no_image_data": True
                 }
             )

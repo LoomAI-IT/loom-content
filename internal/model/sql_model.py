@@ -2,36 +2,32 @@ create_categories_table = """
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
-    
+
     name TEXT NOT NULL,
-    prompt_for_image_style TEXT NOT NULL,
+    hint TEXT NOT NULL,
 
     goal TEXT NOT NULL,
-    
-    structure_skeleton TEXT[] NOT NULL,
-    structure_flex_level_min INTEGER NOT NULL,
-    structure_flex_level_max INTEGER NOT NULL,
-    structure_flex_level_comment TEXT NOT NULL,
-    
-    must_have TEXT[] NOT NULL,
-    must_avoid TEXT[] NOT NULL,
-    
-    social_networks_rules TEXT NOT NULL,
-    
+    tone_of_voice TEXT[] DEFAULT '{}',
+    brand_rules TEXT[] DEFAULT '{}',
+
+    creativity_level INTEGER DEFAULT 5,
+    audience_segment TEXT NOT NULL,
+
     len_min INTEGER NOT NULL,
     len_max INTEGER NOT NULL,
-    
+
     n_hashtags_min INTEGER NOT NULL,
     n_hashtags_max INTEGER NOT NULL,
-    
-    cta_type TEXT NOT NULL,
-    tone_of_voice TEXT[] DEFAULT '{}',
-    
-    brand_rules TEXT[] DEFAULT '{}',
-    good_samples JSONB[] NOT NULL,
 
-    additional_info TEXT[] NOT NULL,
-    
+    cta_type TEXT NOT NULL,
+    cta_strategy JSONB DEFAULT '{}',
+
+    good_samples JSONB[] DEFAULT '{}',
+    bad_samples JSONB[] DEFAULT '{}',
+    additional_info JSONB[] DEFAULT '{}',
+
+    prompt_for_image_style TEXT NOT NULL,
+
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 """

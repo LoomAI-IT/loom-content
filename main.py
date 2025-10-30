@@ -10,10 +10,12 @@ from aiogram.client.telegram import TelegramAPIServer
 from infrastructure.pg.pg import PG
 from infrastructure.telemetry.telemetry import Telemetry, AlertManager
 from infrastructure.weedfs.weedfs import AsyncWeed
+from pkg.client.external.claude.client import AnthropicClient
 from pkg.client.external.telegram.client import LTelegramClient
 
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
+from pkg.client.external.googleai.client import GoogleAIClient
 
 from pkg.client.internal.loom_authorization.client import LoomAuthorizationClient
 from pkg.client.internal.loom_organization.client import LoomOrganizationClient
@@ -116,7 +118,19 @@ loom_tg_bot_client = LoomTgBotClient(
 
 openai_client = OpenAIClient(
     tel=tel,
-    api_key=cfg.openai_api_key
+    api_key=cfg.openai_api_key,
+    neuroapi_api_key=cfg.neuroapi_openai_api_key,
+    proxy=cfg.proxy
+)
+anthropic_client = AnthropicClient(
+    tel,
+    cfg.anthropic_api_key,
+    proxy=cfg.proxy
+)
+googleai_client = GoogleAIClient(
+    tel=tel,
+    api_key=cfg.googleai_api_key,
+    proxy=cfg.proxy
 )
 vizard_client = VizardClient(
     api_key=cfg.vizard_api_key
@@ -134,6 +148,7 @@ publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
 social_network_repo = SocialNetworkRepo(tel, db)
 
+
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
 
@@ -142,7 +157,9 @@ publication_service = PublicationService(
     tel=tel,
     repo=publication_repo,
     social_network_repo=social_network_repo,
+    anthropic_client=anthropic_client,
     openai_client=openai_client,
+    googleai_client=googleai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=loom_organization_client,

@@ -15,21 +15,15 @@ class ModerationStatus(Enum):
 class Category:
     id: int
     organization_id: int
-
     name: str
-    prompt_for_image_style: str
+    hint: str
 
     goal: str
+    tone_of_voice: list[str]
+    brand_rules: list[str]
 
-    structure_skeleton: list[str]
-    structure_flex_level_min: int
-    structure_flex_level_max: int
-    structure_flex_level_comment: str
-
-    must_have: list[str]
-    must_avoid: list[str]
-
-    social_networks_rules: str
+    creativity_level: int
+    audience_segment: str
 
     len_min: int
     len_max: int
@@ -38,12 +32,13 @@ class Category:
     n_hashtags_max: int
 
     cta_type: str
-    tone_of_voice: list[str]
+    cta_strategy: dict
 
-    brand_rules: list[str]
     good_samples: list[dict]
+    bad_samples: list[dict]
+    additional_info: list[dict]
 
-    additional_info: list[str]
+    prompt_for_image_style: str
 
     created_at: datetime
 
@@ -54,25 +49,23 @@ class Category:
                 id=row.id,
                 organization_id=row.organization_id,
                 name=row.name,
-                prompt_for_image_style=row.prompt_for_image_style,
+                hint=row.hint,
                 goal=row.goal,
-                structure_skeleton=row.structure_skeleton,
-                structure_flex_level_min=row.structure_flex_level_min,
-                structure_flex_level_max=row.structure_flex_level_max,
-                structure_flex_level_comment=row.structure_flex_level_comment,
-                must_have=row.must_have,
-                must_avoid=row.must_avoid,
-                social_networks_rules=row.social_networks_rules,
+                tone_of_voice=row.tone_of_voice,
+                brand_rules=row.brand_rules,
+                creativity_level=row.creativity_level,
+                audience_segment=row.audience_segment,
                 len_min=row.len_min,
                 len_max=row.len_max,
                 n_hashtags_min=row.n_hashtags_min,
                 n_hashtags_max=row.n_hashtags_max,
                 cta_type=row.cta_type,
-                tone_of_voice=row.tone_of_voice,
-                brand_rules=row.brand_rules,
+                cta_strategy=row.cta_strategy,
                 good_samples=row.good_samples,
+                bad_samples=row.bad_samples,
                 additional_info=row.additional_info,
-                created_at=row.created_at
+                prompt_for_image_style=row.prompt_for_image_style,
+                created_at=row.created_at,
             )
             for row in rows
         ]
@@ -82,26 +75,25 @@ class Category:
             "id": self.id,
             "organization_id": self.organization_id,
             "name": self.name,
-            "prompt_for_image_style": self.prompt_for_image_style,
+            "hint": self.hint,
             "goal": self.goal,
-            "structure_skeleton": self.structure_skeleton,
-            "structure_flex_level_min": self.structure_flex_level_min,
-            "structure_flex_level_max": self.structure_flex_level_max,
-            "structure_flex_level_comment": self.structure_flex_level_comment,
-            "must_have": self.must_have,
-            "must_avoid": self.must_avoid,
-            "social_networks_rules": self.social_networks_rules,
+            "tone_of_voice": self.tone_of_voice,
+            "brand_rules": self.brand_rules,
+            "creativity_level": self.creativity_level,
+            "audience_segment": self.audience_segment,
             "len_min": self.len_min,
             "len_max": self.len_max,
             "n_hashtags_min": self.n_hashtags_min,
             "n_hashtags_max": self.n_hashtags_max,
             "cta_type": self.cta_type,
-            "tone_of_voice": self.tone_of_voice,
-            "brand_rules": self.brand_rules,
+            "cta_strategy": self.cta_strategy,
             "good_samples": self.good_samples,
+            "bad_samples": self.bad_samples,
             "additional_info": self.additional_info,
-            "created_at": self.created_at.isoformat()
+            "prompt_for_image_style": self.prompt_for_image_style,
+            "created_at": self.created_at.isoformat(),
         }
+
 
 @dataclass
 class Publication:
@@ -122,7 +114,7 @@ class Publication:
     image_fid: str
     image_name: str
 
-    openai_rub_cost: int # TODO нигде не используется, невозможно посчитать
+    openai_rub_cost: int  # TODO нигде не используется, невозможно посчитать
 
     moderation_status: ModerationStatus
     moderation_comment: str

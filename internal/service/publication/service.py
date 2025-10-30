@@ -18,6 +18,8 @@ class PublicationService(interface.IPublicationService):
             repo: interface.IPublicationRepo,
             social_network_repo: interface.ISocialNetworkRepo,
             openai_client: interface.IOpenAIClient,
+            anthropic_client: interface.IAnthropicClient,
+            googleai_client: interface.GoogleAIClient,
             storage: interface.IStorage,
             prompt_generator: interface.IPublicationPromptGenerator,
             organization_client: interface.ILoomOrganizationClient,
@@ -32,6 +34,8 @@ class PublicationService(interface.IPublicationService):
         self.repo = repo
         self.social_network_repo = social_network_repo
         self.openai_client = openai_client
+        self.anthropic_client = anthropic_client
+        self.googleai_client = googleai_client
         self.storage = storage
         self.prompt_generator = prompt_generator
         self.organization_client = organization_client
@@ -42,6 +46,7 @@ class PublicationService(interface.IPublicationService):
         self.environment = environment
         self.avg_generate_text_rub_cost = 3
         self.avg_generate_image_rub_cost = 25
+        self.avg_edit_image_rub_cost = 5
         self.avg_transcribe_audio_rub_cost = 1
 
     # ПУБЛИКАЦИИ
@@ -60,27 +65,127 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
+        web_search_result = ""
+
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
+            text_reference,
             category,
             organization
         )
 
-        publication_data, generate_cost = await self.openai_client.generate_json(
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
             history=[
                 {
                     "role": "user",
-                    "content": f"Создай пост для социальной сети, вот мой запрос: {text_reference}"
+                    "content": """
+<system>
+Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+Обрати внимание на каждый XML тег и проанализуй данные в нем
+Большое внимание на <good_samples> и <bad_samples>
+
+ultrathink
+<system/>
+
+<user>
+Создай текст для поста
+</user>
+                        """
                 }
             ],
             system_prompt=text_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
+            max_tokens=20000,
+            thinking_tokens=15000,
+            llm_model="claude-sonnet-4-5",
         )
 
         await self._debit_organization_balance(
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
+        return publication_data
+
+    @traced_method()
+    async def test_generate_publication_text(
+            self,
+            text_reference: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
+    ) -> dict:
+        category = model.Category(
+            id=-1,
+            organization_id=organization_id,
+            name=name,
+            hint=hint,
+            goal=goal,
+            tone_of_voice=tone_of_voice,
+            brand_rules=brand_rules,
+            creativity_level=creativity_level,
+            audience_segment=audience_segment,
+            len_min=len_min,
+            len_max=len_max,
+            n_hashtags_min=n_hashtags_min,
+            n_hashtags_max=n_hashtags_max,
+            cta_type=cta_type,
+            cta_strategy=cta_strategy,
+            good_samples=good_samples,
+            bad_samples=bad_samples,
+            additional_info=additional_info,
+            prompt_for_image_style=prompt_for_image_style,
+            created_at=datetime.now()
+        )
+
+        organization = await self.organization_client.get_organization_by_id(category.organization_id)
+
+        web_search_result = ""
+
+        text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
+            text_reference,
+            category,
+            organization
+        )
+
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
+            history=[
+                {
+                    "role": "user",
+                    "content": """
+<system>
+Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+Обрати внимание на каждый XML тег и проанализуй данные в нем
+Большое внимание на <good_samples> и <bad_samples>
+
+ultrathink
+<system/>
+
+<user>
+Создай текст для поста
+</user>
+                        """
+                }
+            ],
+            system_prompt=text_system_prompt,
+            max_tokens=20000,
+            thinking_tokens=15000,
+            llm_model="claude-sonnet-4-5",
+        )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
         return publication_data
 
     @traced_method()
@@ -104,17 +209,31 @@ class PublicationService(interface.IPublicationService):
                 category,
                 organization,
                 publication_text,
+                prompt,
             )
-            publication_data, generate_cost = await self.openai_client.generate_json(
+            publication_data, generate_cost = await self.anthropic_client.generate_json(
                 history=[
                     {
                         "role": "user",
-                        "content": f"Создай улучшенный пост для социальной сети c этими правками: {prompt}"
+                        "content": """
+<system>
+Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+Обрати внимание на каждый XML тег и проанализуй данные в нем
+Большое внимание на <good_samples> и <bad_samples>
+
+ultrathink
+<system/>
+
+<user>
+Следуй инструкциям перегенерации
+</user>
+                        """
                     }
                 ],
                 system_prompt=text_system_prompt,
-                temperature=1,
-                llm_model="gpt-5"
+                llm_model="claude-sonnet-4-5",
+                max_tokens=20000,
+                thinking_tokens=15000,
             )
         else:
             self.logger.info("Регенерация текста публикации без промпта")
@@ -122,23 +241,38 @@ class PublicationService(interface.IPublicationService):
                 category,
                 organization,
                 publication_text,
+                "",
             )
-            publication_data, generate_cost = await self.openai_client.generate_json(
+            publication_data, generate_cost = await self.anthropic_client.generate_json(
                 history=[
                     {
                         "role": "user",
-                        "content": f"Создай улучшенный пост для социальной сети"
+                        "content": """
+<system>
+Очень хорошо подумай, чтобы соответсовать всему что промпте, ты должен учесть все что относится к рубрике и организации
+Обрати внимание на каждый XML тег и проанализуй данные в нем
+Большое внимание на <good_samples> и <bad_samples>
+
+ultrathink
+<system/>
+
+<user>
+Следуй инструкциям перегенерации
+</user>
+                        """
                     }
                 ],
                 system_prompt=text_system_prompt,
-                temperature=1,
-                llm_model="gpt-5"
+                llm_model="claude-sonnet-4-5",
+                max_tokens=20000,
+                thinking_tokens=15000,
             )
 
         await self._debit_organization_balance(
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
         return publication_data
 
     @traced_method()
@@ -162,21 +296,47 @@ class PublicationService(interface.IPublicationService):
             size = "1536x1024"
             quality = "high"
         else:
-            size = "1024x1024"
-            quality = "low"
+            # size = "1024x1024"
+            # quality = "low"
+            size = "1536x1024"
+            quality = "high"
 
         if prompt:
             if image_file:
-                self.logger.info("Редактирование изображения с промптом и файлом")
-                image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
+                self.logger.info("Генерация изображения с промптом и файлом")
+                generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
+                    prompt,
                     category.prompt_for_image_style,
                     publication_text,
-                    prompt
+                    category,
+                    organization,
                 )
                 image_content = await image_file.read()
+                generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
+                    history=[
+                        {
+                            "role": "user",
+                            "content": """
+<system>
+ultrathink
+<system/>
+
+<user>
+Сделай JSON-промпт для генерации картинки
+</user>
+"""
+                        }
+                    ],
+                    system_prompt=generate_image_system_prompt,
+                    llm_model="claude-sonnet-4-5",
+                    max_tokens=20000,
+                    thinking_tokens=15000,
+                    images=[image_content]
+                )
+
                 images, generate_cost = await self.openai_client.edit_image(
                     image=image_content,
-                    prompt=image_system_prompt,
+                    prompt=str(generate_image_prompt),
                     image_model="gpt-image-1",
                     size=size,
                     quality=quality,
@@ -184,13 +344,38 @@ class PublicationService(interface.IPublicationService):
                 )
             else:
                 self.logger.info("Генерация изображения с промптом")
-                image_system_prompt = await self.prompt_generator.get_regenerate_publication_image_system_prompt(
+                generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
+                    prompt,
                     category.prompt_for_image_style,
                     publication_text,
-                    prompt
+                    category,
+                    organization,
+                    True
                 )
+
+                generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
+                    history=[
+                        {
+                            "role": "user",
+                            "content": """
+<system>
+ultrathink
+<system/>
+
+<user>
+Сделай JSON-промпт для генерации картинки
+</user>
+"""
+                        }
+                    ],
+                    system_prompt=generate_image_system_prompt,
+                    llm_model="claude-sonnet-4-5",
+                    max_tokens=20000,
+                    thinking_tokens=15000,
+                )
+
                 images, generate_cost = await self.openai_client.generate_image(
-                    prompt=image_system_prompt,
+                    prompt=str(generate_image_prompt),
                     image_model="gpt-image-1",
                     size=size,
                     quality=quality,
@@ -199,13 +384,38 @@ class PublicationService(interface.IPublicationService):
 
         else:
             self.logger.info("Генерация изображения без промпта")
-            image_system_prompt = await self.prompt_generator.get_generate_publication_image_system_prompt(
+            generate_image_system_prompt = await self.prompt_generator.get_generate_image_prompt_system(
                 category.prompt_for_image_style,
-                publication_text
+                publication_text,
+                category,
+                organization
             )
 
+            generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
+                history=[
+                    {
+                        "role": "user",
+                        "content": """
+<system>
+ultrathink
+<system/>
+
+<user>
+Сделай JSON-промпт для генерации картинки
+</user>
+"""
+                    }
+                ],
+                system_prompt=generate_image_system_prompt,
+                llm_model="claude-sonnet-4-5",
+                max_tokens=20000,
+                thinking_tokens=15000,
+            )
+
+
+
             images, generate_cost = await self.openai_client.generate_image(
-                prompt=image_system_prompt,
+                prompt=str(generate_image_prompt),
                 image_model="gpt-image-1",
                 size=size,
                 quality=quality,
@@ -213,6 +423,11 @@ class PublicationService(interface.IPublicationService):
             )
 
         images_url = await self._upload_images(images)
+
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
 
         await self._debit_organization_balance(
             category.organization_id,
@@ -452,46 +667,42 @@ class PublicationService(interface.IPublicationService):
             self,
             organization_id: int,
             name: str,
-            prompt_for_image_style: str,
+            hint: str,
             goal: str,
-            structure_skeleton: list[str],
-            structure_flex_level_min: int,
-            structure_flex_level_max: int,
-            structure_flex_level_comment: str,
-            must_have: list[str],
-            must_avoid: list[str],
-            social_networks_rules: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
             len_min: int,
             len_max: int,
             n_hashtags_min: int,
             n_hashtags_max: int,
             cta_type: str,
-            tone_of_voice: list[str],
-            brand_rules: list[str],
+            cta_strategy: dict,
             good_samples: list[dict],
-            additional_info: list[str]
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
     ) -> int:
         category_id = await self.repo.create_category(
             organization_id=organization_id,
             name=name,
-            prompt_for_image_style=prompt_for_image_style,
+            hint=hint,
             goal=goal,
-            structure_skeleton=structure_skeleton,
-            structure_flex_level_min=structure_flex_level_min,
-            structure_flex_level_max=structure_flex_level_max,
-            structure_flex_level_comment=structure_flex_level_comment,
-            must_have=must_have,
-            must_avoid=must_avoid,
-            social_networks_rules=social_networks_rules,
+            tone_of_voice=tone_of_voice,
+            brand_rules=brand_rules,
+            creativity_level=creativity_level,
+            audience_segment=audience_segment,
             len_min=len_min,
             len_max=len_max,
             n_hashtags_min=n_hashtags_min,
             n_hashtags_max=n_hashtags_max,
             cta_type=cta_type,
-            tone_of_voice=tone_of_voice,
-            brand_rules=brand_rules,
+            cta_strategy=cta_strategy,
             good_samples=good_samples,
-            additional_info=additional_info
+            bad_samples=bad_samples,
+            additional_info=additional_info,
+            prompt_for_image_style=prompt_for_image_style
         )
         return category_id
 
@@ -510,46 +721,42 @@ class PublicationService(interface.IPublicationService):
             self,
             category_id: int,
             name: str = None,
-            prompt_for_image_style: str = None,
+            hint: str = None,
             goal: str = None,
-            structure_skeleton: list[str] = None,
-            structure_flex_level_min: int = None,
-            structure_flex_level_max: int = None,
-            structure_flex_level_comment: str = None,
-            must_have: list[str] = None,
-            must_avoid: list[str] = None,
-            social_networks_rules: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            creativity_level: int = None,
+            audience_segment: str = None,
             len_min: int = None,
             len_max: int = None,
             n_hashtags_min: int = None,
             n_hashtags_max: int = None,
             cta_type: str = None,
-            tone_of_voice: list[str] = None,
-            brand_rules: list[str] = None,
+            cta_strategy: dict = None,
             good_samples: list[dict] = None,
-            additional_info: list[str] = None
+            bad_samples: list[dict] = None,
+            additional_info: list[dict] = None,
+            prompt_for_image_style: str = None
     ) -> None:
         await self.repo.update_category(
             category_id=category_id,
             name=name,
-            prompt_for_image_style=prompt_for_image_style,
+            hint=hint,
             goal=goal,
-            structure_skeleton=structure_skeleton,
-            structure_flex_level_min=structure_flex_level_min,
-            structure_flex_level_max=structure_flex_level_max,
-            structure_flex_level_comment=structure_flex_level_comment,
-            must_have=must_have,
-            must_avoid=must_avoid,
-            social_networks_rules=social_networks_rules,
+            tone_of_voice=tone_of_voice,
+            brand_rules=brand_rules,
+            creativity_level=creativity_level,
+            audience_segment=audience_segment,
             len_min=len_min,
             len_max=len_max,
             n_hashtags_min=n_hashtags_min,
             n_hashtags_max=n_hashtags_max,
             cta_type=cta_type,
-            tone_of_voice=tone_of_voice,
-            brand_rules=brand_rules,
+            cta_strategy=cta_strategy,
             good_samples=good_samples,
-            additional_info=additional_info
+            bad_samples=bad_samples,
+            additional_info=additional_info,
+            prompt_for_image_style=prompt_for_image_style
         )
 
     @traced_method()
@@ -677,13 +884,15 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
+        web_search_result = ""
         text_system_prompt = await self.prompt_generator.get_generate_autoposting_text_system_prompt(
             autoposting_category,
             organization,
-            source_post_text
+            source_post_text,
+            web_search_result
         )
 
-        publication_data, generate_cost = await self.openai_client.generate_json(
+        publication_data, generate_cost = await self.anthropic_client.generate_json(
             history=[
                 {
                     "role": "user",
@@ -691,8 +900,9 @@ class PublicationService(interface.IPublicationService):
                 }
             ],
             system_prompt=text_system_prompt,
-            temperature=1,
-            llm_model="gpt-5"
+            llm_model="claude-sonnet-4-5",
+            max_tokens=15000,
+            thinking_tokens=10000,
         )
         await self._debit_organization_balance(
             autoposting_category.organization_id,
@@ -838,6 +1048,16 @@ class PublicationService(interface.IPublicationService):
             audio_file: UploadFile,
             organization_id: int,
     ) -> str:
+        if organization_id == -1:
+            audio_content = await audio_file.read()
+            transcribed_text, generate_cost = await self.openai_client.transcribe_audio(
+                audio_content,
+                audio_file.filename,
+                "whisper-1",
+                "ru"
+            )
+            return transcribed_text
+
         organization = await self.organization_client.get_organization_by_id(organization_id)
         organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
 
@@ -859,6 +1079,73 @@ class PublicationService(interface.IPublicationService):
 
         return transcribed_text
 
+    @traced_method()
+    async def edit_image(
+            self,
+            organization_id: int,
+            image_file: UploadFile,
+            prompt: str,
+    ) -> list[str]:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "edit_image"):
+            self.logger.info("Недостаточно средств на балансе")
+            raise common.ErrInsufficientBalance()
+
+        self.logger.info("Редактирование изображения через GoogleAI")
+        image_content = await image_file.read()
+
+        result_image_data, result_text = await self.googleai_client.edit_image(
+            image_data=image_content,
+            prompt=prompt,
+        )
+
+        result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
+        images_url = await self._upload_images([result_image_base64])
+
+        await self._debit_organization_balance(
+            organization_id,
+            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+        )
+
+        return images_url
+
+    @traced_method()
+    async def combine_images(
+            self,
+            organization_id: int,
+            category_id: int,
+            images_files: list[UploadFile],
+            prompt: str,
+    ) -> list[str]:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
+
+        if self._check_balance(organization, organization_cost_multiplier, "edit_image"):
+            self.logger.info("Недостаточно средств на балансе")
+            raise common.ErrInsufficientBalance()
+
+        images_data = []
+        for image_file in images_files:
+            image_content = await image_file.read()
+            images_data.append(image_content)
+
+        result_image_data, result_text = await self.googleai_client.combine_images(
+            images_data=images_data,
+            prompt=prompt,
+        )
+
+        result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
+        images_url = await self._upload_images([result_image_base64])
+
+        await self._debit_organization_balance(
+            organization_id,
+            0.04 * len(images_files) * organization_cost_multiplier.generate_image_cost_multiplier
+        )
+
+        return images_url
+
     async def _upload_images(self, images: list[str]) -> list[str]:
         images_url = []
         for image in images:
@@ -878,11 +1165,17 @@ class PublicationService(interface.IPublicationService):
             operation: str
     ) -> bool:
         if operation == "generate_text":
-            return float(organization.rub_balance) < organization_cost_multiplier.generate_text_cost_multiplier * self.avg_generate_text_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_text_cost_multiplier * self.avg_generate_text_rub_cost
         elif operation == "generate_image":
-            return float(organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_generate_image_rub_cost
+        elif operation == "edit_image":
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.generate_image_cost_multiplier * self.avg_edit_image_rub_cost
         elif operation == "transcribe_audio":
-            return float(organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
+            return float(
+                organization.rub_balance) < organization_cost_multiplier.transcribe_audio_cost_multiplier * self.avg_transcribe_audio_rub_cost
         return True
 
     async def _debit_organization_balance(self, organization_id: int, usd_cost: float):

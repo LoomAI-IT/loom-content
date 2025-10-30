@@ -1,8 +1,9 @@
 from contextvars import ContextVar
 
+import httpx
 from opentelemetry.trace import SpanKind
 
-from internal import interface, model
+from internal import interface, model, common
 from pkg.client.client import AsyncHTTPClient
 from pkg.trace_wrapper import traced_method
 
@@ -33,7 +34,17 @@ class LoomOrganizationClient(interface.ILoomOrganizationClient):
             "amount_rub": amount_rub,
             "interserver_secret_key": self.interserver_secret_key,
         }
-        await self.client.post("/balance/debit", json=body)
+        try:
+            await self.client.post("/balance/debit", json=body)
+        except httpx.HTTPStatusError as err:
+            if err.response.status_code == 400:
+                try:
+                    response_data = err.response.json()
+                    if response_data.get("insufficient_balance"):
+                        raise common.ErrInsufficientBalance()
+                except Exception:
+                    pass
+            raise
 
     @traced_method(SpanKind.CLIENT)
     async def get_organization_by_id(self, organization_id: int) -> model.Organization:

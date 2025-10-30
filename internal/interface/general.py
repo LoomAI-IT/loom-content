@@ -3,10 +3,8 @@ from abc import abstractmethod
 from typing import Protocol, Sequence, Any, Literal
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 from opentelemetry.metrics import Meter
 from opentelemetry.trace import Tracer
-from starlette.responses import StreamingResponse
 
 from internal import model
 
@@ -54,7 +52,6 @@ class IHttpMiddleware(Protocol):
     def authorization_middleware03(self, app: FastAPI): pass
 
 
-
 class IRedis(Protocol):
     @abstractmethod
     async def set(self, key: str, value: Any, ttl: int = None) -> bool: pass
@@ -95,6 +92,26 @@ class IDB(Protocol):
     async def multi_query(self, queries: list[str]) -> None: pass
 
 
+class GoogleAIClient(Protocol):
+    @abstractmethod
+    async def edit_image(
+            self,
+            image_data: bytes,
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]: pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            images_data: list[bytes],
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]: pass
+
+
 class IVizardClient(Protocol):
     @abstractmethod
     def calculate_price(
@@ -127,6 +144,40 @@ class IVizardClient(Protocol):
     ) -> dict: pass
 
 
+class IAnthropicClient(Protocol):
+    @abstractmethod
+    async def generate_str(
+            self,
+            history: list,
+            system_prompt: str,
+            temperature: float = 1.0,
+            llm_model: str = "claude-haiku-4-5",
+            max_tokens: int = 4096,
+            thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
+            enable_web_search: bool = True,
+            max_searches: int = 5,
+            images: list[bytes] = None,
+    ) -> tuple[str, dict]: pass
+
+    @abstractmethod
+    async def generate_json(
+            self,
+            history: list,
+            system_prompt: str,
+            temperature: float = 1.0,
+            llm_model: str = "claude-haiku-4-5",
+            max_tokens: int = 4096,
+            thinking_tokens: int = None,
+            enable_caching: bool = True,
+            cache_ttl: str = "5m",
+            enable_web_search: bool = True,
+            max_searches: int = 5,
+            images: list[bytes] = None,
+    ) -> tuple[dict, dict]: pass
+
+
 class IOpenAIClient(Protocol):
     @abstractmethod
     async def generate_str(
@@ -147,6 +198,12 @@ class IOpenAIClient(Protocol):
             llm_model: str,
             pdf_file: bytes = None,
     ) -> tuple[dict, dict]: pass
+
+    @abstractmethod
+    async def web_search(
+            self,
+            query: str,
+    ) -> str: pass
 
     @abstractmethod
     async def transcribe_audio(

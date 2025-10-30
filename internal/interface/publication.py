@@ -22,6 +22,13 @@ class IPublicationController(Protocol):
         pass
 
     @abstractmethod
+    async def test_generate_publication_text(
+            self,
+            body: TestGeneratePublicationTextBody,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
     async def regenerate_publication_text(
             self,
             body: RegeneratePublicationTextBody,
@@ -191,6 +198,24 @@ class IPublicationController(Protocol):
     ) -> JSONResponse:
         pass
 
+    @abstractmethod
+    async def edit_image(
+            self,
+            organization_id: int = Form(...),
+            prompt: str = Form(...),
+            image_file: UploadFile = File(...),
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            organization_id: int = Form(...),
+            category_id: int = Form(...),
+            prompt: str = Form(...),
+            images_files: list[UploadFile] = File(...),
+    ) -> JSONResponse:
+        pass
 
 class IPublicationService(Protocol):
     # Публикация
@@ -199,6 +224,30 @@ class IPublicationService(Protocol):
             self,
             category_id: int,
             text_reference: str
+    ) -> dict: pass
+
+    @abstractmethod
+    async def test_generate_publication_text(
+            self,
+            text_reference: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
     ) -> dict: pass
 
     @abstractmethod
@@ -302,24 +351,22 @@ class IPublicationService(Protocol):
             self,
             organization_id: int,
             name: str,
-            prompt_for_image_style: str,
+            hint: str,
             goal: str,
-            structure_skeleton: list[str],
-            structure_flex_level_min: int,
-            structure_flex_level_max: int,
-            structure_flex_level_comment: str,
-            must_have: list[str],
-            must_avoid: list[str],
-            social_networks_rules: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
             len_min: int,
             len_max: int,
             n_hashtags_min: int,
             n_hashtags_max: int,
             cta_type: str,
-            tone_of_voice: list[str],
-            brand_rules: list[str],
+            cta_strategy: dict,
             good_samples: list[dict],
-            additional_info: list[str]
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
     ) -> int:
         pass
 
@@ -336,24 +383,22 @@ class IPublicationService(Protocol):
             self,
             category_id: int,
             name: str = None,
-            prompt_for_image_style: str = None,
+            hint: str = None,
             goal: str = None,
-            structure_skeleton: list[str] = None,
-            structure_flex_level_min: int = None,
-            structure_flex_level_max: int = None,
-            structure_flex_level_comment: str = None,
-            must_have: list[str] = None,
-            must_avoid: list[str] = None,
-            social_networks_rules: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            creativity_level: int = None,
+            audience_segment: str = None,
             len_min: int = None,
             len_max: int = None,
             n_hashtags_min: int = None,
             n_hashtags_max: int = None,
             cta_type: str = None,
-            tone_of_voice: list[str] = None,
-            brand_rules: list[str] = None,
+            cta_strategy: dict = None,
             good_samples: list[dict] = None,
-            additional_info: list[str] = None
+            bad_samples: list[dict] = None,
+            additional_info: list[dict] = None,
+            prompt_for_image_style: str = None
     ) -> None:
         pass
 
@@ -500,6 +545,25 @@ class IPublicationService(Protocol):
     ) -> list[str]:
         pass
 
+    @abstractmethod
+    async def edit_image(
+            self,
+            organization_id: int,
+            image_file: UploadFile,
+            prompt: str
+    ) -> list[str]:
+        pass
+
+    @abstractmethod
+    async def combine_images(
+            self,
+            organization_id: int,
+            category_id: int,
+            images_files: list[UploadFile],
+            prompt: str
+    ) -> list[str]:
+        pass
+
 
 class IPublicationRepo(Protocol):
     @abstractmethod
@@ -551,24 +615,22 @@ class IPublicationRepo(Protocol):
             self,
             organization_id: int,
             name: str,
-            prompt_for_image_style: str,
+            hint: str,
             goal: str,
-            structure_skeleton: list[str],
-            structure_flex_level_min: int,
-            structure_flex_level_max: int,
-            structure_flex_level_comment: str,
-            must_have: list[str],
-            must_avoid: list[str],
-            social_networks_rules: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
             len_min: int,
             len_max: int,
             n_hashtags_min: int,
             n_hashtags_max: int,
             cta_type: str,
-            tone_of_voice: list[str],
-            brand_rules: list[str],
+            cta_strategy: dict,
             good_samples: list[dict],
-            additional_info: list[str]
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
     ) -> int:
         pass
 
@@ -577,24 +639,22 @@ class IPublicationRepo(Protocol):
             self,
             category_id: int,
             name: str = None,
-            prompt_for_image_style: str = None,
+            hint: str = None,
             goal: str = None,
-            structure_skeleton: list[str] = None,
-            structure_flex_level_min: int = None,
-            structure_flex_level_max: int = None,
-            structure_flex_level_comment: str = None,
-            must_have: list[str] = None,
-            must_avoid: list[str] = None,
-            social_networks_rules: str = None,
+            tone_of_voice: list[str] = None,
+            brand_rules: list[str] = None,
+            creativity_level: int = None,
+            audience_segment: str = None,
             len_min: int = None,
             len_max: int = None,
             n_hashtags_min: int = None,
             n_hashtags_max: int = None,
             cta_type: str = None,
-            tone_of_voice: list[str] = None,
-            brand_rules: list[str] = None,
+            cta_strategy: dict = None,
             good_samples: list[dict] = None,
-            additional_info: list[str] = None
+            bad_samples: list[dict] = None,
+            additional_info: list[dict] = None,
+            prompt_for_image_style: str = None
     ) -> None:
         pass
 
@@ -732,9 +792,11 @@ class IPublicationRepo(Protocol):
 
 
 class IPublicationPromptGenerator(Protocol):
+
     @abstractmethod
     async def get_generate_publication_text_system_prompt(
             self,
+            user_text_reference: str,
             category: model.Category,
             organization: model.Organization,
     ) -> str:
@@ -745,26 +807,38 @@ class IPublicationPromptGenerator(Protocol):
             self,
             category: model.Category,
             organization: model.Organization,
+            current_publication_text: str,
+            regeneration_instructions: str,
+    ) -> str: pass
+
+    @abstractmethod
+    async def get_upgrade_combine_prompt_system_prompt(
+            self,
+            combine_prompt: str,
+            category: model.Category,
+            organization: model.Organization,
+    ) -> str: pass
+
+    @abstractmethod
+    async def get_generate_image_prompt_system(
+            self,
+            prompt_for_image_style: str,
             publication_text: str,
+            category: model.Category,
+            organization: model.Organization,
     ) -> str:
         pass
 
     @abstractmethod
-    async def get_generate_publication_image_system_prompt(
+    async def get_generate_image_with_user_prompt_system(
             self,
-            prompt_for_image_style: str,
-            publication_text: str
-    ) -> str:
-        pass
-
-    @abstractmethod
-    async def get_regenerate_publication_image_system_prompt(
-            self,
+            user_prompt: str,
             prompt_for_image_style: str,
             publication_text: str,
-            changes: str
-    ) -> str:
-        pass
+            category: model.Category,
+            organization: model.Organization,
+            has_reference_image: bool = False,
+    ) -> str: pass
 
     @abstractmethod
     async def get_filter_post_system_prompt(
@@ -779,7 +853,8 @@ class IPublicationPromptGenerator(Protocol):
             self,
             autoposting_category: model.AutopostingCategory,
             organization: model.Organization,
-            source_post_text: str
+            source_post_text: str,
+            web_search_result: str
     ) -> str:
         pass
 

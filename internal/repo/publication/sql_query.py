@@ -62,46 +62,42 @@ create_category = """
 INSERT INTO categories (
     organization_id,
     name,
-    prompt_for_image_style,
+    hint,
     goal,
-    structure_skeleton,
-    structure_flex_level_min,
-    structure_flex_level_max,
-    structure_flex_level_comment,
-    must_have,
-    must_avoid,
-    social_networks_rules,
+    tone_of_voice,
+    brand_rules,
+    creativity_level,
+    audience_segment,
     len_min,
     len_max,
     n_hashtags_min,
     n_hashtags_max,
     cta_type,
-    tone_of_voice,
-    brand_rules,
+    cta_strategy,
     good_samples,
-    additional_info
+    bad_samples,
+    additional_info,
+    prompt_for_image_style
 )
 VALUES (
     :organization_id,
     :name,
-    :prompt_for_image_style,
+    :hint,
     :goal,
-    :structure_skeleton,
-    :structure_flex_level_min,
-    :structure_flex_level_max,
-    :structure_flex_level_comment,
-    :must_have,
-    :must_avoid,
-    :social_networks_rules,
+    :tone_of_voice,
+    :brand_rules,
+    :creativity_level,
+    :audience_segment,
     :len_min,
     :len_max,
     :n_hashtags_min,
     :n_hashtags_max,
     :cta_type,
-    :tone_of_voice,
-    :brand_rules,
+    :cta_strategy,
     :good_samples,
-    :additional_info
+    :bad_samples,
+    :additional_info,
+    :prompt_for_image_style
 )
 RETURNING id;
 """
@@ -110,24 +106,22 @@ update_category = """
 UPDATE categories
 SET
     name = COALESCE(:name, name),
-    prompt_for_image_style = COALESCE(:prompt_for_image_style, prompt_for_image_style),
+    hint = COALESCE(:hint, hint),
     goal = COALESCE(:goal, goal),
-    structure_skeleton = COALESCE(:structure_skeleton, structure_skeleton),
-    structure_flex_level_min = COALESCE(:structure_flex_level_min, structure_flex_level_min),
-    structure_flex_level_max = COALESCE(:structure_flex_level_max, structure_flex_level_max),
-    structure_flex_level_comment = COALESCE(:structure_flex_level_comment, structure_flex_level_comment),
-    must_have = COALESCE(:must_have, must_have),
-    must_avoid = COALESCE(:must_avoid, must_avoid),
-    social_networks_rules = COALESCE(:social_networks_rules, social_networks_rules),
+    tone_of_voice = COALESCE(:tone_of_voice, tone_of_voice),
+    brand_rules = COALESCE(:brand_rules, brand_rules),
+    creativity_level = COALESCE(:creativity_level, creativity_level),
+    audience_segment = COALESCE(:audience_segment, audience_segment),
     len_min = COALESCE(:len_min, len_min),
     len_max = COALESCE(:len_max, len_max),
     n_hashtags_min = COALESCE(:n_hashtags_min, n_hashtags_min),
     n_hashtags_max = COALESCE(:n_hashtags_max, n_hashtags_max),
     cta_type = COALESCE(:cta_type, cta_type),
-    tone_of_voice = COALESCE(:tone_of_voice, tone_of_voice),
-    brand_rules = COALESCE(:brand_rules, brand_rules),
+    cta_strategy = COALESCE(:cta_strategy, cta_strategy),
     good_samples = COALESCE(:good_samples, good_samples),
-    additional_info = COALESCE(:additional_info, additional_info)
+    bad_samples = COALESCE(:bad_samples, bad_samples),
+    additional_info = COALESCE(:additional_info, additional_info),
+    prompt_for_image_style = COALESCE(:prompt_for_image_style, prompt_for_image_style)
 WHERE id = :category_id;
 """
 
