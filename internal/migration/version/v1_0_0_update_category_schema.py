@@ -1,4 +1,4 @@
-from internal import interface, model
+from internal import interface
 from internal.migration.base import Migration, MigrationInfo
 
 
@@ -6,7 +6,7 @@ class UpdateCategorySchema(Migration):
 
     def get_info(self) -> MigrationInfo:
         return MigrationInfo(
-            version="v0_0_22",
+            version="v1_0_0",
             name="update_category_schema",
             depends_on="v0_0_15"
         )
@@ -14,7 +14,7 @@ class UpdateCategorySchema(Migration):
     async def up(self, db: interface.IDB):
         queries = [
             add_new_category_fields,
-            convert_additional_info_to_jsonb,
+            recreate_additional_info_as_jsonb,
             drop_old_category_fields
         ]
 
@@ -23,7 +23,7 @@ class UpdateCategorySchema(Migration):
     async def down(self, db: interface.IDB):
         queries = [
             restore_old_category_fields,
-            convert_additional_info_to_text_array,
+            recreate_additional_info_as_text_array,
             drop_new_category_fields
         ]
 
@@ -37,24 +37,15 @@ ALTER TABLE categories
     ADD COLUMN IF NOT EXISTS creativity_level INTEGER DEFAULT 0,
     ADD COLUMN IF NOT EXISTS audience_segment TEXT DEFAULT '',
     ADD COLUMN IF NOT EXISTS cta_strategy JSONB DEFAULT '{}',
-    ADD COLUMN IF NOT EXISTS bad_samples JSONB[] DEFAULT '{}';
+    ADD COLUMN IF NOT EXISTS bad_samples JSONB[] DEFAULT'{}';
 """
 
-convert_additional_info_to_jsonb = """
--- Create temporary column
-ALTER TABLE categories ADD COLUMN IF NOT EXISTS additional_info_new JSONB[] DEFAULT '{}';
-
--- Convert TEXT[] to JSONB[] by wrapping each string in a JSON object
-UPDATE categories
-SET additional_info_new = ARRAY(
-    SELECT jsonb_build_object('text', elem)
-    FROM unnest(additional_info) AS elem
-)
-WHERE additional_info IS NOT NULL AND array_length(additional_info, 1) > 0;
-
--- Drop old column and rename new one
+recreate_additional_info_as_jsonb = """
+-- Drop old TEXT[] column
 ALTER TABLE categories DROP COLUMN IF EXISTS additional_info;
-ALTER TABLE categories RENAME COLUMN additional_info_new TO additional_info;
+
+-- Create new JSONB[] column
+ALTER TABLE categories ADD COLUMN additional_info JSONB[] DEFAULT '{}';
 """
 
 drop_old_category_fields = """
@@ -81,21 +72,12 @@ ALTER TABLE categories
     ADD COLUMN IF NOT EXISTS social_networks_rules TEXT NOT NULL DEFAULT '';
 """
 
-convert_additional_info_to_text_array = """
--- Create temporary column
-ALTER TABLE categories ADD COLUMN IF NOT EXISTS additional_info_old TEXT[] DEFAULT '{}';
-
--- Convert JSONB[] to TEXT[] by extracting 'text' field or converting to string
-UPDATE categories
-SET additional_info_old = ARRAY(
-    SELECT COALESCE(elem->>'text', elem::text)
-    FROM unnest(additional_info) AS elem
-)
-WHERE additional_info IS NOT NULL AND array_length(additional_info, 1) > 0;
-
--- Drop new column and rename old one
+recreate_additional_info_as_text_array = """
+-- Drop JSONB[] column
 ALTER TABLE categories DROP COLUMN IF EXISTS additional_info;
-ALTER TABLE categories RENAME COLUMN additional_info_old TO additional_info;
+
+-- Create TEXT[] column
+ALTER TABLE categories ADD COLUMN additional_info TEXT[] DEFAULT '{}';
 """
 
 drop_new_category_fields = """
