@@ -118,7 +118,7 @@ def get_login_vk_html(organization_id: int, domain: str) -> str:
                         const VKID = window.VKIDSDK;
                         VKID.Config.init({{
                             app: 54287509,
-                            redirectUrl: 'https://{domain}/api/content/vk/select-group-page/{organization_id}',
+                            redirectUrl: 'https://{domain}/api/content/vk/select-group-page',
                             responseMode: VKID.ConfigResponseMode.Callback,
                             source: VKID.ConfigSource.LOWCODE,
                             scope: 'wall,groups,offline', // wall - публикация постов, groups - доступ к группам, offline - постоянный токен

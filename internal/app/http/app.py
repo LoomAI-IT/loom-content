@@ -441,7 +441,7 @@ def include_social_network_handlers(
     )
 
     app.add_api_route(
-        prefix + "/vk/select-group-page/{organization_id}",
+        prefix + "/vk/select-group-page",
         social_network_controller.get_vk_select_group_page,
         methods=["GET"],
         tags=["VK HTML Pages"]
