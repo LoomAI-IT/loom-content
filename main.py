@@ -145,14 +145,16 @@ telegram_client = LTelegramClient(
 )
 
 vk_client = VkClient(
-    app_id=cfg.vk_app_id,
+    client_id=cfg.vk_client_id,
+    client_secret=cfg.vk_client_secret,
+    redirect_url=cfg.vk_redirect_url,
+
 )
 
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
 social_network_repo = SocialNetworkRepo(tel, db)
-
 
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
@@ -191,14 +193,12 @@ social_network_service = SocialNetworkService(
     repo=social_network_repo,
     telegram_client=telegram_client,
     vk_client=vk_client,
-    vk_app_secret=cfg.vk_app_secret,
-    domain=cfg.domain,
 )
 
 # Инициализация контроллеров
 publication_controller = PublicationController(tel, publication_service)
 video_cut_controller = VideoCutController(tel, video_cut_service)
-social_network_controller = SocialNetworkController(tel, social_network_service, cfg.domain)
+social_network_controller = SocialNetworkController(tel, social_network_service, cfg.vk_redirect_url)
 
 # Инициализация middleware
 http_middleware = HttpMiddleware(tel, loom_authorization_client, cfg.prefix, log_context)

@@ -13,13 +13,11 @@ class SocialNetworkController(interface.ISocialNetworkController):
             self,
             tel: interface.ITelemetry,
             social_network_service: interface.ISocialNetworkService,
-            domain: str,
             vk_redirect_url: str,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.social_network_service = social_network_service
-        self.domain = domain
         self.vk_redirect_url = vk_redirect_url
 
     # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ

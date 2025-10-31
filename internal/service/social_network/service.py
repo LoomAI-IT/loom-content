@@ -9,16 +9,12 @@ class SocialNetworkService(interface.ISocialNetworkService):
             repo: interface.ISocialNetworkRepo,
             telegram_client: interface.ITelegramClient,
             vk_client: interface.IVkClient,
-            domain: str,
-            vk_redirect_url: str,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
         self.telegram_client = telegram_client
         self.vk_client = vk_client
-        self.domain = domain
-        self.vk_redirect_url = vk_redirect_url
 
     @traced_method()
     async def create_youtube(
