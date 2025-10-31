@@ -25,6 +25,7 @@ class PublicationService(interface.IPublicationService):
             organization_client: interface.ILoomOrganizationClient,
             vizard_client: interface.IVizardClient,
             telegram_client: interface.ITelegramClient,
+            vk_client: interface.IVkClient,
             loom_tg_bot_client: interface.ILoomTgBotClient,
             loom_domain: str,
             environment: str,
@@ -41,6 +42,7 @@ class PublicationService(interface.IPublicationService):
         self.organization_client = organization_client
         self.vizard_client = vizard_client
         self.telegram_client = telegram_client
+        self.vk_client = vk_client
         self.loom_tg_bot_client = loom_tg_bot_client
         self.loom_domain = loom_domain
         self.environment = environment
@@ -610,6 +612,15 @@ ultrathink
                     tg_link=tg_post_link,
                 )
                 post_links["telegram"] = tg_post_link
+
+            if publication.vk_source:
+                self.logger.info("Публикация в VK")
+                vk_post_link = await self._publish_to_vk(publication)
+                await self.repo.change_publication(
+                    publication_id=publication_id,
+                    vk_link=vk_post_link,
+                )
+                post_links["vkontakte"] = vk_post_link
 
             await self.loom_tg_bot_client.notify_publication_approved(
                 account_id=publication.creator_id,
@@ -1204,3 +1215,32 @@ ultrathink
                 text=publication.text,
             )
         return tg_post_link
+
+    async def _publish_to_vk(self, publication: model.Publication) -> str:
+        """
+        Публикация поста в VK
+
+        Args:
+            publication: Публикация для размещения
+
+        Returns:
+            Ссылка на опубликованный пост в VK
+        """
+        vkontakte_account = (await self.social_network_repo.get_vkontakte_by_organization(
+            publication.organization_id
+        ))[0]
+
+        # Конвертируем HTML <br> обратно в переносы строк для VK
+        message = publication.text.replace("<br>", "\n")
+
+        # Публикуем пост (пока только текст, без изображения)
+        result = await self.vk_client.publish_post(
+            access_token=vkontakte_account.vk_access_token,
+            owner_id=-int(vkontakte_account.vk_group_id),  # Отрицательный ID для группы
+            message=message
+        )
+
+        # Формируем ссылку на пост
+        vk_post_link = f"https://vk.com/wall-{vkontakte_account.vk_group_id}_{result['post_id']}"
+
+        return vk_post_link

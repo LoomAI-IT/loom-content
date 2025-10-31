@@ -73,3 +73,4 @@ class Config:
         # VK configuration
         self.vk_app_id = os.getenv("VK_APP_ID", "")
         self.vk_app_secret = os.getenv("VK_APP_SECRET", "")
+        self.vk_redirect_url = f"https://{self.domain}/api/content/vk/select-group-page"

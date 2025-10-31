@@ -414,7 +414,7 @@ def include_social_network_handlers(
     app.add_api_route(
         prefix + "/social-network/vkontakte",
         social_network_controller.create_vkontakte,
-        methods=["POST"],
+        methods=["GET"],
         tags=["SocialNetwork"]
     )
 

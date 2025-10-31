@@ -182,7 +182,7 @@ def get_select_vk_group_html(organization_id: int, domain: str) -> str:
         const loading = document.getElementById('loading');
         const errorDiv = document.getElementById('error');
 
-        // Загружаем группы пользователя
+        // Загружаем группы пользователя через сервер (токен на сервере, запрос с IP сервера)
         async function loadGroups() {{
             try {{
                 const response = await fetch('https://{domain}/api/content/social-network/vkontakte/get-groups/{organization_id}');

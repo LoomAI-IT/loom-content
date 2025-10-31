@@ -13,12 +13,14 @@ class SocialNetworkController(interface.ISocialNetworkController):
             self,
             tel: interface.ITelemetry,
             social_network_service: interface.ISocialNetworkService,
-            domain: str
+            domain: str,
+            vk_redirect_url: str,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.social_network_service = social_network_service
         self.domain = domain
+        self.vk_redirect_url = vk_redirect_url
 
     # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @auto_log()
@@ -91,15 +93,21 @@ class SocialNetworkController(interface.ISocialNetworkController):
     @traced_method()
     async def create_vkontakte(
             self,
-            body: CreateVkTokenBody,
-    ) -> JSONResponse:
+            code: str,
+            state: str,
+    ) -> HTMLResponse:
+        organization_id = int(state)
+
         await self.social_network_service.create_vkontakte(
-            body.organization_id,
-            body.access_token,
+            organization_id=organization_id,
+            authorization_code=code
         )
-        return JSONResponse(
-            status_code=200,
-            content={}
+
+        redirect_url = f"{self.vk_redirect_url}?organization_id={organization_id}"
+
+        return HTMLResponse(
+            content=f'<html><head><meta http-equiv="refresh" content="0;url={redirect_url}"></head></html>',
+            status_code=200
         )
 
     @auto_log()
@@ -190,7 +198,8 @@ class SocialNetworkController(interface.ISocialNetworkController):
             self,
             organization_id: int,
     ) -> HTMLResponse:
-        html_content = get_login_vk_html(organization_id, self.domain)
+        vk_oauth_url = self.social_network_service.get_vk_oauth_url(organization_id)
+        html_content = get_login_vk_html(vk_oauth_url)
         return HTMLResponse(content=html_content, status_code=200)
 
     @auto_log()

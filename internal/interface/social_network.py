@@ -53,8 +53,9 @@ class ISocialNetworkController(Protocol):
     @abstractmethod
     async def create_vkontakte(
             self,
-            body: CreateVkTokenBody,
-    ) -> JSONResponse: pass
+            code: str,
+            state: str,
+    ) -> HTMLResponse: pass
 
     @abstractmethod
     async def get_vk_groups(
@@ -104,7 +105,7 @@ class ISocialNetworkService(Protocol):
     async def create_vkontakte(
             self,
             organization_id: int,
-            access_token: str,
+            authorization_code: str,
     ) -> None: pass
 
     @abstractmethod
@@ -168,6 +169,9 @@ class ISocialNetworkService(Protocol):
             organization_id: int
     ) -> Dict[str, List]:
         pass
+
+    @abstractmethod
+    def get_vk_oauth_url(self, organization_id: int) -> str: pass
 
 
 class ISocialNetworkRepo(Protocol):
@@ -330,6 +334,9 @@ class ITelegramClient(Protocol):
 
 class IVkClient(Protocol):
     @abstractmethod
+    def get_oauth_url(self, state) -> str: pass
+
+    @abstractmethod
     async def get_user_groups(self, access_token: str) -> list[dict]:
         """
         Получить список групп пользователя VK, где он является администратором
@@ -348,5 +355,31 @@ class IVkClient(Protocol):
                     "members_count": int
                 }
             ]
+        """
+        pass
+
+    @abstractmethod
+    async def exchange_code_for_token(self, authorization_code: str) -> dict:
+        pass
+
+    @abstractmethod
+    async def publish_post(
+            self,
+            access_token: str,
+            owner_id: int,
+            message: str,
+            attachments: str = None
+    ) -> dict:
+        """
+        Опубликовать пост на стене группы VK
+
+        Args:
+            access_token: VK access token
+            owner_id: ID группы (отрицательное число)
+            message: Текст поста
+            attachments: Вложения (опционально)
+
+        Returns:
+            Словарь с информацией о созданном посте
         """
         pass

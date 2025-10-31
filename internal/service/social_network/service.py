@@ -9,12 +9,16 @@ class SocialNetworkService(interface.ISocialNetworkService):
             repo: interface.ISocialNetworkRepo,
             telegram_client: interface.ITelegramClient,
             vk_client: interface.IVkClient,
+            domain: str,
+            vk_redirect_url: str,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
         self.telegram_client = telegram_client
         self.vk_client = vk_client
+        self.domain = domain
+        self.vk_redirect_url = vk_redirect_url
 
     @traced_method()
     async def create_youtube(
@@ -28,12 +32,25 @@ class SocialNetworkService(interface.ISocialNetworkService):
     async def create_vkontakte(
             self,
             organization_id: int,
-            access_token: str,
+            authorization_code: str,
     ) -> None:
-        await self.repo.create_vkontakte(
-            organization_id,
-            access_token,
+        token_data = await self.vk_client.exchange_code_for_token(
+            authorization_code=authorization_code,
         )
+
+        access_token = token_data["access_token"]
+
+        vkontakte_list = await self.repo.get_vkontakte_by_organization(organization_id)
+        if vkontakte_list:
+            await self.repo.update_vkontakte(
+                organization_id=organization_id,
+                vk_access_token=access_token
+            )
+        else:
+            await self.repo.create_vkontakte(
+                organization_id=organization_id,
+                access_token=access_token
+            )
 
     @traced_method()
     async def create_instagram(
@@ -127,3 +144,6 @@ class SocialNetworkService(interface.ISocialNetworkService):
         }
 
         return social_networks
+
+    def get_vk_oauth_url(self, organization_id: int) -> str:
+        return self.vk_client.get_oauth_url(organization_id)

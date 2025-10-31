@@ -1,11 +1,11 @@
-def get_login_vk_html(organization_id: int, domain: str) -> str:
+def get_login_vk_html(oauth_url: str) -> str:
     return f"""
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход через VK ID</title>
+    <title>Вход через VK</title>
     <style>
         * {{
             margin: 0;
@@ -48,48 +48,27 @@ def get_login_vk_html(organization_id: int, domain: str) -> str:
             font-size: 16px;
         }}
 
-        .login-section {{
+        .vk-button {{
+            display: inline-block;
             margin-top: 40px;
+            padding: 16px 40px;
+            background: #0077FF;
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
         }}
 
-        .divider {{
-            margin: 30px 0;
-            text-align: center;
-            position: relative;
-        }}
-
-        .divider::before {{
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #e0e0e0;
-        }}
-
-        .divider span {{
-            background: white;
-            padding: 0 15px;
-            color: #999;
-            font-size: 14px;
-            position: relative;
-            z-index: 1;
+        .vk-button:hover {{
+            background: #0066DD;
         }}
 
         .info {{
             margin-top: 30px;
             font-size: 14px;
             color: #999;
-        }}
-
-        .info a {{
-            color: #667eea;
-            text-decoration: none;
-        }}
-
-        .info a:hover {{
-            text-decoration: underline;
         }}
 
         @media (max-width: 480px) {{
@@ -107,74 +86,15 @@ def get_login_vk_html(organization_id: int, domain: str) -> str:
     <div class="container">
         <div class="logo">
             <h1>Loom AI</h1>
-            <p>Войдите, чтобы продолжить</p>
+            <p>Подключите VK для публикации постов</p>
         </div>
 
-        <div class="login-section">
-            <div id="vk-button">
-                <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
-                <script type="text/javascript">
-                    if ('VKIDSDK' in window) {{
-                        const VKID = window.VKIDSDK;
-                        VKID.Config.init({{
-                            app: 54287509,
-                            redirectUrl: 'https://{domain}/api/content/vk/select-group-page',
-                            responseMode: VKID.ConfigResponseMode.Callback,
-                            source: VKID.ConfigSource.LOWCODE,
-                            scope: 'wall,groups,offline', // wall - публикация постов, groups - доступ к группам, offline - постоянный токен
-                        }});
-                        const oneTap = new VKID.OneTap();
-                        oneTap.render({{
-                            container: document.currentScript.parentElement,
-                            showAlternativeLogin: true
-                        }})
-                        .on(VKID.WidgetEvents.ERROR, vkidOnError)
-                        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {{
-                            const code = payload.code;
-                            const deviceId = payload.device_id;
-                            VKID.Auth.exchangeCode(code, deviceId)
-                                .then(vkidOnSuccess)
-                                .catch(vkidOnError);
-                        }});
-
-                        function vkidOnSuccess(data) {{
-                            // Обработка полученного результата
-                            console.log('Успешная авторизация:', data);
-
-                            // Отправляем access_token на ваш сервер
-                            fetch('https://{domain}/api/content/social-network/vkontakte', {{
-                                method: 'POST',
-                                headers: {{
-                                    'Content-Type': 'application/json',
-                                }},
-                                body: JSON.stringify({{
-                                    access_token: data.access_token,
-                                    organization_id: {organization_id},
-                                }})
-                            }})
-                            .then(response => response.json())
-                            .then(result => {{
-                                console.log('Токен сохранен:', result);
-                                window.location.href = '/api/content/vk/select-group-page?organization_id={organization_id}';
-                            }})
-                            .catch(error => {{
-                                console.error('Ошибка сохранения токена:', error);
-                                alert('Ошибка при сохранении данных. Попробуйте еще раз.');
-                            }});
-                        }}
-
-                        function vkidOnError(error) {{
-                            // Обработка ошибки
-                            console.error('Ошибка авторизации:', error);
-                            alert('Произошла ошибка при авторизации. Попробуйте еще раз.');
-                        }}
-                    }}
-                </script>
-            </div>
-        </div>
+        <a href="{oauth_url}" class="vk-button">
+            Войти через VK
+        </a>
 
         <div class="info">
-            Нажимая "Войти", вы соглашаетесь с <a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a>
+            Вы будете перенаправлены на страницу авторизации VK
         </div>
     </div>
 </body>

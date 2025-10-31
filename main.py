@@ -170,6 +170,7 @@ publication_service = PublicationService(
     organization_client=loom_organization_client,
     vizard_client=vizard_client,
     telegram_client=telegram_client,
+    vk_client=vk_client,
     loom_tg_bot_client=loom_tg_bot_client,
     loom_domain=cfg.domain,
     environment=cfg.environment
@@ -190,6 +191,8 @@ social_network_service = SocialNetworkService(
     repo=social_network_repo,
     telegram_client=telegram_client,
     vk_client=vk_client,
+    vk_app_secret=cfg.vk_app_secret,
+    domain=cfg.domain,
 )
 
 # Инициализация контроллеров
