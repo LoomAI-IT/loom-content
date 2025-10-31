@@ -3,7 +3,7 @@ import io
 from abc import abstractmethod
 from typing import Protocol, Dict, List
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from internal import model
 from internal.controller.http.handler.social_network.model import *
@@ -73,6 +73,21 @@ class ISocialNetworkController(Protocol):
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @abstractmethod
     async def get_social_networks_by_organization(self, organization_id: int) -> JSONResponse:
+        pass
+
+    # HTML СТРАНИЦЫ ДЛЯ VK
+    @abstractmethod
+    async def get_vk_login_page(
+            self,
+            organization_id: int,
+    ) -> HTMLResponse:
+        pass
+
+    @abstractmethod
+    async def get_vk_select_group_page(
+            self,
+            organization_id: int,
+    ) -> HTMLResponse:
         pass
 
 
@@ -314,4 +329,24 @@ class ITelegramClient(Protocol):
 
 
 class IVkClient(Protocol):
-    pass
+    @abstractmethod
+    async def get_user_groups(self, access_token: str) -> list[dict]:
+        """
+        Получить список групп пользователя VK, где он является администратором
+
+        Args:
+            access_token: VK access token пользователя
+
+        Returns:
+            Список словарей с информацией о группах:
+            [
+                {
+                    "id": int,
+                    "name": str,
+                    "screen_name": str,
+                    "photo_100": str,
+                    "members_count": int
+                }
+            ]
+        """
+        pass

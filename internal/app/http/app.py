@@ -432,6 +432,21 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
+    # HTML СТРАНИЦЫ ДЛЯ VK
+    app.add_api_route(
+        prefix + "/vk/login-page/{organization_id}",
+        social_network_controller.get_vk_login_page,
+        methods=["GET"],
+        tags=["VK HTML Pages"]
+    )
+
+    app.add_api_route(
+        prefix + "/vk/select-group-page/{organization_id}",
+        social_network_controller.get_vk_select_group_page,
+        methods=["GET"],
+        tags=["VK HTML Pages"]
+    )
+
     # Получение всех социальных сетей по организации
     app.add_api_route(
         prefix + "/social-network/organization/{organization_id}",

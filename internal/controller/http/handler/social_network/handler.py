@@ -1,7 +1,9 @@
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from internal import interface
 from internal.controller.http.handler.social_network.model import *
+from internal.controller.http.handler.social_network.login_vk import get_login_vk_html
+from internal.controller.http.handler.social_network.select_vk_group import get_select_vk_group_html
 from pkg.log_wrapper import auto_log
 from pkg.trace_wrapper import traced_method
 
@@ -11,10 +13,12 @@ class SocialNetworkController(interface.ISocialNetworkController):
             self,
             tel: interface.ITelemetry,
             social_network_service: interface.ISocialNetworkService,
+            domain: str
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.social_network_service = social_network_service
+        self.domain = domain
 
     # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @auto_log()
@@ -90,7 +94,7 @@ class SocialNetworkController(interface.ISocialNetworkController):
             body: CreateVkTokenBody,
     ) -> JSONResponse:
         await self.social_network_service.create_vkontakte(
-            body.rganization_id,
+            body.organization_id,
             body.access_token,
         )
         return JSONResponse(
@@ -178,3 +182,22 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 }
             }
         )
+
+    # HTML СТРАНИЦЫ ДЛЯ VK
+    @auto_log()
+    @traced_method()
+    async def get_vk_login_page(
+            self,
+            organization_id: int,
+    ) -> HTMLResponse:
+        html_content = get_login_vk_html(organization_id, self.domain)
+        return HTMLResponse(content=html_content, status_code=200)
+
+    @auto_log()
+    @traced_method()
+    async def get_vk_select_group_page(
+            self,
+            organization_id: int,
+    ) -> HTMLResponse:
+        html_content = get_select_vk_group_html(organization_id, self.domain)
+        return HTMLResponse(content=html_content, status_code=200)

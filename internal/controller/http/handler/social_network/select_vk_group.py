@@ -1,4 +1,5 @@
-select_vk_group_html = f"""
+def get_select_vk_group_html(organization_id: int, domain: str) -> str:
+    return f"""
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -184,7 +185,7 @@ select_vk_group_html = f"""
         // Загружаем группы пользователя
         async function loadGroups() {{
             try {{
-                const response = await fetch('/api/content/social-network/vkontakte/get-groups');
+                const response = await fetch('https://{domain}/api/content/social-network/vkontakte/get-groups/{organization_id}');
                 const data = await response.json();
 
                 if (data.error) {{
@@ -215,7 +216,7 @@ select_vk_group_html = f"""
                         <div class="group-check"></div>
                     `;
 
-                    groupItem.addEventListener('click', () => selectGroup(groupItem, group.id));
+                    groupItem.addEventListener('click', () => selectGroup(groupItem, group.id, group.name));
                     groupsList.appendChild(groupItem);
                 }});
 
@@ -224,7 +225,9 @@ select_vk_group_html = f"""
             }}
         }}
 
-        function selectGroup(element, groupId) {{
+        let selectedGroupName = null;
+
+        function selectGroup(element, groupId, groupName) {{
             // Убираем выделение с других групп
             document.querySelectorAll('.group-item').forEach(item => {{
                 item.classList.remove('selected');
@@ -233,6 +236,7 @@ select_vk_group_html = f"""
             // Выделяем выбранную группу
             element.classList.add('selected');
             selectedGroupId = groupId;
+            selectedGroupName = groupName;
             submitBtn.disabled = false;
         }}
 
@@ -250,13 +254,15 @@ select_vk_group_html = f"""
             submitBtn.textContent = 'Сохранение...';
 
             try {{
-                const response = await fetch('/api/content/social-network/vkontakte/select-group', {{
+                const response = await fetch('https://{domain}/api/content/social-network/vkontakte/select-group', {{
                     method: 'POST',
                     headers: {{
                         'Content-Type': 'application/json',
                     }},
                     body: JSON.stringify({{
-                        group_id: selectedGroupId
+                        organization_id: {organization_id},
+                        vk_group_id: selectedGroupId,
+                        vk_group_name: selectedGroupName
                     }})
                 }});
 

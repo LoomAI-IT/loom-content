@@ -1,4 +1,5 @@
-login_vk_html = f"""
+def get_login_vk_html(organization_id: int, domain: str) -> str:
+    return f"""
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -117,7 +118,7 @@ login_vk_html = f"""
                         const VKID = window.VKIDSDK;
                         VKID.Config.init({{
                             app: 54287509,
-                            redirectUrl: 'https://dev3.loom-ai.ru/vk/redirect',
+                            redirectUrl: 'https://{domain}/api/content/vk/select-group-page/{organization_id}',
                             responseMode: VKID.ConfigResponseMode.Callback,
                             source: VKID.ConfigSource.LOWCODE,
                             scope: 'wall,groups,offline', // wall - публикация постов, groups - доступ к группам, offline - постоянный токен
@@ -141,23 +142,17 @@ login_vk_html = f"""
                             console.log('Успешная авторизация:', data);
 
                             // Отправляем access_token на ваш сервер
-                            fetch('https://dev3.loom-ai.ru/api/content/social-network/vkontakte/save-token', {{
+                            fetch('https://{domain}/api/content/social-network/vkontakte', {{
                                 method: 'POST',
                                 headers: {{
                                     'Content-Type': 'application/json',
                                 }},
                                 body: JSON.stringify({{
                                     access_token: data.access_token,
-                                    user_id: data.user_id,
-                                    expires_in: data.expires_in
+                                    organization_id: {organization_id},
                                 }})
                             }})
                             .then(response => response.json())
-                            .then(result => {{
-                                console.log('Токен сохранен:', result);
-                                // Перенаправляем пользователя на страницу выбора группы
-                                window.location.href = '/select-group';
-                            }})
                             .catch(error => {{
                                 console.error('Ошибка сохранения токена:', error);
                                 alert('Ошибка при сохранении данных. Попробуйте еще раз.');
