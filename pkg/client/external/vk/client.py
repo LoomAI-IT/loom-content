@@ -33,16 +33,17 @@ class VkClient(interface.IVkClient):
         }
 
         response = await self.api_client.get(
-            path="/groups.get",
+            "/groups.get",
             params=params
         )
+        response_json = response.json()
 
-        if "error" in response:
-            error_msg = response["error"].get("error_msg", "Unknown error")
+        if "error" in response_json:
+            error_msg = response_json["error"].get("error_msg", "Unknown error")
             raise Exception(f"VK API error: {error_msg}")
 
         # VK API возвращает данные в формате {"response": {"count": N, "items": [...]}}
-        items = response.get("response", {}).get("items", [])
+        items = response_json.get("response", {}).get("items", [])
 
         # Форматируем данные для удобного использования
         groups = []
