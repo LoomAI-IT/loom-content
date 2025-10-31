@@ -19,7 +19,7 @@ class VkClient(interface.IVkClient):
 
     def get_oauth_url(self, state) -> str:
         scope = "wall,groups,offline"
-        oauth_url = f"https://oauth.vk.com/authorize?client_id={self.client_id}&redirect_uri={self.redirect_url}&scope={scope}&response_type=code&state={organization_id}&display=page"
+        oauth_url = f"https://oauth.vk.com/authorize?client_id={self.client_id}&redirect_uri={self.redirect_url}&scope={scope}&response_type=code&state={state}&display=page"
         return oauth_url
 
     async def get_user_groups(self, access_token: str) -> list[dict]:
