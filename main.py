@@ -12,6 +12,7 @@ from infrastructure.telemetry.telemetry import Telemetry, AlertManager
 from infrastructure.weedfs.weedfs import AsyncWeed
 from pkg.client.external.claude.client import AnthropicClient
 from pkg.client.external.telegram.client import LTelegramClient
+from pkg.client.external.vk.client import VkClient
 
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
@@ -143,6 +144,10 @@ telegram_client = LTelegramClient(
     cfg.tg_api_hash,
 )
 
+vk_client = VkClient(
+    app_id=cfg.vk_app_id,
+)
+
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
@@ -184,6 +189,7 @@ social_network_service = SocialNetworkService(
     tel=tel,
     repo=social_network_repo,
     telegram_client=telegram_client,
+    vk_client=vk_client,
 )
 
 # Инициализация контроллеров

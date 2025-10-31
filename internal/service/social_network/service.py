@@ -8,11 +8,13 @@ class SocialNetworkService(interface.ISocialNetworkService):
             tel: interface.ITelemetry,
             repo: interface.ISocialNetworkRepo,
             telegram_client: interface.ITelegramClient,
+            vk_client: interface.IVkClient,
     ):
         self.tracer = tel.tracer()
         self.logger = tel.logger()
         self.repo = repo
         self.telegram_client = telegram_client
+        self.vk_client = vk_client
 
     @traced_method()
     async def create_youtube(
@@ -21,6 +23,17 @@ class SocialNetworkService(interface.ISocialNetworkService):
     ) -> int:
         youtube_id = await self.repo.create_youtube(organization_id=organization_id)
         return youtube_id
+
+    @traced_method()
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+    ) -> None:
+        await self.repo.create_vkontakte(
+            organization_id,
+            access_token,
+        )
 
     @traced_method()
     async def create_instagram(
@@ -62,6 +75,23 @@ class SocialNetworkService(interface.ISocialNetworkService):
         )
 
     @traced_method()
+    async def update_vkontakte(
+            self,
+            organization_id: int,
+            vk_group_id: str = None,
+            vk_access_token: str = None,
+            vk_group_name: str = None,
+            autoselect: bool = None
+    ) -> None:
+        await self.repo.update_vkontakte(
+            organization_id=organization_id,
+            vk_group_id=vk_group_id,
+            vk_access_token=vk_access_token,
+            vk_group_name=vk_group_name,
+            autoselect=autoselect
+        )
+
+    @traced_method()
     async def delete_telegram(
             self,
             organization_id: int,
@@ -69,12 +99,15 @@ class SocialNetworkService(interface.ISocialNetworkService):
         await self.repo.delete_telegram(organization_id)
 
     @traced_method()
-    async def create_vkontakte(
+    async def get_vk_groups(
             self,
             organization_id: int
-    ) -> int:
-        vkontakte_id = await self.repo.create_vkontakte(organization_id=organization_id)
-        return vkontakte_id
+    ) -> list[dict]:
+        vkontakte = (await self.repo.get_vkontakte_by_organization(organization_id))[0]
+
+        groups = await self.vk_client.get_user_groups(vkontakte.vk_access_token)
+
+        return groups
 
     @traced_method()
     async def get_social_networks_by_organization(

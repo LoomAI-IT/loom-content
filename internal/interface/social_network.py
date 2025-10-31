@@ -53,7 +53,20 @@ class ISocialNetworkController(Protocol):
     @abstractmethod
     async def create_vkontakte(
             self,
-            body: CreateSocialNetworkBody,
+            body: CreateVkTokenBody,
+    ) -> JSONResponse: pass
+
+    @abstractmethod
+    async def get_vk_groups(
+            self,
+            organization_id: int,
+    ) -> JSONResponse:
+        pass
+
+    @abstractmethod
+    async def select_vk_group(
+            self,
+            body: SelectVkGroupBody,
     ) -> JSONResponse:
         pass
 
@@ -71,6 +84,13 @@ class ISocialNetworkService(Protocol):
             organization_id: int
     ) -> int:
         pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+    ) -> None: pass
 
     @abstractmethod
     async def create_instagram(
@@ -109,10 +129,21 @@ class ISocialNetworkService(Protocol):
     ): pass
 
     @abstractmethod
-    async def create_vkontakte(
+    async def get_vk_groups(
             self,
             organization_id: int
-    ) -> int:
+    ) -> list[dict]:
+        pass
+
+    @abstractmethod
+    async def update_vkontakte(
+            self,
+            organization_id: int,
+            vk_group_id: str = None,
+            vk_access_token: str = None,
+            vk_group_name: str = None,
+            autoselect: bool = None
+    ) -> None:
         pass
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
@@ -132,6 +163,13 @@ class ISocialNetworkRepo(Protocol):
             organization_id: int
     ) -> int:
         pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+    ) -> int: pass
 
     @abstractmethod
     async def create_instagram(
@@ -164,11 +202,14 @@ class ISocialNetworkRepo(Protocol):
     ): pass
 
     @abstractmethod
-    async def create_vkontakte(
+    async def update_vkontakte(
             self,
-            organization_id: int
-    ) -> int:
-        pass
+            organization_id: int,
+            vk_group_id: str = None,
+            vk_access_token: str = None,
+            vk_group_name: str = None,
+            autoselect: bool = None,
+    ): pass
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @abstractmethod
@@ -186,6 +227,7 @@ class ISocialNetworkRepo(Protocol):
     @abstractmethod
     async def get_vkontakte_by_organization(self, organization_id: int) -> List[model.Vkontakte]:
         pass
+
 
 
 class IInstagramClient(Protocol):
@@ -272,45 +314,4 @@ class ITelegramClient(Protocol):
 
 
 class IVkClient(Protocol):
-    @abstractmethod
-    def get_auth_url(self, redirect_uri: str, scope: str = "wall,groups") -> str: pass
-
-    @abstractmethod
-    async def get_access_token(self, code: str, redirect_uri: str) -> dict: pass
-
-    @abstractmethod
-    async def get_user_info(self, access_token: str, user_ids: str | list[str] = None) -> list[dict]: pass
-
-    @abstractmethod
-    def get_auth_url_for_groups(
-            self,
-            redirect_uri: str,
-            group_ids: list[str],
-            scope: str = "wall,photos,manage"
-    ) -> str: pass
-
-    @abstractmethod
-    async def upload_photo(self, access_token: str, photo_path: str, group_id: str = None) -> str: pass
-
-    @abstractmethod
-    async def post_to_wall(
-            self,
-            access_token: str,
-            message: str = "",
-            owner_id: str = None,
-            attachments: list[str] = None,
-            from_group: bool = False,
-            publish_date: int = None
-    ) -> dict: pass
-
-    @abstractmethod
-    async def post_to_group(
-            self,
-            access_token: str,
-            group_id: str,
-            message: str = "",
-            attachments: list[str] = None,
-            from_group: bool = True,
-            publish_date: int = None,
-            photo_paths: list[str] = None
-    ) -> dict: pass
+    pass

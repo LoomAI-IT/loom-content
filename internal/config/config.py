@@ -69,3 +69,7 @@ class Config:
 
         # Vizard configuration
         self.vizard_api_key = os.getenv("VIZARD_API_KEY", "")
+
+        # VK configuration
+        self.vk_app_id = os.getenv("VK_APP_ID", "")
+        self.vk_app_secret = os.getenv("VK_APP_SECRET", "")

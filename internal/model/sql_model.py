@@ -193,6 +193,9 @@ CREATE TABLE IF NOT EXISTS vkontakte (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
     autoselect BOOLEAN DEFAULT TRUE,
+    vk_group_id TEXT DEFAULT '',
+    vk_access_token TEXT DEFAULT '',
+    vk_group_name TEXT DEFAULT '',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

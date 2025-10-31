@@ -24,6 +24,18 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
 
         return youtube_id
 
+
+    @traced_method()
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+    ) -> int:
+        args = {'organization_id': organization_id, 'vk_access_token': access_token}
+        vkontakte_id = await self.db.insert(create_vkontakte, args)
+        return vkontakte_id
+
+
     @traced_method()
     async def create_instagram(
             self,
@@ -65,6 +77,24 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
         await self.db.update(update_telegram, args)
 
     @traced_method()
+    async def update_vkontakte(
+            self,
+            organization_id: int,
+            vk_group_id: str = None,
+            vk_access_token: str = None,
+            vk_group_name: str = None,
+            autoselect: bool = None,
+    ):
+        args = {
+            'organization_id': organization_id,
+            'vk_group_id': vk_group_id,
+            'vk_access_token': vk_access_token,
+            'vk_group_name': vk_group_name,
+            'autoselect': autoselect,
+        }
+        await self.db.update(update_vkontakte, args)
+
+    @traced_method()
     async def delete_telegram(
             self,
             organization_id: int,
@@ -73,16 +103,6 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
             'organization_id': organization_id,
         }
         await self.db.delete(delete_telegram, args)
-
-    @traced_method()
-    async def create_vkontakte(
-            self,
-            organization_id: int
-    ) -> int:
-        args = {'organization_id': organization_id}
-        vkontakte_id = await self.db.insert(create_vkontakte, args)
-
-        return vkontakte_id
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
 

@@ -1,5 +1,3 @@
-from opentelemetry.trace import Status, StatusCode, SpanKind
-
 from fastapi.responses import JSONResponse
 
 from internal import interface
@@ -87,6 +85,21 @@ class SocialNetworkController(interface.ISocialNetworkController):
 
     @auto_log()
     @traced_method()
+    async def create_vkontakte(
+            self,
+            body: CreateVkTokenBody,
+    ) -> JSONResponse:
+        await self.social_network_service.create_vkontakte(
+            body.rganization_id,
+            body.access_token,
+        )
+        return JSONResponse(
+            status_code=200,
+            content={}
+        )
+
+    @auto_log()
+    @traced_method()
     async def update_telegram(
             self,
             body: UpdateTgBody,
@@ -115,23 +128,41 @@ class SocialNetworkController(interface.ISocialNetworkController):
             content={}
         )
 
+    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+
     @auto_log()
     @traced_method()
-    async def create_vkontakte(
+    async def get_vk_groups(
             self,
-            body: CreateSocialNetworkBody,
+            organization_id: int,
     ) -> JSONResponse:
-        vkontakte_id = await self.social_network_service.create_vkontakte(
-            organization_id=body.organization_id
-        )
+        groups = await self.social_network_service.get_vk_groups(organization_id)
         return JSONResponse(
-            status_code=201,
+            status_code=200,
             content={
-                "vkontakte_id": vkontakte_id
+                "groups": groups
             }
         )
 
-    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    @auto_log()
+    @traced_method()
+    async def select_vk_group(
+            self,
+            body: SelectVkGroupBody,
+    ) -> JSONResponse:
+        await self.social_network_service.update_vkontakte(
+            organization_id=body.organization_id,
+            vk_group_id=body.vk_group_id,
+            vk_group_name=body.vk_group_name
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True
+            }
+        )
+
     @auto_log()
     @traced_method()
     async def get_social_networks_by_organization(self, organization_id: int) -> JSONResponse:

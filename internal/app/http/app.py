@@ -411,7 +411,6 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
-    # Создание VKontakte
     app.add_api_route(
         prefix + "/social-network/vkontakte",
         social_network_controller.create_vkontakte,
@@ -419,7 +418,19 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
-    # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
+    app.add_api_route(
+        prefix + "/social-network/vkontakte/get-groups/{organization_id}",
+        social_network_controller.get_vk_groups,
+        methods=["GET"],
+        tags=["SocialNetwork"]
+    )
+
+    app.add_api_route(
+        prefix + "/social-network/vkontakte/select-group",
+        social_network_controller.select_vk_group,
+        methods=["POST"],
+        tags=["SocialNetwork"]
+    )
 
     # Получение всех социальных сетей по организации
     app.add_api_route(
