@@ -73,4 +73,4 @@ class Config:
         # VK configuration
         self.vk_client_id = os.getenv("LOOM_VK_APP_ID", "")
         self.vk_client_secret = os.getenv("LOOM_VK_APP_SECRET", "")
-        self.vk_redirect_url = f"https://{self.domain}/api/content/vk/select-group-page"
+        self.vk_redirect_url = f"https://{self.domain}/api/content/social-network/vkontakte"
