@@ -71,6 +71,6 @@ class Config:
         self.vizard_api_key = os.getenv("VIZARD_API_KEY", "")
 
         # VK configuration
-        self.vk_client_id = os.getenv("VK_APP_ID", "")
-        self.vk_client_secret = os.getenv("VK_APP_SECRET", "")
+        self.vk_client_id = os.getenv("LOOM_VK_APP_ID", "")
+        self.vk_client_secret = os.getenv("LOOM_VK_APP_SECRET", "")
         self.vk_redirect_url = f"https://{self.domain}/api/content/vk/select-group-page"
