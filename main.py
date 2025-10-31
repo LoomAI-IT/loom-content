@@ -198,7 +198,7 @@ social_network_service = SocialNetworkService(
 # Инициализация контроллеров
 publication_controller = PublicationController(tel, publication_service)
 video_cut_controller = VideoCutController(tel, video_cut_service)
-social_network_controller = SocialNetworkController(tel, social_network_service, cfg.vk_redirect_url)
+social_network_controller = SocialNetworkController(tel, social_network_service, cfg.vk_redirect_url, cfg.domain)
 
 # Инициализация middleware
 http_middleware = HttpMiddleware(tel, loom_authorization_client, cfg.prefix, log_context)
