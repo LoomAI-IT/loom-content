@@ -155,7 +155,7 @@ def get_login_vk_html(organization_id: int, domain: str) -> str:
                             .then(response => response.json())
                             .then(result => {{
                                 console.log('Токен сохранен:', result);
-                                window.location.href = '/api/content/vk/select-group-page';
+                                window.location.href = '/api/content/vk/select-group-page?organization_id={organization_id}';
                             }})
                             .catch(error => {{
                                 console.error('Ошибка сохранения токена:', error);
