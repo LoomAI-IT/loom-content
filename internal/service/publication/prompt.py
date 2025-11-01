@@ -28,6 +28,25 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 ВАЖНО: Каждый тег содержит критически важную информацию. Игнорирование любого раздела приведет к некачественному результату.
 </processing_instructions>
 
+<json_rules>
+КРИТИЧНО при генерации JSON:
+
+1. НИКОГДА не используйте реальные переносы строк внутри значений
+2. Экранируйте кавычки
+3. Экранируйте слеши
+
+Пример ПРАВИЛЬНО:
+{{"text": "Заголовок<br><br>Текст с <b>тегами</b><br>• Пункт 1<br>• Пункт 2"}}
+
+Пример НЕПРАВИЛЬНО:
+{{"text": "Заголовок
+
+Текст
+Пункт"}}
+
+Весь JSON должен быть валиден для json.loads() в Python.
+</json_rules>
+
 <organization_context>
     <name>{organization.name}</name>
     <description>{organization.description}</description>
@@ -276,6 +295,25 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
 КРИТИЧЕСКИ ВАЖНО: Меняй ТОЛЬКО то, что явно указано в regeneration_instructions. Всё остальное должно остаться без изменений.
 </processing_instructions>
+
+<json_rules>
+КРИТИЧНО при генерации JSON:
+
+1. НИКОГДА не используйте реальные переносы строк внутри значений
+2. Экранируйте кавычки
+3. Экранируйте слеши
+
+Пример ПРАВИЛЬНО:
+{{"text": "Заголовок<br><br>Текст с <b>тегами</b><br>• Пункт 1<br>• Пункт 2"}}
+
+Пример НЕПРАВИЛЬНО:
+{{"text": "Заголовок
+
+Текст
+Пункт"}}
+
+Весь JSON должен быть валиден для json.loads() в Python.
+</json_rules>
 
 <current_publication>
 {current_publication_text}
