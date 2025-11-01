@@ -276,6 +276,101 @@ ultrathink
         return publication_data
 
     @traced_method()
+    async def test_generate_publication_image(
+            self,
+            publication_text: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
+    ) -> list[str]:
+        category = model.Category(
+            id=-1,
+            organization_id=organization_id,
+            name=name,
+            hint=hint,
+            goal=goal,
+            tone_of_voice=tone_of_voice,
+            brand_rules=brand_rules,
+            creativity_level=creativity_level,
+            audience_segment=audience_segment,
+            len_min=len_min,
+            len_max=len_max,
+            n_hashtags_min=n_hashtags_min,
+            n_hashtags_max=n_hashtags_max,
+            cta_type=cta_type,
+            cta_strategy=cta_strategy,
+            good_samples=good_samples,
+            bad_samples=bad_samples,
+            additional_info=additional_info,
+            prompt_for_image_style=prompt_for_image_style,
+            created_at=datetime.now()
+        )
+        organization = await self.organization_client.get_organization_by_id(category.organization_id)
+
+        if self.environment == "prod":
+            size = "1536x1024"
+            quality = "high"
+        else:
+            # size = "1024x1024"
+            # quality = "low"
+            size = "1536x1024"
+            quality = "high"
+
+        generate_image_system_prompt = await self.prompt_generator.get_generate_image_prompt_system(
+            publication_text,
+            category,
+            organization
+        )
+
+        generate_image_prompt, generate_prompt_cost = await self.anthropic_client.generate_json(
+            history=[
+                {
+                    "role": "user",
+                    "content": """
+<system>
+ultrathink
+<system/>
+
+<user>
+Сделай JSON-промпт для генерации картинки
+</user>
+    """
+                }
+            ],
+            system_prompt=generate_image_system_prompt,
+            llm_model="claude-sonnet-4-5",
+            max_tokens=20000,
+            thinking_tokens=15000,
+        )
+
+        images, generate_cost = await self.openai_client.generate_image(
+            prompt=str(generate_image_prompt),
+            image_model="gpt-image-1",
+            size=size,
+            quality=quality,
+            n=1,
+        )
+
+        images_url = await self._upload_images(images)
+
+        return images_url
+
+    @traced_method()
     async def generate_publication_image(
             self,
             category_id: int,
@@ -306,7 +401,6 @@ ultrathink
                 self.logger.info("Генерация изображения с промптом и файлом")
                 generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
                     prompt,
-                    category.prompt_for_image_style,
                     publication_text,
                     category,
                     organization,
@@ -346,7 +440,6 @@ ultrathink
                 self.logger.info("Генерация изображения с промптом")
                 generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
                     prompt,
-                    category.prompt_for_image_style,
                     publication_text,
                     category,
                     organization,
@@ -385,7 +478,6 @@ ultrathink
         else:
             self.logger.info("Генерация изображения без промпта")
             generate_image_system_prompt = await self.prompt_generator.get_generate_image_prompt_system(
-                category.prompt_for_image_style,
                 publication_text,
                 category,
                 organization
@@ -411,8 +503,6 @@ ultrathink
                 max_tokens=20000,
                 thinking_tokens=15000,
             )
-
-
 
             images, generate_cost = await self.openai_client.generate_image(
                 prompt=str(generate_image_prompt),

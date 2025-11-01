@@ -49,39 +49,31 @@ class PublicationController(interface.IPublicationController):
             self,
             body: TestGeneratePublicationTextBody,
     ) -> JSONResponse:
-        try:
-            text_data = await self.publication_service.test_generate_publication_text(
-                text_reference=body.text_reference,
-                organization_id=body.organization_id,
-                name=body.name,
-                hint=body.hint,
-                goal=body.goal,
-                tone_of_voice=body.tone_of_voice,
-                brand_rules=body.brand_rules,
-                creativity_level=body.creativity_level,
-                audience_segment=body.audience_segment,
-                len_min=body.len_min,
-                len_max=body.len_max,
-                n_hashtags_min=body.n_hashtags_min,
-                n_hashtags_max=body.n_hashtags_max,
-                cta_type=body.cta_type,
-                cta_strategy=body.cta_strategy,
-                good_samples=body.good_samples,
-                bad_samples=body.bad_samples,
-                additional_info=body.additional_info,
-                prompt_for_image_style=body.prompt_for_image_style
-            )
-            return JSONResponse(
-                status_code=200,
-                content=text_data
-            )
-        except common.ErrInsufficientBalance:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "insufficient_balance": True,
-                }
-            )
+        text_data = await self.publication_service.test_generate_publication_text(
+            text_reference=body.text_reference,
+            organization_id=body.organization_id,
+            name=body.name,
+            hint=body.hint,
+            goal=body.goal,
+            tone_of_voice=body.tone_of_voice,
+            brand_rules=body.brand_rules,
+            creativity_level=body.creativity_level,
+            audience_segment=body.audience_segment,
+            len_min=body.len_min,
+            len_max=body.len_max,
+            n_hashtags_min=body.n_hashtags_min,
+            n_hashtags_max=body.n_hashtags_max,
+            cta_type=body.cta_type,
+            cta_strategy=body.cta_strategy,
+            good_samples=body.good_samples,
+            bad_samples=body.bad_samples,
+            additional_info=body.additional_info,
+            prompt_for_image_style=body.prompt_for_image_style
+        )
+        return JSONResponse(
+            status_code=200,
+            content=text_data
+        )
 
     @auto_log()
     @traced_method()
@@ -107,6 +99,38 @@ class PublicationController(interface.IPublicationController):
                     "insufficient_balance": True,
                 }
             )
+
+    @auto_log()
+    @traced_method()
+    async def test_generate_publication_image(
+            self,
+            body: TestGeneratePublicationImageBody,
+    ) -> JSONResponse:
+        images_url = await self.publication_service.test_generate_publication_image(
+            publication_text=body.publication_text,
+            organization_id=body.organization_id,
+            name=body.name,
+            hint=body.hint,
+            goal=body.goal,
+            tone_of_voice=body.tone_of_voice,
+            brand_rules=body.brand_rules,
+            creativity_level=body.creativity_level,
+            audience_segment=body.audience_segment,
+            len_min=body.len_min,
+            len_max=body.len_max,
+            n_hashtags_min=body.n_hashtags_min,
+            n_hashtags_max=body.n_hashtags_max,
+            cta_type=body.cta_type,
+            cta_strategy=body.cta_strategy,
+            good_samples=body.good_samples,
+            bad_samples=body.bad_samples,
+            additional_info=body.additional_info,
+            prompt_for_image_style=body.prompt_for_image_style
+        )
+        return JSONResponse(
+            status_code=200,
+            content=images_url
+        )
 
     @auto_log()
     @traced_method()

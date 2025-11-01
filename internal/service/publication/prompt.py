@@ -797,7 +797,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
     async def get_generate_image_prompt_system(
                 self,
-                prompt_for_image_style: str,
                 publication_text: str,
                 category: model.Category,
                 organization: model.Organization,
@@ -813,7 +812,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     <input_data>
         <image_style>
             Базовый стиль изображения:
-            {prompt_for_image_style}
+            {category.prompt_for_image_style}
         </image_style>
 
         <publication>
@@ -823,19 +822,16 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
 
         <category>
             Рубрика/рубрика публикации:
-            - Название: {category.name if hasattr(category, 'name') else 'N/A'}
-            - Описание: {category.description if hasattr(category, 'description') else 'N/A'}
-            - Тип контента: {category.content_type if hasattr(category, 'content_type') else 'N/A'}
+            - Название: {category.name}
+            - Цель: {category.goal}
+            - Целевая аудитори: {category.audience_segment}
+            - Ton: {category.tone_of_voice}
         </category>
 
         <organization>
             Информация об организации:
-            - Название: {organization.name if hasattr(organization, 'name') else 'N/A'}
-            - Индустрия: {organization.industry if hasattr(organization, 'industry') else 'N/A'}
-            - Описание: {organization.description if hasattr(organization, 'description') else 'N/A'}
-            - Бренд-стиль: {organization.brand_style if hasattr(organization, 'brand_style') else 'N/A'}
-            - Фирменные цвета: {organization.brand_colors if hasattr(organization, 'brand_colors') else 'N/A'}
-            - Целевая аудитория: {organization.target_audience if hasattr(organization, 'target_audience') else 'N/A'}
+            - Название: {organization.name}
+            - Описание: {organization.description}
         </organization>
     </input_data>
 
@@ -1425,7 +1421,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         ФИНАЛЬНОЕ НАПОМИНАНИЕ:
 
         Вы получили:
-        - Стиль: "{prompt_for_image_style}"
+        - Стиль: "{category.prompt_for_image_style}"
         - Текст публикации: "{publication_text}"
         - Рубрика: {category.name if hasattr(category, 'name') else 'N/A'}
         - Организация: {organization.name if hasattr(organization, 'name') else 'N/A'}
@@ -1445,7 +1441,6 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     async def get_generate_image_with_user_prompt_system(
             self,
             user_prompt: str,
-            prompt_for_image_style: str,
             publication_text: str,
             category: model.Category,
             organization: model.Organization,
@@ -1487,29 +1482,31 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
     {reference_section}
         <image_style>
             Базовый стиль изображения (используйте как отправную точку):
-            {prompt_for_image_style}
+            {category.prompt_for_image_style}
         </image_style>
 
         <publication>
             Контекст публикации (для понимания цели и аудитории):
             {publication_text}
         </publication>
+        
+        <publication>
+            Текст публикации, которую нужно проиллюстрировать:
+            {publication_text}
+        </publication>
 
         <category>
-            Рубрика публикации:
-            - Название: {category.name if hasattr(category, 'name') else 'N/A'}
-            - Описание: {category.description if hasattr(category, 'description') else 'N/A'}
-            - Тип контента: {category.content_type if hasattr(category, 'content_type') else 'N/A'}
+            Рубрика/рубрика публикации:
+            - Название: {category.name}
+            - Цель: {category.goal}
+            - Целевая аудитори: {category.audience_segment}
+            - Ton: {category.tone_of_voice}
         </category>
 
         <organization>
-            Информация об организации (для соблюдения брендинга):
-            - Название: {organization.name if hasattr(organization, 'name') else 'N/A'}
-            - Индустрия: {organization.industry if hasattr(organization, 'industry') else 'N/A'}
-            - Описание: {organization.description if hasattr(organization, 'description') else 'N/A'}
-            - Бренд-стиль: {organization.brand_style if hasattr(organization, 'brand_style') else 'N/A'}
-            - Фирменные цвета: {organization.brand_colors if hasattr(organization, 'brand_colors') else 'N/A'}
-            - Целевая аудитория: {organization.target_audience if hasattr(organization, 'target_audience') else 'N/A'}
+            Информация об организации:
+            - Название: {organization.name}
+            - Описание: {organization.description}
         </organization>
     </input_data>
 
@@ -2342,7 +2339,7 @@ class PublicationPromptGenerator(interface.IPublicationPromptGenerator):
         Вы получили:
         - USER PROMPT (ГЛАВНОЕ): "{user_prompt}"
         - Референсная картинка: {"ДА - проанализируйте её" if has_reference_image else "НЕТ"}
-        - Стиль (справочно): "{prompt_for_image_style}"
+        - Стиль (справочно): "{category.prompt_for_image_style}"
         - Текст публикации: "{publication_text}"
         - Организация: {organization.name if hasattr(organization, 'name') else 'N/A'}
 

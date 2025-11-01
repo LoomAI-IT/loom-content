@@ -35,6 +35,11 @@ class IPublicationController(Protocol):
     ) -> JSONResponse:
         pass
 
+    async def test_generate_publication_image(
+            self,
+            body: TestGeneratePublicationImageBody,
+    ) -> JSONResponse: pass
+
     @abstractmethod
     async def generate_publication_image(
             self,
@@ -257,6 +262,30 @@ class IPublicationService(Protocol):
             publication_text: str,
             prompt: str = None
     ) -> dict: pass
+
+    @abstractmethod
+    async def test_generate_publication_image(
+            self,
+            publication_text: str,
+            organization_id: int,
+            name: str,
+            hint: str,
+            goal: str,
+            tone_of_voice: list[str],
+            brand_rules: list[str],
+            creativity_level: int,
+            audience_segment: str,
+            len_min: int,
+            len_max: int,
+            n_hashtags_min: int,
+            n_hashtags_max: int,
+            cta_type: str,
+            cta_strategy: dict,
+            good_samples: list[dict],
+            bad_samples: list[dict],
+            additional_info: list[dict],
+            prompt_for_image_style: str
+    ) -> list[str]: pass
 
     @abstractmethod
     async def generate_publication_image(
@@ -822,7 +851,6 @@ class IPublicationPromptGenerator(Protocol):
     @abstractmethod
     async def get_generate_image_prompt_system(
             self,
-            prompt_for_image_style: str,
             publication_text: str,
             category: model.Category,
             organization: model.Organization,
@@ -833,7 +861,6 @@ class IPublicationPromptGenerator(Protocol):
     async def get_generate_image_with_user_prompt_system(
             self,
             user_prompt: str,
-            prompt_for_image_style: str,
             publication_text: str,
             category: model.Category,
             organization: model.Organization,

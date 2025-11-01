@@ -65,6 +65,14 @@ def include_publication_handlers(
         methods=["POST"],
         tags=["Publication"],
     )
+
+    app.add_api_route(
+        prefix + "/publication/image/test-generate",
+        publication_controller.test_generate_publication_image,
+        methods=["POST"],
+        tags=["Publication"],
+    )
+
     app.add_api_route(
         prefix + "/publication/image/generate",
         publication_controller.generate_publication_image,
