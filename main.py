@@ -215,7 +215,7 @@ app = NewHTTP(
 if __name__ == "__main__":
     if args.mode == "http":
         if cfg.environment == "prod":
-            workers = 2
+            workers = 1
         else:
             workers = 1
 
