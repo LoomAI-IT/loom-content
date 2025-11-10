@@ -71,24 +71,6 @@ class SocialNetworkService(interface.ISocialNetworkService):
         await self.repo.delete_telegram(organization_id)
 
     @traced_method()
-    async def create_vkontakte(
-            self,
-            organization_id: int,
-            access_token: str,
-            refresh_token: str,
-            device_id: str,
-            user_id: int
-    ) -> int:
-        vkontakte_id = await self.repo.create_vkontakte(
-            organization_id=organization_id,
-            access_token=access_token,
-            refresh_token=refresh_token,
-            device_id=device_id,
-            user_id=user_id
-        )
-        return vkontakte_id
-
-    @traced_method()
     async def update_vkontakte(
             self,
             organization_id: int,
@@ -144,7 +126,7 @@ class SocialNetworkService(interface.ISocialNetworkService):
 
         # Если записи нет - создаём, если есть - обновляем
         if not existing_vk_records:
-            await self.create_vkontakte(
+            vkontakte_id = await self.repo.create_vkontakte(
                 organization_id=organization_id,
                 access_token=access_token,
                 refresh_token=refresh_token,
