@@ -3,7 +3,8 @@ import io
 from abc import abstractmethod
 from typing import Protocol, Dict, List
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import Request
 
 from internal import model
 from internal.controller.http.handler.social_network.model import *
@@ -61,6 +62,9 @@ class ISocialNetworkController(Protocol):
     @abstractmethod
     async def get_social_networks_by_organization(self, organization_id: int) -> JSONResponse:
         pass
+
+    @abstractmethod
+    async def vk_oauth_callback(self, request: Request) -> HTMLResponse: pass
 
 
 class ISocialNetworkService(Protocol):

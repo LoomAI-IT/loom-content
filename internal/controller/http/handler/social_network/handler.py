@@ -1,6 +1,7 @@
 from opentelemetry.trace import Status, StatusCode, SpanKind
 
-from fastapi.responses import JSONResponse
+from fastapi import Request
+from fastapi.responses import JSONResponse, HTMLResponse
 
 from internal import interface
 from internal.controller.http.handler.social_network.model import *
@@ -147,3 +148,118 @@ class SocialNetworkController(interface.ISocialNetworkController):
                 }
             }
         )
+
+    # VK OAUTH CALLBACK
+    @auto_log()
+    @traced_method()
+    async def vk_oauth_callback(self, request: Request) -> HTMLResponse:
+        """
+        Заглушка для VK OAuth callback.
+        Показывает все параметры, которые VK отправляет на redirect_uri.
+        """
+        # Получаем все query параметры
+        query_params = dict(request.query_params)
+
+        # Логируем все входящие параметры
+        self.logger.info(f"VK OAuth callback received with params: {query_params}")
+
+        # Создаем HTML для отображения параметров
+        html_content = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>VK OAuth Callback - Debug</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    max-width: 800px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                }
+                .container {
+                    background-color: white;
+                    border-radius: 8px;
+                    padding: 30px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                h1 {
+                    color: #333;
+                    border-bottom: 2px solid #4285f4;
+                    padding-bottom: 10px;
+                }
+                .param {
+                    margin: 15px 0;
+                    padding: 10px;
+                    background-color: #f8f9fa;
+                    border-left: 4px solid #4285f4;
+                    border-radius: 4px;
+                }
+                .param-name {
+                    font-weight: bold;
+                    color: #4285f4;
+                    margin-bottom: 5px;
+                }
+                .param-value {
+                    font-family: monospace;
+                    color: #333;
+                    word-break: break-all;
+                }
+                .empty {
+                    color: #999;
+                    font-style: italic;
+                }
+                .success {
+                    color: #34a853;
+                }
+                .error {
+                    color: #ea4335;
+                    background-color: #fce8e6;
+                    border-left-color: #ea4335;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>VK OAuth Callback - Полученные параметры</h1>
+        """
+
+        if not query_params:
+            html_content += '<p class="empty">Параметры не получены</p>'
+        else:
+            # Проверяем наличие ошибки
+            if 'error' in query_params:
+                html_content += f'''
+                <div class="param error">
+                    <div class="param-name">ERROR</div>
+                    <div class="param-value">{query_params.get('error', 'unknown')}</div>
+                </div>
+                '''
+                if 'error_description' in query_params:
+                    html_content += f'''
+                    <div class="param error">
+                        <div class="param-name">ERROR DESCRIPTION</div>
+                        <div class="param-value">{query_params.get('error_description', '')}</div>
+                    </div>
+                    '''
+
+            # Отображаем все параметры
+            for key, value in query_params.items():
+                css_class = "param"
+                if key == 'code':
+                    css_class += " success"
+
+                html_content += f'''
+                <div class="{css_class}">
+                    <div class="param-name">{key.upper()}</div>
+                    <div class="param-value">{value}</div>
+                </div>
+                '''
+
+        html_content += """
+            </div>
+        </body>
+        </html>
+        """
+
+        return HTMLResponse(content=html_content, status_code=200)

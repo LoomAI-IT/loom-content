@@ -419,6 +419,14 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
+    # VK OAuth Callback (заглушка для отладки)
+    app.add_api_route(
+        prefix + "/social-network/vkontakte/callback",
+        social_network_controller.vk_oauth_callback,
+        methods=["GET"],
+        tags=["SocialNetwork"]
+    )
+
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
 
     # Получение всех социальных сетей по организации
