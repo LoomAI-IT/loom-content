@@ -16,6 +16,7 @@ from pkg.client.external.telegram.client import LTelegramClient
 from pkg.client.external.vizard.client import VizardClient
 from pkg.client.external.openai.client import OpenAIClient
 from pkg.client.external.googleai.client import GoogleAIClient
+from pkg.client.external.vk.client import VkClient
 
 from pkg.client.internal.loom_authorization.client import LoomAuthorizationClient
 from pkg.client.internal.loom_organization.client import LoomOrganizationClient
@@ -143,6 +144,12 @@ telegram_client = LTelegramClient(
     cfg.tg_api_hash,
 )
 
+vk_client = VkClient(
+    cfg.vk_app_id,
+    cfg.vk_app_secret,
+    cfg.vk_redirect_uri
+)
+
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
@@ -184,6 +191,7 @@ social_network_service = SocialNetworkService(
     tel=tel,
     repo=social_network_repo,
     telegram_client=telegram_client,
+    vk_client=vk_client,
 )
 
 # Инициализация контроллеров
