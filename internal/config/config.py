@@ -67,8 +67,8 @@ class Config:
         self.loom_tg_bot_host = os.getenv("LOOM_TG_BOT_CONTAINER_NAME", "localhost")
         self.loom_tg_bot_port = os.getenv("LOOM_TG_BOT_PORT", "8003")
 
-        self.vk_app_id = os.getenv("VK_APP_ID", "")
-        self.vk_app_secret = os.getenv("VK_APP_ID", "")
+        self.vk_app_id = os.getenv("LOOM_VK_APP_ID", "")
+        self.vk_app_secret = os.getenv("LOOM_VK_APP_SECRET", "")
         self.vk_redirect_uri = f"https://{self.domain}{self.prefix}/social-network/vkontakte"
 
         # Vizard configuration
