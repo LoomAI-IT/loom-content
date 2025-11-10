@@ -149,18 +149,10 @@ class SocialNetworkController(interface.ISocialNetworkController):
             }
         )
 
-    # VK OAUTH CALLBACK
     @auto_log()
     @traced_method()
     async def vk_oauth_callback(self, request: Request) -> HTMLResponse:
-        """
-        Заглушка для VK OAuth callback.
-        Показывает все параметры, которые VK отправляет на redirect_uri.
-        """
-        # Получаем все query параметры
         query_params = dict(request.query_params)
-
-        # Логируем все входящие параметры
         self.logger.info(f"VK OAuth callback received with params: {query_params}")
 
         # Создаем HTML для отображения параметров
