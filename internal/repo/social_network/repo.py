@@ -75,14 +75,34 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
         await self.db.delete(delete_telegram, args)
 
     @traced_method()
-    async def create_vkontakte(
+    async def update_vkontakte(
             self,
-            organization_id: int
-    ) -> int:
-        args = {'organization_id': organization_id}
-        vkontakte_id = await self.db.insert(create_vkontakte, args)
+            organization_id: int,
+            access_token: str = None,
+            refresh_token: str = None,
+            device_id: str = None,
+            user_id: int = None,
+            vk_group_id: int = None,
+            vk_group_name: str = None
+    ):
+        args = {
+            'organization_id': organization_id,
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'device_id': device_id,
+            'user_id': user_id,
+            'vk_group_id': vk_group_id,
+            'vk_group_name': vk_group_name
+        }
+        await self.db.update(update_vkontakte, args)
 
-        return vkontakte_id
+    @traced_method()
+    async def get_vkontakte_by_id(self, vkontakte_id: int) -> list[model.Vkontakte]:
+        args = {'vkontakte_id': vkontakte_id}
+        rows = await self.db.select(get_vkontakte_by_id, args)
+        if rows:
+            rows = model.Vkontakte.serialize(rows)
+        return rows
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
 

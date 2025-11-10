@@ -192,7 +192,15 @@ create_vkontakte_table = """
 CREATE TABLE IF NOT EXISTS vkontakte (
     id SERIAL PRIMARY KEY,
     organization_id INTEGER NOT NULL,
+    
     autoselect BOOLEAN DEFAULT TRUE,
+    access_token TEXT,
+    refresh_token TEXT,
+    
+    device_id TEXT,
+    user_id INTEGER,
+    vk_group_id INTEGER,
+    vk_group_name TEXT,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

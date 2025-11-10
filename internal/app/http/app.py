@@ -411,13 +411,21 @@ def include_social_network_handlers(
         tags=["SocialNetwork"]
     )
 
-    # Создание VKontakt
+    # Создание VKontakte
 
-    # VK OAuth Callback (заглушка для отладки)
+    # VK OAuth Callback
     app.add_api_route(
         prefix + "/social-network/vkontakte",
         social_network_controller.vk_oauth_callback,
         methods=["GET"],
+        tags=["SocialNetwork"]
+    )
+
+    # VK Group Selection
+    app.add_api_route(
+        prefix + "/social-network/vkontakte/select-group",
+        social_network_controller.vk_select_group,
+        methods=["POST"],
         tags=["SocialNetwork"]
     )
 

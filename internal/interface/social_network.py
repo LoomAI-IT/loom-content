@@ -52,9 +52,9 @@ class ISocialNetworkController(Protocol):
     ) -> JSONResponse: pass
 
     @abstractmethod
-    async def create_vkontakte(
+    async def vk_select_group(
             self,
-            body: CreateSocialNetworkBody,
+            body: 'VkSelectGroupBody',
     ) -> JSONResponse:
         pass
 
@@ -113,10 +113,25 @@ class ISocialNetworkService(Protocol):
     ): pass
 
     @abstractmethod
-    async def create_vkontakte(
+    async def update_vkontakte(
             self,
-            organization_id: int
-    ) -> int:
+            organization_id: int,
+            access_token: str = None,
+            refresh_token: str = None,
+            device_id: str = None,
+            user_id: int = None,
+            vk_group_id: int = None,
+            vk_group_name: str = None
+    ):
+        pass
+
+    @abstractmethod
+    async def process_vk_oauth_callback(
+            self,
+            code: str,
+            device_id: str,
+            state_token: str
+    ) -> tuple[int, list]:
         pass
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
@@ -168,10 +183,20 @@ class ISocialNetworkRepo(Protocol):
     ): pass
 
     @abstractmethod
-    async def create_vkontakte(
+    async def update_vkontakte(
             self,
-            organization_id: int
-    ) -> int:
+            organization_id: int,
+            access_token: str = None,
+            refresh_token: str = None,
+            device_id: str = None,
+            user_id: int = None,
+            vk_group_id: int = None,
+            vk_group_name: str = None
+    ):
+        pass
+
+    @abstractmethod
+    async def get_vkontakte_by_id(self, vkontakte_id: int) -> list[model.Vkontakte]:
         pass
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ

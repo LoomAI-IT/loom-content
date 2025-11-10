@@ -94,6 +94,12 @@ class Vkontakte:
     id: int
     organization_id: int
     autoselect: bool
+    access_token: str
+    refresh_token: str
+    device_id: str
+    user_id: int
+    vk_group_id: int
+    vk_group_name: str
 
     created_at: datetime
 
@@ -104,6 +110,12 @@ class Vkontakte:
                 id=row.id,
                 organization_id=row.organization_id,
                 autoselect=row.autoselect,
+                access_token=row.access_token,
+                refresh_token=row.refresh_token,
+                device_id=row.device_id,
+                user_id=row.user_id,
+                vk_group_id=row.vk_group_id,
+                vk_group_name=row.vk_group_name,
                 created_at=row.created_at,
             )
             for row in rows
@@ -114,5 +126,11 @@ class Vkontakte:
             "id": self.id,
             "organization_id": self.organization_id,
             "autoselect": self.autoselect,
+            "access_token": self.access_token,
+            "refresh_token": self.refresh_token,
+            "device_id": self.device_id,
+            "user_id": self.user_id,
+            "vk_group_id": self.vk_group_id,
+            "vk_group_name": self.vk_group_name,
             "created_at": self.created_at.isoformat()
         }

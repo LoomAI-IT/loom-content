@@ -15,3 +15,9 @@ class UpdateTgBody(BaseModel):
 
 class CreateSocialNetworkBody(BaseModel):
     organization_id: int
+
+
+class VkSelectGroupBody(BaseModel):
+    organization_id: int
+    group_id: int
+    group_name: str

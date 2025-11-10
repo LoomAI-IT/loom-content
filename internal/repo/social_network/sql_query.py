@@ -46,14 +46,21 @@ DELETE FROM telegrams
 WHERE organization_id = :organization_id;
 """
 
-create_vkontakte = """
-INSERT INTO vkontakte (
-    organization_id
-)
-VALUES (
-    :organization_id
-)
-RETURNING id;
+update_vkontakte = """
+UPDATE vkontakte
+SET
+    access_token = COALESCE(:access_token, access_token),
+    refresh_token = COALESCE(:refresh_token, refresh_token),
+    device_id = COALESCE(:device_id, device_id),
+    user_id = COALESCE(:user_id, user_id),
+    vk_group_id = COALESCE(:vk_group_id, vk_group_id),
+    vk_group_name = COALESCE(:vk_group_name, vk_group_name)
+WHERE organization_id = :organization_id;
+"""
+
+get_vkontakte_by_id = """
+SELECT * FROM vkontakte
+WHERE id = :vkontakte_id;
 """
 
 # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
