@@ -71,6 +71,24 @@ class SocialNetworkService(interface.ISocialNetworkService):
         await self.repo.delete_telegram(organization_id)
 
     @traced_method()
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+            refresh_token: str,
+            device_id: str,
+            user_id: int
+    ) -> int:
+        vkontakte_id = await self.repo.create_vkontakte(
+            organization_id=organization_id,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            device_id=device_id,
+            user_id=user_id
+        )
+        return vkontakte_id
+
+    @traced_method()
     async def update_vkontakte(
             self,
             organization_id: int,
@@ -121,14 +139,26 @@ class SocialNetworkService(interface.ISocialNetworkService):
         refresh_token = token_result.get('refresh_token')
         user_id = token_result.get('user_id')
 
-        # Сохраняем токены в БД (без группы пока)
-        await self.update_vkontakte(
-            organization_id=organization_id,
-            access_token=access_token,
-            refresh_token=refresh_token,
-            device_id=device_id,
-            user_id=user_id
-        )
+        # Проверяем существование записи VKontakte для организации
+        existing_vk_records = await self.repo.get_vkontakte_by_organization(organization_id)
+
+        # Если записи нет - создаём, если есть - обновляем
+        if not existing_vk_records:
+            await self.create_vkontakte(
+                organization_id=organization_id,
+                access_token=access_token,
+                refresh_token=refresh_token,
+                device_id=device_id,
+                user_id=user_id
+            )
+        else:
+            await self.update_vkontakte(
+                organization_id=organization_id,
+                access_token=access_token,
+                refresh_token=refresh_token,
+                device_id=device_id,
+                user_id=user_id
+            )
 
         # Получаем список групп пользователя
         groups = await self.vk_client.get_user_groups(

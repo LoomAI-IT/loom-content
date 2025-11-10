@@ -51,6 +51,28 @@ class SocialNetworkRepo(interface.ISocialNetworkRepo):
         return telegram_id
 
     @traced_method()
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+            refresh_token: str,
+            device_id: str,
+            user_id: int,
+            autoselect: bool = True
+    ) -> int:
+        args = {
+            'organization_id': organization_id,
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'device_id': device_id,
+            'user_id': user_id,
+            'autoselect': autoselect,
+        }
+        vkontakte_id = await self.db.insert(create_vkontakte, args)
+
+        return vkontakte_id
+
+    @traced_method()
     async def update_telegram(
             self,
             organization_id: int,

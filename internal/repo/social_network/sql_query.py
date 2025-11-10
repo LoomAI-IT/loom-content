@@ -33,6 +33,26 @@ VALUES (
 RETURNING id;
 """
 
+create_vkontakte = """
+INSERT INTO vkontakte (
+    organization_id,
+    access_token,
+    refresh_token,
+    device_id,
+    user_id,
+    autoselect
+)
+VALUES (
+    :organization_id,
+    :access_token,
+    :refresh_token,
+    :device_id,
+    :user_id,
+    :autoselect
+)
+RETURNING id;
+"""
+
 update_telegram = """
 UPDATE telegrams
 SET 

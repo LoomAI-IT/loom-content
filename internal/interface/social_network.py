@@ -120,6 +120,17 @@ class ISocialNetworkService(Protocol):
     ): pass
 
     @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+            refresh_token: str,
+            device_id: str,
+            user_id: int
+    ) -> int:
+        pass
+
+    @abstractmethod
     async def update_vkontakte(
             self,
             organization_id: int,
@@ -179,6 +190,18 @@ class ISocialNetworkRepo(Protocol):
             organization_id: int,
             tg_channel_username: str,
             autoselect: bool
+    ) -> int:
+        pass
+
+    @abstractmethod
+    async def create_vkontakte(
+            self,
+            organization_id: int,
+            access_token: str,
+            refresh_token: str,
+            device_id: str,
+            user_id: int,
+            autoselect: bool = True
     ) -> int:
         pass
 
