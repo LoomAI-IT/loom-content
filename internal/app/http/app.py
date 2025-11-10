@@ -413,6 +413,14 @@ def include_social_network_handlers(
 
     # Создание VKontakte
 
+    # VK Get Auth URL
+    app.add_api_route(
+        prefix + "/social-network/vkontakte/auth-url/{organization_id}",
+        social_network_controller.get_vk_auth_url,
+        methods=["GET"],
+        tags=["SocialNetwork"]
+    )
+
     # VK OAuth Callback
     app.add_api_route(
         prefix + "/social-network/vkontakte",

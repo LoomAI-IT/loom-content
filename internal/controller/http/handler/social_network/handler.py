@@ -188,6 +188,22 @@ class SocialNetworkController(interface.ISocialNetworkController):
             }
         )
 
+    @auto_log()
+    @traced_method()
+    async def get_vk_auth_url(
+            self,
+            organization_id: int
+    ) -> JSONResponse:
+        vk_auth_url = await self.social_network_service.get_vk_auth_url(
+            organization_id=organization_id
+        )
+        return JSONResponse(
+            status_code=200,
+            content={
+                "vk_auth_url": vk_auth_url
+            }
+        )
+
     def _render_group_selection_page(self, organization_id: int, groups: list) -> HTMLResponse:
         """Рендерит страницу выбора группы VK"""
         groups_html = ""

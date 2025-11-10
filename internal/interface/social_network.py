@@ -58,6 +58,13 @@ class ISocialNetworkController(Protocol):
     ) -> JSONResponse:
         pass
 
+    @abstractmethod
+    async def get_vk_auth_url(
+            self,
+            organization_id: int
+    ) -> JSONResponse:
+        pass
+
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @abstractmethod
     async def get_social_networks_by_organization(self, organization_id: int) -> JSONResponse:
@@ -132,6 +139,13 @@ class ISocialNetworkService(Protocol):
             device_id: str,
             state_token: str
     ) -> tuple[int, list]:
+        pass
+
+    @abstractmethod
+    async def get_vk_auth_url(
+            self,
+            organization_id: int
+    ) -> str:
         pass
 
     # ПОЛУЧЕНИЕ СОЦИАЛЬНЫХ СЕТЕЙ

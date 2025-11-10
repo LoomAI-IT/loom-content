@@ -139,6 +139,16 @@ class SocialNetworkService(interface.ISocialNetworkService):
         return organization_id, groups
 
     @traced_method()
+    async def get_vk_auth_url(
+            self,
+            organization_id: int
+    ) -> str:
+        auth_url, state = self.vk_client.get_user_auth_url(
+            data={"organization_id": organization_id}
+        )
+        return auth_url
+
+    @traced_method()
     async def get_social_networks_by_organization(
             self,
             organization_id: int
