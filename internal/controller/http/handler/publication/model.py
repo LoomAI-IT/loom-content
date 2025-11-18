@@ -111,6 +111,10 @@ class UpdateCategoryBody(BaseModel):
     prompt_for_image_style: str = None
 
 
+class GenerateCategoriesBody(BaseModel):
+    organization_id: int
+
+
 # РУБРИКИ ДЛЯ АВТОПОСТИНГА
 class CreateAutopostingCategoryBody(BaseModel):
     organization_id: int

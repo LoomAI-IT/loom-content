@@ -431,6 +431,28 @@ class PublicationController(interface.IPublicationController):
             }
         )
 
+    @auto_log()
+    @traced_method()
+    async def generate_categories(
+            self,
+            body: GenerateCategoriesBody
+    ) -> JSONResponse:
+        try:
+            categories = await self.publication_service.generate_categories(
+                organization_id=body.organization_id
+            )
+            return JSONResponse(
+                status_code=200,
+                content={"categories": categories}
+            )
+        except common.ErrInsufficientBalance:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "insufficient_balance": True,
+                }
+            )
+
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
     @auto_log()
     @traced_method()
