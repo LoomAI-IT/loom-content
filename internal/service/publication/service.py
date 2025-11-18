@@ -771,11 +771,6 @@ ultrathink
             organization_id: int
     ) -> list[dict]:
         organization = await self.organization_client.get_organization_by_id(organization_id)
-        organization_cost_multiplier = await self.organization_client.get_cost_multiplier(organization.id)
-
-        if self._check_balance(organization, organization_cost_multiplier, "generate_text"):
-            self.logger.info("Недостаточно средств на балансе")
-            raise common.ErrInsufficientBalance()
 
         system_prompt = await self.prompt_generator.get_generate_categories_system_prompt(organization)
 
@@ -802,11 +797,6 @@ ultrathink
             thinking_tokens=20000,
             llm_model="claude-sonnet-4-5",
             enable_web_search=True
-        )
-
-        await self._debit_organization_balance(
-            organization_id,
-            generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
 
         created_categories = []
