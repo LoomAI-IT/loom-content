@@ -146,6 +146,12 @@ class IPublicationController(Protocol):
     async def delete_category(self, category_id: int) -> JSONResponse:
         pass
 
+    @abstractmethod
+    async def generate_categories(
+            self,
+            body: GenerateCategoriesBody
+    ) -> JSONResponse: pass
+
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
     @abstractmethod
     async def create_autoposting_category(
@@ -405,6 +411,12 @@ class IPublicationService(Protocol):
     @abstractmethod
     async def delete_category(self, category_id: int) -> None:
         pass
+
+    @abstractmethod
+    async def generate_categories(
+            self,
+            organization_id: int
+    ) -> list[dict]: pass
 
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
     @abstractmethod
@@ -865,3 +877,9 @@ class IPublicationPromptGenerator(Protocol):
             publication_text: str
     ) -> str:
         pass
+
+    @abstractmethod
+    async def get_generate_categories_system_prompt(
+            self,
+            organization: model.Organization
+    ) -> str: pass

@@ -766,6 +766,67 @@ ultrathink
         await self.repo.delete_publication_by_category_id(category_id)
 
     @traced_method()
+    async def generate_categories(
+            self,
+            organization_id: int
+    ) -> list[dict]:
+        organization = await self.organization_client.get_organization_by_id(organization_id)
+
+        system_prompt = await self.prompt_generator.get_generate_categories_system_prompt(organization)
+
+        categories_data, generate_cost = await self.anthropic_client.generate_json(
+            history=[
+                {
+                    "role": "user",
+                    "content": """
+<system>
+Очень хорошо проанализируй организацию, используй web_search для изучения ниши
+Создай 2 профессиональные рубрики с учетом всех требований из промпта
+
+ultrathink
+</system>
+
+<user>
+Создай 2 рубрики для организации
+</user>
+                    """
+                }
+            ],
+            system_prompt=system_prompt,
+            max_tokens=25000,
+            thinking_tokens=20000,
+            llm_model="claude-sonnet-4-5",
+            enable_web_search=True
+        )
+
+        created_categories = []
+        for category in categories_data["categories"]:
+            category_id = await self.create_category(
+                organization_id=organization_id,
+                name=category["name"],
+                hint=category["hint"],
+                goal=category["goal"],
+                tone_of_voice=category["tone_of_voice"],
+                brand_rules=category["brand_rules"],
+                creativity_level=category["creativity_level"],
+                audience_segment=category["audience_segment"],
+                len_min=category["len_min"],
+                len_max=category["len_max"],
+                n_hashtags_min=category["n_hashtags_min"],
+                n_hashtags_max=category["n_hashtags_max"],
+                cta_type=category["cta_type"],
+                cta_strategy=category["cta_strategy"],
+                good_samples=category["good_samples"],
+                bad_samples=category["bad_samples"],
+                additional_info=category["additional_info"],
+                prompt_for_image_style=category["prompt_for_image_style"]
+            )
+            category["id"] = category_id
+            created_categories.append(category)
+
+        return created_categories
+
+    @traced_method()
     async def create_autoposting_category(
             self,
             organization_id: int,

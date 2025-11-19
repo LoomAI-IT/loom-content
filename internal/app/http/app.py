@@ -197,6 +197,14 @@ def include_publication_handlers(
         tags=["Category"]
     )
 
+    # Генерация рубрик для организации
+    app.add_api_route(
+        prefix + "/publication/categories/generate",
+        publication_controller.generate_categories,
+        methods=["POST"],
+        tags=["Category"]
+    )
+
     # РУБРИКИ ДЛЯ АВТОПОСТИНГА
 
     # Создание рубрики для автопостинга
