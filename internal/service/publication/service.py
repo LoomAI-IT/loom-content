@@ -1160,6 +1160,7 @@ ultrathink
         result_image_data, result_text = await self.googleai_client.edit_image(
             image_data=image_content,
             prompt=prompt,
+            aspect_ratio="16:9",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
@@ -1195,6 +1196,7 @@ ultrathink
         result_image_data, result_text = await self.googleai_client.combine_images(
             images_data=images_data,
             prompt=prompt,
+            aspect_ratio="16:9",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
