@@ -39,7 +39,7 @@ class GoogleAIClient(interface.GoogleAIClient):
                 }
             )
 
-        self.model_name = "gemini-3-pro-preview-image"
+        self.model_name = "gemini-3-pro-image-preview"
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"
 
     async def close(self):
