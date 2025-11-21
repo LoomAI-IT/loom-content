@@ -11,6 +11,22 @@ from internal.common.error import ErrNoImageData
 from pkg.trace_wrapper import traced_method
 
 
+MODEL_PRICING = {
+    "gemini-3-pro-image-preview": {
+        "input_text_per_1m": 2.00,
+        "input_image": 0.0011,
+        "output_text_per_1m": 12.00,
+        "output_image": 0.134,
+    },
+    "gemini-2.5-flash-image": {
+        "input_text_per_1m": 0.30,
+        "input_image": None,
+        "output_text_per_1m": 2.50,
+        "output_image": 0.039,
+    },
+}
+
+
 class GoogleAIClient(interface.GoogleAIClient):
     def __init__(
             self,
@@ -39,7 +55,6 @@ class GoogleAIClient(interface.GoogleAIClient):
                 }
             )
 
-        self.model_name = "gemini-3-pro-image-preview"
         self.base_url = "https://generativelanguage.googleapis.com/v1beta"
 
     async def close(self):
@@ -62,28 +77,43 @@ class GoogleAIClient(interface.GoogleAIClient):
 
         return base64_image, mime_type
 
-    def _calculate_cost(self, result: dict, input_images_count: int = 0) -> dict:
+    def _calculate_cost(self, result: dict, model_name: str, input_images_count: int = 0) -> dict:
         usage = result.get('usageMetadata', {})
         self.logger.debug("Gemini usage", {"usage": str(usage)})
 
-        # Input text: $2/1M tokens
+        pricing = MODEL_PRICING.get(model_name)
+
+        # Input text
         input_text_tokens = 0
         for detail in usage.get('promptTokensDetails', []):
             if detail.get('modality') == 'TEXT':
                 input_text_tokens = detail.get('tokenCount', 0)
-        input_text_cost = input_text_tokens / 1_000_000 * 2.00
+        input_text_cost = input_text_tokens / 1_000_000 * pricing["input_text_per_1m"]
 
-        # Input images: $0.067/image
-        input_images_cost = input_images_count * 0.067
+        # Input images
+        if pricing["input_image"] is not None:
+            input_images_cost = input_images_count * pricing["input_image"]
+        else:
+            # по токенам (для flash)
+            input_image_tokens = 0
+            for detail in usage.get('promptTokensDetails', []):
+                if detail.get('modality') == 'IMAGE':
+                    input_image_tokens = detail.get('tokenCount', 0)
+            input_images_cost = input_image_tokens / 1_000_000 * pricing["input_text_per_1m"]
 
-        # Output text/thinking: $12/1M tokens
+        # Output text/thinking
         thoughts_tokens = usage.get('thoughtsTokenCount', 0)
-        output_text_cost = thoughts_tokens / 1_000_000 * 12.00
+        output_text_tokens = 0
+        for detail in usage.get('candidatesTokensDetails', []):
+            if detail.get('modality') == 'TEXT':
+                output_text_tokens = detail.get('tokenCount', 0)
+        output_text_cost = (output_text_tokens + thoughts_tokens) / 1_000_000 * pricing["output_text_per_1m"]
 
-        output_images_cost = 0.134
+        # Output image
+        output_images_cost = pricing["output_image"]
 
         total_cost = round(input_text_cost + input_images_cost + output_text_cost + output_images_cost, 6)
-        self.logger.debug("Gemini cost", {"total_cost": f"${total_cost}"})
+        self.logger.debug("Gemini cost", {"model": model_name, "total_cost": f"${total_cost}"})
 
         return {"total_cost": total_cost}
 
@@ -92,9 +122,10 @@ class GoogleAIClient(interface.GoogleAIClient):
             parts: list,
             aspect_ratio: Optional[str] = None,
             response_modalities: Optional[list[str]] = None,
-            input_images_count: int = 0
+            input_images_count: int = 0,
+            model_name: Optional[str] = None
     ) -> tuple[bytes, dict]:
-        """Базовый метод для генерации контента"""
+
         payload: dict = {
             "contents": [{"parts": parts}]
         }
@@ -110,7 +141,7 @@ class GoogleAIClient(interface.GoogleAIClient):
         if config:
             payload['generationConfig'] = config
 
-        url = f"{self.base_url}/models/{self.model_name}:generateContent"
+        url = f"{self.base_url}/models/{model_name}:generateContent"
         response = await self.http_client.post(
             url,
             json=payload,
@@ -134,7 +165,7 @@ class GoogleAIClient(interface.GoogleAIClient):
             self.logger.warning("Ответ Gemini без изображения", result)
             raise ErrNoImageData()
 
-        return result_image_data, self._calculate_cost(result, input_images_count)
+        return result_image_data, self._calculate_cost(result, model_name, input_images_count)
 
     @traced_method(SpanKind.CLIENT)
     async def edit_image(
@@ -142,14 +173,15 @@ class GoogleAIClient(interface.GoogleAIClient):
             image_data: bytes,
             prompt: str,
             aspect_ratio: str = None,
-            response_modalities: list[str] = None
+            response_modalities: list[str] = None,
+            model_name: str = None
     ) -> tuple[bytes, dict]:
         base64_image, mime_type = self._image_to_base64(image_data)
         parts = [
             {"text": prompt},
             {"inline_data": {"mime_type": mime_type, "data": base64_image}}
         ]
-        return await self._generate_content(parts, aspect_ratio, response_modalities, input_images_count=1)
+        return await self._generate_content(parts, aspect_ratio, response_modalities, input_images_count=1, model_name=model_name)
 
     @traced_method(SpanKind.CLIENT)
     async def combine_images(
@@ -157,7 +189,8 @@ class GoogleAIClient(interface.GoogleAIClient):
             images_data: list[bytes],
             prompt: str,
             aspect_ratio: str = None,
-            response_modalities: list[str] = None
+            response_modalities: list[str] = None,
+            model_name: str = None
     ) -> tuple[bytes, dict]:
         if len(images_data) > 14:
             raise ValueError("Maximum 14 images supported for best performance")
@@ -167,18 +200,20 @@ class GoogleAIClient(interface.GoogleAIClient):
             base64_image, mime_type = self._image_to_base64(img_data)
             parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
-        return await self._generate_content(parts, aspect_ratio, response_modalities, input_images_count=len(images_data))
+        return await self._generate_content(parts, aspect_ratio, response_modalities, input_images_count=len(images_data), model_name=model_name)
 
     @traced_method(SpanKind.CLIENT)
     async def generate_image(
             self,
             prompt: str,
             aspect_ratio: str = None,
-            response_modalities: list[str] = None
+            response_modalities: list[str] = None,
+            model_name: str = None
     ) -> tuple[bytes, dict]:
         parts = [{"text": prompt}]
         return await self._generate_content(
             parts,
             aspect_ratio,
-            response_modalities or ["TEXT", "IMAGE"]
+            response_modalities or ["TEXT", "IMAGE"],
+            model_name=model_name
         )

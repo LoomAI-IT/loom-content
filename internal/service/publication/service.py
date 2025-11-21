@@ -325,6 +325,7 @@ ultrathink
                 images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
                     aspect_ratio="16:9",
+                    model_name="gemini-3-pro-image-preview",
                 )
                 images = [images]
             else:
@@ -362,6 +363,7 @@ ultrathink
                 images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
                     aspect_ratio="16:9",
+                    model_name="gemini-3-pro-image-preview",
                 )
                 images = [images]
 
@@ -398,6 +400,7 @@ ultrathink
             images, generate_cost = await self.googleai_client.generate_image(
                 prompt=str(generate_image_prompt),
                 aspect_ratio="16:9",
+                model_name="gemini-3-pro-image-preview",
             )
             images = [images]
 
@@ -975,6 +978,7 @@ ultrathink
         images, generate_cost = await self.googleai_client.generate_image(
             prompt=str(image_system_prompt),
             aspect_ratio="16:9",
+            model_name="gemini-3-pro-image-preview",
         )
         images = [images]
 
@@ -1136,6 +1140,7 @@ ultrathink
 
         result_image_data, generate_cost = await self.googleai_client.edit_image(
             image_data=image_content,
+            model_name="gemini-3-pro-image-preview",
             prompt=prompt,
             aspect_ratio="16:9",
         )
@@ -1173,6 +1178,7 @@ ultrathink
         result_image_data, generate_cost = await self.googleai_client.combine_images(
             images_data=images_data,
             prompt=prompt,
+            model_name="gemini-3-pro-image-preview",
             aspect_ratio="16:9",
         )
 
