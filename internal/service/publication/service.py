@@ -1134,7 +1134,7 @@ ultrathink
         self.logger.info("Редактирование изображения через GoogleAI")
         image_content = await image_file.read()
 
-        result_image_data, result_text = await self.googleai_client.edit_image(
+        result_image_data, generate_cost = await self.googleai_client.edit_image(
             image_data=image_content,
             prompt=prompt,
             aspect_ratio="16:9",
@@ -1145,7 +1145,7 @@ ultrathink
 
         await self._debit_organization_balance(
             organization_id,
-            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
         )
 
         return images_url
@@ -1170,7 +1170,7 @@ ultrathink
             image_content = await image_file.read()
             images_data.append(image_content)
 
-        result_image_data, result_text = await self.googleai_client.combine_images(
+        result_image_data, generate_cost = await self.googleai_client.combine_images(
             images_data=images_data,
             prompt=prompt,
             aspect_ratio="16:9",
@@ -1181,7 +1181,7 @@ ultrathink
 
         await self._debit_organization_balance(
             organization_id,
-            0.04 * len(images_files) * organization_cost_multiplier.generate_image_cost_multiplier
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
         )
 
         return images_url
