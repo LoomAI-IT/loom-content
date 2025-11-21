@@ -414,13 +414,11 @@ ultrathink
 
 
 
-            images, generate_cost = await self.openai_client.generate_image(
+            images, generate_cost = await self.googleai_client.generate_image(
                 prompt=str(generate_image_prompt),
-                image_model="gpt-image-1",
-                size=size,
-                quality=quality,
-                n=1,
+                aspect_ratio="16:9",
             )
+            images = [images]
 
         images_url = await self._upload_images(images)
 
@@ -1209,10 +1207,13 @@ ultrathink
 
         return images_url
 
-    async def _upload_images(self, images: list[str]) -> list[str]:
+    async def _upload_images(self, images: list[str | bytes]) -> list[str]:
         images_url = []
         for image in images:
-            image_bytes = base64.b64decode(image)
+            if isinstance(image, str):
+                image_bytes = base64.b64decode(image)
+            else:
+                image_bytes = image
             image_name = "autoposting_image.png"
 
             upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)

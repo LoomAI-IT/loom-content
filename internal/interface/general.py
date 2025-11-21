@@ -111,6 +111,14 @@ class GoogleAIClient(Protocol):
             response_modalities: list[str] = None
     ) -> tuple[bytes, str]: pass
 
+    @abstractmethod
+    async def generate_image(
+            self,
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]: pass
+
 
 class IVizardClient(Protocol):
     @abstractmethod

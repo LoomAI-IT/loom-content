@@ -233,3 +233,65 @@ class GoogleAIClient(interface.GoogleAIClient):
             return result_image_data, result_text
         except Exception as e:
             raise
+
+    @traced_method(SpanKind.CLIENT)
+    async def generate_image(
+            self,
+            prompt: str,
+            aspect_ratio: str = None,
+            response_modalities: list[str] = None
+    ) -> tuple[bytes, str]:
+        """Генерация изображения по текстовому описанию"""
+        try:
+            parts = [
+                {
+                    "text": prompt
+                }
+            ]
+
+            payload: dict = {
+                "contents": [
+                    {
+                        "parts": parts
+                    }
+                ]
+            }
+
+            generation_config = self._build_generation_config(
+                aspect_ratio,
+                response_modalities or ["TEXT", "IMAGE"]
+            )
+            if generation_config:
+                payload['generationConfig'] = generation_config
+
+            url = f"{self.base_url}/models/{self.model_name}:generateContent"
+            response = await self.http_client.post(
+                url,
+                json=payload,
+                headers={
+                    "x-goog-api-key": self.api_key
+                }
+            )
+            response.raise_for_status()
+
+            result = response.json()
+
+            result_image_data = None
+            result_text = None
+
+            if 'candidates' in result and len(result['candidates']) > 0:
+                candidate = result['candidates'][0]
+                if 'content' in candidate and 'parts' in candidate['content']:
+                    for part in candidate['content']['parts']:
+                        if 'text' in part:
+                            result_text = part['text']
+                        elif 'inlineData' in part:
+                            result_image_data = base64.b64decode(part['inlineData']['data'])
+
+            if result_image_data is None:
+                self.logger.warning("Ответ Gemini", result)
+                raise ErrNoImageData()
+
+            return result_image_data, result_text
+        except Exception as e:
+            raise
