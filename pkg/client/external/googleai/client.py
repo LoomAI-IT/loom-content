@@ -10,7 +10,6 @@ from internal import interface
 from internal.common.error import ErrNoImageData
 from pkg.trace_wrapper import traced_method
 
-
 MODEL_PRICING = {
     "gemini-3-pro-image-preview": {
         "input_text_per_1m": 2.00,
@@ -135,8 +134,8 @@ class GoogleAIClient(interface.GoogleAIClient):
             config['imageConfig'] = {
                 'aspectRatio': aspect_ratio,
             }
-        if model_name == "gemini-3-pro-image-preview":
-            config["imageSize"] = "2K"
+            if model_name == "gemini-3-pro-image-preview":
+                config["imageConfig"]["aspectRatio"] = "2K"
 
         if response_modalities:
             config['responseModalities'] = response_modalities
@@ -208,7 +207,8 @@ class GoogleAIClient(interface.GoogleAIClient):
             base64_image, mime_type = self._image_to_base64(img_data)
             parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
-        return await self._generate_content(parts, model_name, aspect_ratio, response_modalities, input_images_count=len(images_data))
+        return await self._generate_content(parts, model_name, aspect_ratio, response_modalities,
+                                            input_images_count=len(images_data))
 
     @traced_method(SpanKind.CLIENT)
     async def generate_image(
