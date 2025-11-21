@@ -421,16 +421,16 @@ ultrathink
             images = [images]
 
         images_url = await self._upload_images(images)
-
-        await self._debit_organization_balance(
-            category.organization_id,
-            generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-        )
-
-        await self._debit_organization_balance(
-            category.organization_id,
-            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
-        )
+        #
+        # await self._debit_organization_balance(
+        #     category.organization_id,
+        #     generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        # )
+        #
+        # await self._debit_organization_balance(
+        #     category.organization_id,
+        #     generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        # )
         return images_url
 
     @traced_method()
