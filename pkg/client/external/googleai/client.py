@@ -65,6 +65,8 @@ class GoogleAIClient(interface.GoogleAIClient):
     def _calculate_cost(self, result: dict) -> dict:
         """Расчет стоимости запроса"""
         usage = result.get('usageMetadata', {})
+        self.logger.debug("Gemini usage", usage)
+
         input_tokens = usage.get('promptTokenCount', 0)
         output_tokens = usage.get('candidatesTokenCount', 0)
 
@@ -112,7 +114,6 @@ class GoogleAIClient(interface.GoogleAIClient):
         response.raise_for_status()
 
         result = response.json()
-        self.logger.info("Ответ Gemini", result)
 
         result_image_data = None
 
