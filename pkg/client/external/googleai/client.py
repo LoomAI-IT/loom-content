@@ -218,5 +218,5 @@ class GoogleAIClient(interface.GoogleAIClient):
             parts,
             model_name,
             aspect_ratio,
-            response_modalities or ["TEXT", "IMAGE"],
+            ["IMAGE"],
         )
