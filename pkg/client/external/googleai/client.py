@@ -150,6 +150,11 @@ class GoogleAIClient(interface.GoogleAIClient):
             json=payload,
             headers={"x-goog-api-key": self.api_key}
         )
+        if response.status_code >= 400:
+            self.logger.error("Google AI API error", {
+                "status_code": response.status_code,
+                "response_body": response.text
+            })
         response.raise_for_status()
 
         result = response.json()
