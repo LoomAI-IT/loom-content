@@ -65,8 +65,6 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        web_search_result = ""
-
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
             category,
@@ -97,12 +95,13 @@ ultrathink
             thinking_tokens=15000,
             llm_model="claude-sonnet-4-5",
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
 
         await self._debit_organization_balance(
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
-        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
+
         return publication_data
 
     @traced_method()
@@ -152,8 +151,6 @@ ultrathink
         )
 
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
-
-        web_search_result = ""
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
@@ -292,15 +289,6 @@ ultrathink
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        if self.environment == "prod":
-            size = "1536x1024"
-            quality = "high"
-        else:
-            # size = "1024x1024"
-            # quality = "low"
-            size = "1536x1024"
-            quality = "high"
-
         if prompt:
             if image_file:
                 self.logger.info("Генерация изображения с промптом и файлом")
@@ -407,8 +395,6 @@ ultrathink
                 thinking_tokens=15000,
             )
 
-
-
             images, generate_cost = await self.googleai_client.generate_image(
                 prompt=str(generate_image_prompt),
                 aspect_ratio="16:9",
@@ -416,16 +402,16 @@ ultrathink
             images = [images]
 
         images_url = await self._upload_images(images)
-        #
-        # await self._debit_organization_balance(
-        #     category.organization_id,
-        #     generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
-        # )
-        #
-        # await self._debit_organization_balance(
-        #     category.organization_id,
-        #     generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
-        # )
+
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_prompt_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
+        )
+
+        await self._debit_organization_balance(
+            category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        )
         return images_url
 
     @traced_method()
@@ -994,10 +980,10 @@ ultrathink
 
         images_url = await self._upload_images(images)
 
-        # await self._debit_organization_balance(
-        #     autoposting_category.organization_id,
-        #     generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
-        # )
+        await self._debit_organization_balance(
+            autoposting_category.organization_id,
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        )
         return images_url
 
     @traced_method()

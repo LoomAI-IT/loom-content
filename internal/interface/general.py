@@ -100,7 +100,7 @@ class GoogleAIClient(Protocol):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]: pass
+    ) -> tuple[bytes, dict]: pass
 
     @abstractmethod
     async def combine_images(
@@ -109,7 +109,7 @@ class GoogleAIClient(Protocol):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]: pass
+    ) -> tuple[bytes, dict]: pass
 
     @abstractmethod
     async def generate_image(
@@ -117,7 +117,7 @@ class GoogleAIClient(Protocol):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]: pass
+    ) -> tuple[bytes, dict]: pass
 
 
 class IVizardClient(Protocol):

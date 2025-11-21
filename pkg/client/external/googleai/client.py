@@ -50,7 +50,6 @@ class GoogleAIClient(interface.GoogleAIClient):
         """Конвертация изображения в base64 и определение mime-type"""
         image = Image.open(BytesIO(image_data))
 
-        # Определяем mime-type
         format_to_mime = {
             'PNG': 'image/png',
             'JPEG': 'image/jpeg',
@@ -59,30 +58,77 @@ class GoogleAIClient(interface.GoogleAIClient):
             'GIF': 'image/gif'
         }
         mime_type = format_to_mime.get(image.format, 'image/jpeg')
-
-        # Конвертируем в base64
         base64_image = base64.b64encode(image_data).decode('utf-8')
 
         return base64_image, mime_type
 
-    def _build_generation_config(
+    def _calculate_cost(self, result: dict) -> dict:
+        """Расчет стоимости запроса"""
+        usage = result.get('usageMetadata', {})
+        input_tokens = usage.get('promptTokenCount', 0)
+        output_tokens = usage.get('candidatesTokenCount', 0)
+
+        # $2 per 1M input, $120 per 1M output (для изображений)
+        input_cost = round(input_tokens * 0.000002, 6)
+        output_cost = round(output_tokens * 0.00012, 6)
+        total_cost = round(input_cost + output_cost, 6)
+
+        return {
+            "total_cost": total_cost,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "input_cost": input_cost,
+            "output_cost": output_cost,
+        }
+
+    async def _generate_content(
             self,
+            parts: list,
             aspect_ratio: Optional[str] = None,
             response_modalities: Optional[list[str]] = None
-    ) -> dict:
-        """Построение конфигурации генерации"""
-        config = {}
+    ) -> tuple[bytes, dict]:
+        """Базовый метод для генерации контента"""
+        payload: dict = {
+            "contents": [{"parts": parts}]
+        }
 
+        config = {}
         if aspect_ratio:
             config['imageConfig'] = {
                 'aspectRatio': aspect_ratio,
                 "imageSize": "2K"
             }
-
         if response_modalities:
             config['responseModalities'] = response_modalities
+        if config:
+            payload['generationConfig'] = config
 
-        return config
+        url = f"{self.base_url}/models/{self.model_name}:generateContent"
+        response = await self.http_client.post(
+            url,
+            json=payload,
+            headers={"x-goog-api-key": self.api_key}
+        )
+        response.raise_for_status()
+
+        result = response.json()
+        self.logger.debug("Ответ Gemini", result)
+
+        result_image_data = None
+
+        if 'candidates' in result and len(result['candidates']) > 0:
+            candidate = result['candidates'][0]
+            if 'content' in candidate and 'parts' in candidate['content']:
+                for part in candidate['content']['parts']:
+                    if 'inlineData' in part:
+                        result_image_data = base64.b64decode(part['inlineData']['data'])
+                        break
+
+        if result_image_data is None:
+            self.logger.warning("Ответ Gemini без изображения", result)
+            raise ErrNoImageData()
+
+        return result_image_data, self._calculate_cost(result)
 
     @traced_method(SpanKind.CLIENT)
     async def edit_image(
@@ -91,72 +137,13 @@ class GoogleAIClient(interface.GoogleAIClient):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]:
-        try:
-            # Конвертируем изображение в base64
-            base64_image, mime_type = self._image_to_base64(image_data)
-
-            # Формируем запрос (сначала текст, потом изображение)
-            parts = [
-                {
-                    "text": prompt
-                },
-                {
-                    "inline_data": {
-                        "mime_type": mime_type,
-                        "data": base64_image
-                    }
-                }
-            ]
-
-            payload: dict = {
-                "contents": [
-                    {
-                        "parts": parts
-                    }
-                ]
-            }
-
-            # Добавляем конфигурацию генерации если есть
-            generation_config = self._build_generation_config(aspect_ratio, response_modalities)
-            if generation_config:
-                payload['generationConfig'] = generation_config
-
-            # Отправляем запрос
-            url = f"{self.base_url}/models/{self.model_name}:generateContent"
-            response = await self.http_client.post(
-                url,
-                json=payload,
-                headers={
-                    "x-goog-api-key": self.api_key
-                }
-            )
-            response.raise_for_status()
-
-            # Парсим ответ
-            result = response.json()
-
-            result_image_data = None
-            result_text = None
-
-            # Извлекаем данные из ответа
-            if 'candidates' in result and len(result['candidates']) > 0:
-                candidate = result['candidates'][0]
-                if 'content' in candidate and 'parts' in candidate['content']:
-                    for part in candidate['content']['parts']:
-                        if 'text' in part:
-                            result_text = part['text']
-                        elif 'inlineData' in part:
-                            result_image_data = base64.b64decode(part['inlineData']['data'])
-
-            if result_image_data is None:
-                self.logger.warning("Ответ Gemini", result)
-                raise ErrNoImageData()
-
-            return result_image_data, result_text
-
-        except Exception as e:
-            raise
+    ) -> tuple[bytes, dict]:
+        base64_image, mime_type = self._image_to_base64(image_data)
+        parts = [
+            {"text": prompt},
+            {"inline_data": {"mime_type": mime_type, "data": base64_image}}
+        ]
+        return await self._generate_content(parts, aspect_ratio, response_modalities)
 
     @traced_method(SpanKind.CLIENT)
     async def combine_images(
@@ -165,75 +152,16 @@ class GoogleAIClient(interface.GoogleAIClient):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]:
-        try:
-            if len(images_data) > 3:
-                raise ValueError("Maximum 3 images supported for best performance")
+    ) -> tuple[bytes, dict]:
+        if len(images_data) > 14:
+            raise ValueError("Maximum 14 images supported for best performance")
 
-            # Сначала добавляем текстовый промпт
-            parts: list = [
-                {
-                    "text": prompt
-                }
-            ]
+        parts: list = [{"text": prompt}]
+        for img_data in images_data:
+            base64_image, mime_type = self._image_to_base64(img_data)
+            parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
-            # Затем добавляем все изображения
-            for img_data in images_data:
-                base64_image, mime_type = self._image_to_base64(img_data)
-                parts.append({
-                    "inline_data": {
-                        "mime_type": mime_type,
-                        "data": base64_image
-                    }
-                })
-
-            payload: dict = {
-                "contents": [
-                    {
-                        "parts": parts
-                    }
-                ]
-            }
-
-            # Добавляем конфигурацию генерации если есть
-            generation_config = self._build_generation_config(aspect_ratio, response_modalities)
-            if generation_config:
-                payload['generationConfig'] = generation_config
-
-            # Отправляем запрос
-            url = f"{self.base_url}/models/{self.model_name}:generateContent"
-            response = await self.http_client.post(
-                url,
-                json=payload,
-                headers={
-                    "x-goog-api-key": self.api_key
-                }
-            )
-            response.raise_for_status()
-
-            # Парсим ответ
-            result = response.json()
-
-            result_image_data = None
-            result_text = None
-
-            # Извлекаем данные из ответа
-            if 'candidates' in result and len(result['candidates']) > 0:
-                candidate = result['candidates'][0]
-                if 'content' in candidate and 'parts' in candidate['content']:
-                    for part in candidate['content']['parts']:
-                        if 'text' in part:
-                            result_text = part['text']
-                        elif 'inlineData' in part:
-                            result_image_data = base64.b64decode(part['inlineData']['data'])
-
-            if result_image_data is None:
-                self.logger.warning("Ответ Gemini", result)
-                raise ErrNoImageData()
-
-            return result_image_data, result_text
-        except Exception as e:
-            raise
+        return await self._generate_content(parts, aspect_ratio, response_modalities)
 
     @traced_method(SpanKind.CLIENT)
     async def generate_image(
@@ -241,58 +169,10 @@ class GoogleAIClient(interface.GoogleAIClient):
             prompt: str,
             aspect_ratio: str = None,
             response_modalities: list[str] = None
-    ) -> tuple[bytes, str]:
-        """Генерация изображения по текстовому описанию"""
-        try:
-            parts = [
-                {
-                    "text": prompt
-                }
-            ]
-
-            payload: dict = {
-                "contents": [
-                    {
-                        "parts": parts
-                    }
-                ]
-            }
-
-            generation_config = self._build_generation_config(
-                aspect_ratio,
-                response_modalities or ["TEXT", "IMAGE"]
-            )
-            if generation_config:
-                payload['generationConfig'] = generation_config
-
-            url = f"{self.base_url}/models/{self.model_name}:generateContent"
-            response = await self.http_client.post(
-                url,
-                json=payload,
-                headers={
-                    "x-goog-api-key": self.api_key
-                }
-            )
-            response.raise_for_status()
-
-            result = response.json()
-
-            result_image_data = None
-            result_text = None
-
-            if 'candidates' in result and len(result['candidates']) > 0:
-                candidate = result['candidates'][0]
-                if 'content' in candidate and 'parts' in candidate['content']:
-                    for part in candidate['content']['parts']:
-                        if 'text' in part:
-                            result_text = part['text']
-                        elif 'inlineData' in part:
-                            result_image_data = base64.b64decode(part['inlineData']['data'])
-
-            if result_image_data is None:
-                self.logger.warning("Ответ Gemini", result)
-                raise ErrNoImageData()
-
-            return result_image_data, result_text
-        except Exception as e:
-            raise
+    ) -> tuple[bytes, dict]:
+        parts = [{"text": prompt}]
+        return await self._generate_content(
+            parts,
+            aspect_ratio,
+            response_modalities or ["TEXT", "IMAGE"]
+        )
