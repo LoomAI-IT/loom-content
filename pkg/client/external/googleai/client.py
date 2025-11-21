@@ -63,24 +63,14 @@ class GoogleAIClient(interface.GoogleAIClient):
         return base64_image, mime_type
 
     def _calculate_cost(self, result: dict) -> dict:
-        """Расчет стоимости запроса"""
         usage = result.get('usageMetadata', {})
-        self.logger.debug("Gemini usage", usage)
-
-        input_tokens = usage.get('promptTokenCount', 0)
-        output_tokens = usage.get('candidatesTokenCount', 0)
-
-        # $2 per 1M input, $120 per 1M output (для изображений)
-        input_cost = round(input_tokens * 0.000002, 6)
-        output_cost = round(output_tokens * 0.00012, 6)
-        total_cost = round(input_cost + output_cost, 6)
+        self.logger.debug("Gemini usage", {"usage": str(usage)})
+        #
+        # token_count = usage['tokenCount']
+        # total_cost = round((token_count / 1_000_000) * 2.00, 6)
 
         return {
-            "total_cost": total_cost,
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens,
-            "input_cost": input_cost,
-            "output_cost": output_cost,
+            "total_cost": 0.0,
         }
 
     async def _generate_content(
