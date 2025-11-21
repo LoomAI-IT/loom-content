@@ -334,14 +334,11 @@ ultrathink
                     images=[image_content]
                 )
 
-                images, generate_cost = await self.openai_client.edit_image(
-                    image=image_content,
+                images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
-                    image_model="gpt-image-1",
-                    size=size,
-                    quality=quality,
-                    n=1
+                    aspect_ratio="16:9",
                 )
+                images = [images]
             else:
                 self.logger.info("Генерация изображения с промптом")
                 generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
@@ -374,13 +371,11 @@ ultrathink
                     thinking_tokens=15000,
                 )
 
-                images, generate_cost = await self.openai_client.generate_image(
+                images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
-                    image_model="gpt-image-1",
-                    size=size,
-                    quality=quality,
-                    n=1,
+                    aspect_ratio="16:9",
                 )
+                images = [images]
 
         else:
             self.logger.info("Генерация изображения без промпта")
@@ -991,20 +986,18 @@ ultrathink
             publication_text
         )
 
-        images, generate_cost = await self.openai_client.generate_image(
-            prompt=image_system_prompt,
-            image_model="gpt-image-1",
-            size="1024x1024",
-            quality="low",
-            n=1,
+        images, generate_cost = await self.googleai_client.generate_image(
+            prompt=str(image_system_prompt),
+            aspect_ratio="16:9",
         )
+        images = [images]
 
         images_url = await self._upload_images(images)
 
-        await self._debit_organization_balance(
-            autoposting_category.organization_id,
-            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
-        )
+        # await self._debit_organization_balance(
+        #     autoposting_category.organization_id,
+        #     generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
+        # )
         return images_url
 
     @traced_method()

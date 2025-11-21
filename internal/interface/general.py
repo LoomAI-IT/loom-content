@@ -187,31 +187,6 @@ class IAnthropicClient(Protocol):
 
 
 class IOpenAIClient(Protocol):
-    @abstractmethod
-    async def generate_str(
-            self,
-            history: list,
-            system_prompt: str,
-            temperature: float,
-            llm_model: str,
-            pdf_file: bytes = None,
-    ) -> tuple[str, dict]: pass
-
-    @abstractmethod
-    async def generate_json(
-            self,
-            history: list,
-            system_prompt: str,
-            temperature: float,
-            llm_model: str,
-            pdf_file: bytes = None,
-    ) -> tuple[dict, dict]: pass
-
-    @abstractmethod
-    async def web_search(
-            self,
-            query: str,
-    ) -> str: pass
 
     @abstractmethod
     async def transcribe_audio(
@@ -225,17 +200,6 @@ class IOpenAIClient(Protocol):
             temperature: float = None,
             timestamp_granularities: list[Literal["word", "segment"]] = None
     ) -> tuple[str, dict]: pass
-
-    @abstractmethod
-    async def generate_image(
-            self,
-            prompt: str,
-            image_model: Literal["dall-e-3", "gpt-image-1"] = "gpt-image-1",
-            size: str = None,
-            quality: str = None,
-            style: Literal["vivid", "natural"] = None,
-            n: int = 1,
-    ) -> tuple[list[str], dict]: pass
 
     @abstractmethod
     async def edit_image(

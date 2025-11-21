@@ -75,7 +75,8 @@ class GoogleAIClient(interface.GoogleAIClient):
 
         if aspect_ratio:
             config['imageConfig'] = {
-                'aspectRatio': aspect_ratio
+                'aspectRatio': aspect_ratio,
+                "imageSize": "2K"
             }
 
         if response_modalities:
