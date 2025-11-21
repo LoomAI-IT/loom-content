@@ -120,8 +120,7 @@ class GoogleAIClient(interface.GoogleAIClient):
             self,
             parts: list,
             model_name: str,
-            aspect_ratio: Optional[str] = None,
-            response_modalities: Optional[list[str]] = None,
+            aspect_ratio: str,
             input_images_count: int = 0,
     ) -> tuple[bytes, dict]:
 
@@ -135,10 +134,9 @@ class GoogleAIClient(interface.GoogleAIClient):
                 'aspectRatio': aspect_ratio,
             }
             if model_name == "gemini-3-pro-image-preview":
-                config["imageConfig"]["aspectRatio"] = "2K"
+                config["imageConfig"]["imageSize"] = "2K"
 
-        if response_modalities:
-            config['responseModalities'] = response_modalities
+        config['responseModalities'] = ["IMAGE"]
 
         if config:
             payload['generationConfig'] = config
@@ -180,7 +178,6 @@ class GoogleAIClient(interface.GoogleAIClient):
             image_data: bytes,
             prompt: str,
             aspect_ratio: str = None,
-            response_modalities: list[str] = None,
             model_name: str = None
     ) -> tuple[bytes, dict]:
         base64_image, mime_type = self._image_to_base64(image_data)
@@ -188,15 +185,14 @@ class GoogleAIClient(interface.GoogleAIClient):
             {"text": prompt},
             {"inline_data": {"mime_type": mime_type, "data": base64_image}}
         ]
-        return await self._generate_content(parts, model_name, aspect_ratio, response_modalities, input_images_count=1)
+        return await self._generate_content(parts, model_name, aspect_ratio, input_images_count=1)
 
     @traced_method(SpanKind.CLIENT)
     async def combine_images(
             self,
             images_data: list[bytes],
             prompt: str,
-            aspect_ratio: str = None,
-            response_modalities: list[str] = None,
+            aspect_ratio: str,
             model_name: str = None
     ) -> tuple[bytes, dict]:
         if len(images_data) > 14:
@@ -207,15 +203,18 @@ class GoogleAIClient(interface.GoogleAIClient):
             base64_image, mime_type = self._image_to_base64(img_data)
             parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
-        return await self._generate_content(parts, model_name, aspect_ratio, response_modalities,
-                                            input_images_count=len(images_data))
+        return await self._generate_content(
+            parts,
+            model_name,
+            aspect_ratio,
+            input_images_count=len(images_data)
+        )
 
     @traced_method(SpanKind.CLIENT)
     async def generate_image(
             self,
             prompt: str,
-            aspect_ratio: str = None,
-            response_modalities: list[str] = None,
+            aspect_ratio: str,
             model_name: str = None
     ) -> tuple[bytes, dict]:
         parts = [{"text": prompt}]
@@ -223,5 +222,4 @@ class GoogleAIClient(interface.GoogleAIClient):
             parts,
             model_name,
             aspect_ratio,
-            ["IMAGE"],
         )

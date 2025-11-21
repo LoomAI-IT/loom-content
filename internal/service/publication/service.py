@@ -322,8 +322,9 @@ ultrathink
                     images=[image_content]
                 )
 
-                images, generate_cost = await self.googleai_client.generate_image(
+                images, generate_cost = await self.googleai_client.edit_image(
                     prompt=str(generate_image_prompt),
+                    image_data=image_content,
                     aspect_ratio="16:9",
                     model_name="gemini-3-pro-image-preview",
                 )
