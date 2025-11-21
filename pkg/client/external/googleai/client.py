@@ -64,6 +64,7 @@ class GoogleAIClient(interface.GoogleAIClient):
 
     def _calculate_cost(self, result: dict, input_images_count: int = 0) -> dict:
         usage = result.get('usageMetadata', {})
+        self.logger.debug("Gemini usage", {"usage": str(usage)})
 
         # Input text: $2/1M tokens
         input_text_tokens = 0
