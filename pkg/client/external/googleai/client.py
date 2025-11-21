@@ -112,7 +112,7 @@ class GoogleAIClient(interface.GoogleAIClient):
         response.raise_for_status()
 
         result = response.json()
-        self.logger.debug("Ответ Gemini", result)
+        self.logger.info("Ответ Gemini", result)
 
         result_image_data = None
 
