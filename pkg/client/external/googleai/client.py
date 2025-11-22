@@ -1,6 +1,5 @@
 from io import BytesIO
 import base64
-from typing import Optional
 
 import httpx
 from PIL import Image
@@ -23,6 +22,20 @@ MODEL_PRICING = {
         "output_text_per_1m": 2.50,
         "output_image": 0.039,
     },
+}
+
+# Доступные aspect ratios с их численными значениями
+ASPECT_RATIOS = {
+    "1:1": 1.0,
+    "2:3": 2 / 3,
+    "3:2": 3 / 2,
+    "3:4": 3 / 4,
+    "4:3": 4 / 3,
+    "4:5": 4 / 5,
+    "5:4": 5 / 4,
+    "9:16": 9 / 16,
+    "16:9": 16 / 9,
+    "21:9": 21 / 9,
 }
 
 
@@ -60,8 +73,18 @@ class GoogleAIClient(interface.GoogleAIClient):
         """Закрытие HTTP клиента"""
         await self.http_client.aclose()
 
-    def _image_to_base64(self, image_data: bytes) -> tuple[str, str]:
-        """Конвертация изображения в base64 и определение mime-type"""
+    def _get_closest_aspect_ratio(self, width: int, height: int) -> str:
+        """Определяет ближайший aspect ratio из доступных вариантов"""
+        current_ratio = width / height
+
+        closest_ratio = min(
+            ASPECT_RATIOS.items(),
+            key=lambda x: abs(x[1] - current_ratio)
+        )
+
+        return closest_ratio[0]
+
+    def _image_to_base64(self, image_data: bytes) -> tuple[str, str, int, int]:
         image = Image.open(BytesIO(image_data))
 
         format_to_mime = {
@@ -74,7 +97,7 @@ class GoogleAIClient(interface.GoogleAIClient):
         mime_type = format_to_mime.get(image.format, 'image/jpeg')
         base64_image = base64.b64encode(image_data).decode('utf-8')
 
-        return base64_image, mime_type
+        return base64_image, mime_type, image.width, image.height
 
     def _calculate_cost(self, result: dict, model_name: str, input_images_count: int = 0) -> dict:
         usage = result.get('usageMetadata', {})
@@ -180,7 +203,12 @@ class GoogleAIClient(interface.GoogleAIClient):
             aspect_ratio: str = None,
             model_name: str = None
     ) -> tuple[bytes, dict]:
-        base64_image, mime_type = self._image_to_base64(image_data)
+        base64_image, mime_type, width, height = self._image_to_base64(image_data)
+
+        # Если aspect_ratio не указан, определяем автоматически
+        if aspect_ratio is None:
+            aspect_ratio = self._get_closest_aspect_ratio(width, height)
+
         parts = [
             {"text": prompt},
             {"inline_data": {"mime_type": mime_type, "data": base64_image}}
@@ -200,7 +228,7 @@ class GoogleAIClient(interface.GoogleAIClient):
 
         parts: list = [{"text": prompt}]
         for img_data in images_data:
-            base64_image, mime_type = self._image_to_base64(img_data)
+            base64_image, mime_type, _, _ = self._image_to_base64(img_data)
             parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
         return await self._generate_content(
