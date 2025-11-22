@@ -325,7 +325,6 @@ ultrathink
                 images, generate_cost = await self.googleai_client.edit_image(
                     prompt=str(generate_image_prompt),
                     image_data=image_content,
-                    aspect_ratio="16:9",
                     model_name="gemini-3-pro-image-preview",
                 )
                 images = [images]
@@ -1143,7 +1142,6 @@ ultrathink
             image_data=image_content,
             model_name="gemini-3-pro-image-preview",
             prompt=prompt,
-            aspect_ratio="16:9",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
@@ -1180,7 +1178,6 @@ ultrathink
             images_data=images_data,
             prompt=prompt,
             model_name="gemini-3-pro-image-preview",
-            aspect_ratio="16:9",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')

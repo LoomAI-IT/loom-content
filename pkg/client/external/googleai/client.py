@@ -200,14 +200,11 @@ class GoogleAIClient(interface.GoogleAIClient):
             self,
             image_data: bytes,
             prompt: str,
-            aspect_ratio: str = None,
             model_name: str = None
     ) -> tuple[bytes, dict]:
         base64_image, mime_type, width, height = self._image_to_base64(image_data)
 
-        # Если aspect_ratio не указан, определяем автоматически
-        if aspect_ratio is None:
-            aspect_ratio = self._get_closest_aspect_ratio(width, height)
+        aspect_ratio = self._get_closest_aspect_ratio(width, height)
 
         parts = [
             {"text": prompt},
@@ -220,15 +217,17 @@ class GoogleAIClient(interface.GoogleAIClient):
             self,
             images_data: list[bytes],
             prompt: str,
-            aspect_ratio: str,
             model_name: str = None
     ) -> tuple[bytes, dict]:
         if len(images_data) > 14:
             raise ValueError("Maximum 14 images supported for best performance")
 
+        aspect_ratio = "1:1"
         parts: list = [{"text": prompt}]
-        for img_data in images_data:
-            base64_image, mime_type, _, _ = self._image_to_base64(img_data)
+        for index, img_data in enumerate(images_data):
+            base64_image, mime_type, width, height = self._image_to_base64(img_data)
+            if index == 0:
+                aspect_ratio = self._get_closest_aspect_ratio(width, height)
             parts.append({"inline_data": {"mime_type": mime_type, "data": base64_image}})
 
         return await self._generate_content(

@@ -98,7 +98,6 @@ class GoogleAIClient(Protocol):
             self,
             image_data: bytes,
             prompt: str,
-            aspect_ratio: str = None,
             model_name: str = None
     ) -> tuple[bytes, dict]: pass
 
@@ -107,7 +106,6 @@ class GoogleAIClient(Protocol):
             self,
             images_data: list[bytes],
             prompt: str,
-            aspect_ratio: str = None,
             model_name: str = None
     ) -> tuple[bytes, dict]: pass
 
