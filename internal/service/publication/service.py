@@ -65,8 +65,6 @@ class PublicationService(interface.IPublicationService):
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        web_search_result = ""
-
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
             category,
@@ -97,12 +95,13 @@ ultrathink
             thinking_tokens=15000,
             llm_model="claude-sonnet-4-5",
         )
+        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
 
         await self._debit_organization_balance(
             category.organization_id,
             generate_cost["total_cost"] * organization_cost_multiplier.generate_text_cost_multiplier
         )
-        publication_data["text"] = publication_data["text"].replace("\n", "<br>")
+
         return publication_data
 
     @traced_method()
@@ -152,8 +151,6 @@ ultrathink
         )
 
         organization = await self.organization_client.get_organization_by_id(category.organization_id)
-
-        web_search_result = ""
 
         text_system_prompt = await self.prompt_generator.get_generate_publication_text_system_prompt(
             text_reference,
@@ -292,15 +289,6 @@ ultrathink
             self.logger.info("Недостаточно средств на балансе")
             raise common.ErrInsufficientBalance()
 
-        if self.environment == "prod":
-            size = "1536x1024"
-            quality = "high"
-        else:
-            # size = "1024x1024"
-            # quality = "low"
-            size = "1536x1024"
-            quality = "high"
-
         if prompt:
             if image_file:
                 self.logger.info("Генерация изображения с промптом и файлом")
@@ -334,14 +322,12 @@ ultrathink
                     images=[image_content]
                 )
 
-                images, generate_cost = await self.openai_client.edit_image(
-                    image=image_content,
+                images, generate_cost = await self.googleai_client.edit_image(
                     prompt=str(generate_image_prompt),
-                    image_model="gpt-image-1",
-                    size=size,
-                    quality=quality,
-                    n=1
+                    image_data=image_content,
+                    model_name="gemini-3-pro-image-preview",
                 )
+                images = [images]
             else:
                 self.logger.info("Генерация изображения с промптом")
                 generate_image_system_prompt = await self.prompt_generator.get_generate_image_with_user_prompt_system(
@@ -374,13 +360,12 @@ ultrathink
                     thinking_tokens=15000,
                 )
 
-                images, generate_cost = await self.openai_client.generate_image(
+                images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
-                    image_model="gpt-image-1",
-                    size=size,
-                    quality=quality,
-                    n=1,
+                    aspect_ratio="16:9",
+                    model_name="gemini-3-pro-image-preview",
                 )
+                images = [images]
 
         else:
             self.logger.info("Генерация изображения без промпта")
@@ -412,15 +397,12 @@ ultrathink
                 thinking_tokens=15000,
             )
 
-
-
-            images, generate_cost = await self.openai_client.generate_image(
+            images, generate_cost = await self.googleai_client.generate_image(
                 prompt=str(generate_image_prompt),
-                image_model="gpt-image-1",
-                size=size,
-                quality=quality,
-                n=1,
+                aspect_ratio="16:9",
+                model_name="gemini-3-pro-image-preview",
             )
+            images = [images]
 
         images_url = await self._upload_images(images)
 
@@ -993,13 +975,12 @@ ultrathink
             publication_text
         )
 
-        images, generate_cost = await self.openai_client.generate_image(
-            prompt=image_system_prompt,
-            image_model="gpt-image-1",
-            size="1024x1024",
-            quality="low",
-            n=1,
+        images, generate_cost = await self.googleai_client.generate_image(
+            prompt=str(image_system_prompt),
+            aspect_ratio="16:9",
+            model_name="gemini-3-pro-image-preview",
         )
+        images = [images]
 
         images_url = await self._upload_images(images)
 
@@ -1157,10 +1138,10 @@ ultrathink
         self.logger.info("Редактирование изображения через GoogleAI")
         image_content = await image_file.read()
 
-        result_image_data, result_text = await self.googleai_client.edit_image(
+        result_image_data, generate_cost = await self.googleai_client.edit_image(
             image_data=image_content,
+            model_name="gemini-3-pro-image-preview",
             prompt=prompt,
-            aspect_ratio="16:9",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
@@ -1168,7 +1149,7 @@ ultrathink
 
         await self._debit_organization_balance(
             organization_id,
-            0.04 * organization_cost_multiplier.generate_image_cost_multiplier
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
         )
 
         return images_url
@@ -1193,10 +1174,10 @@ ultrathink
             image_content = await image_file.read()
             images_data.append(image_content)
 
-        result_image_data, result_text = await self.googleai_client.combine_images(
+        result_image_data, generate_cost = await self.googleai_client.combine_images(
             images_data=images_data,
             prompt=prompt,
-            aspect_ratio="16:9",
+            model_name="gemini-3-pro-image-preview",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
@@ -1204,15 +1185,18 @@ ultrathink
 
         await self._debit_organization_balance(
             organization_id,
-            0.04 * len(images_files) * organization_cost_multiplier.generate_image_cost_multiplier
+            generate_cost["total_cost"] * organization_cost_multiplier.generate_image_cost_multiplier
         )
 
         return images_url
 
-    async def _upload_images(self, images: list[str]) -> list[str]:
+    async def _upload_images(self, images: list[str | bytes]) -> list[str]:
         images_url = []
         for image in images:
-            image_bytes = base64.b64decode(image)
+            if isinstance(image, str):
+                image_bytes = base64.b64decode(image)
+            else:
+                image_bytes = image
             image_name = "autoposting_image.png"
 
             upload_response = await self.storage.upload(io.BytesIO(image_bytes), image_name)
