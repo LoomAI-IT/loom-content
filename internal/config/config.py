@@ -12,6 +12,11 @@ class Config:
         self.prefix = os.getenv("LOOM_CONTENT_PREFIX", "/api/content")
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
 
+        self.avg_generate_text_rub_cost = os.environ.get('AVG_GENERATE_TEXT_RUB_COST')
+        self.avg_generate_image_rub_cost = os.environ.get('AVG_GENERATE_IMAGE_RUB_COST')
+        self.avg_edit_image_rub_cost = os.environ.get('AVG_EDIT_IMAGE_RUB_COST')
+        self.avg_transcribe_audio_rub_cost = os.environ.get('AVG_TRANSCRIBE_AUDIO_RUB_COST')
+
         self.tg_bot_token: str = os.environ.get('LOOM_TG_BOT_TOKEN')
         self.tg_api_id: int = int(os.environ.get('LOOM_TG_API_ID'))
         self.tg_api_hash: str = os.environ.get('LOOM_TG_API_HASH')

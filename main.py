@@ -24,15 +24,20 @@ from pkg.client.internal.loom_employee.client import LoomEmployeeClient
 
 from internal.controller.http.middlerware.middleware import HttpMiddleware
 from internal.controller.http.handler.publication.handler import PublicationController
+from internal.controller.http.handler.autoposting.handler import AutopostingController
 from internal.controller.http.handler.video_cut.handler import VideoCutController
 from internal.controller.http.handler.social_network.handler import SocialNetworkController
 
 from internal.service.video_cut.service import VideoCutService
 from internal.service.publication.service import PublicationService
+from internal.service.autoposting.service import AutopostingService
 from internal.service.social_network.service import SocialNetworkService
+
 from internal.service.publication.prompt import PublicationPromptGenerator
+from internal.service.autoposting.prompt import AutopostingPromptGenerator
 
 from internal.repo.publication.repo import PublicationRepo
+from internal.repo.autoposting.repo import AutopostingRepo
 from internal.repo.video_cut.repo import VideoCutRepo
 from internal.repo.social_network.repo import SocialNetworkRepo
 
@@ -145,29 +150,49 @@ telegram_client = LTelegramClient(
 
 # Инициализация репозиториев
 publication_repo = PublicationRepo(tel, db)
+autoposting_repo = AutopostingRepo(tel, db)
 video_cut_repo = VideoCutRepo(tel, db)
 social_network_repo = SocialNetworkRepo(tel, db)
 
-
 # Инициализация генератора промптов
 publication_prompt_generator = PublicationPromptGenerator()
+autoposting_prompt_generator = AutopostingPromptGenerator()
 
 # Инициализация сервисов
 publication_service = PublicationService(
     tel=tel,
-    repo=publication_repo,
+    publication_repo=publication_repo,
     social_network_repo=social_network_repo,
-    anthropic_client=anthropic_client,
     openai_client=openai_client,
+    anthropic_client=anthropic_client,
     googleai_client=googleai_client,
     storage=storage,
     prompt_generator=publication_prompt_generator,
     organization_client=loom_organization_client,
-    vizard_client=vizard_client,
     telegram_client=telegram_client,
     loom_tg_bot_client=loom_tg_bot_client,
     loom_domain=cfg.domain,
-    environment=cfg.environment
+    avg_generate_text_rub_cost=cfg.avg_generate_text_rub_cost,
+    avg_generate_image_rub_cost=cfg.avg_generate_image_rub_cost,
+    avg_edit_image_rub_cost=cfg.avg_edit_image_rub_cost,
+    avg_transcribe_audio_rub_cost=cfg.avg_transcribe_audio_rub_cost,
+)
+
+autoposting_service = AutopostingService(
+    tel=tel,
+    autoposting_repo=autoposting_repo,
+    prompt_generator=autoposting_prompt_generator,
+    publication_service=publication_service,
+    anthropic_client=anthropic_client,
+    googleai_client=googleai_client,
+    telegram_client=telegram_client,
+    storage=storage,
+    organization_client=loom_organization_client,
+    loom_domain=cfg.domain,
+    avg_generate_text_rub_cost=cfg.avg_generate_text_rub_cost,
+    avg_generate_image_rub_cost=cfg.avg_generate_image_rub_cost,
+    avg_edit_image_rub_cost=cfg.avg_edit_image_rub_cost,
+    avg_transcribe_audio_rub_cost=cfg.avg_transcribe_audio_rub_cost,
 )
 
 video_cut_service = VideoCutService(
@@ -188,6 +213,7 @@ social_network_service = SocialNetworkService(
 
 # Инициализация контроллеров
 publication_controller = PublicationController(tel, publication_service)
+autoposting_controller = AutopostingController(tel, autoposting_service)
 video_cut_controller = VideoCutController(tel, video_cut_service)
 social_network_controller = SocialNetworkController(tel, social_network_service)
 
@@ -197,15 +223,13 @@ http_middleware = HttpMiddleware(tel, loom_authorization_client, cfg.prefix, log
 autoposting = Autoposting(
     tel=tel,
     publication_service=publication_service,
-    telegram_client=telegram_client,
-    openai_client=openai_client,
-    prompt_generator=publication_prompt_generator,
-    loom_employee_client=loom_employee_client
+    autoposting_service=autoposting_service,
 )
 
 app = NewHTTP(
     db=db,
     publication_controller=publication_controller,
+    autoposting_controller=autoposting_controller,
     video_cut_controller=video_cut_controller,
     social_network_controller=social_network_controller,
     http_middleware=http_middleware,

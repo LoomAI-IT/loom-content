@@ -10,7 +10,6 @@ from internal.controller.http.handler.social_network.model import *
 
 
 class ISocialNetworkController(Protocol):
-    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @abstractmethod
     async def create_youtube(
             self,
@@ -64,7 +63,6 @@ class ISocialNetworkController(Protocol):
 
 
 class ISocialNetworkService(Protocol):
-    # СОЗДАНИЕ СОЦИАЛЬНЫХ СЕТЕЙ
     @abstractmethod
     async def create_youtube(
             self,

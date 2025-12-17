@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from starlette.responses import StreamingResponse
 
 from internal import model, interface
-from internal.controller.http.handler.publication.model import *
 
 
 def NewHTTP(
         db: interface.IDB,
         publication_controller: interface.IPublicationController,
+        autoposting_controller: interface.IAutopostingController,
         video_cut_controller: interface.IVideoCutController,
         social_network_controller: interface.ISocialNetworkController,
         http_middleware: interface.IHttpMiddleware,
@@ -23,6 +23,7 @@ def NewHTTP(
     include_db_handler(app, db, prefix, environment)
 
     include_publication_handlers(app, publication_controller, prefix)
+    include_autoposting_handlers(app, autoposting_controller, prefix)
     include_video_cut_handlers(app, video_cut_controller, prefix)
     include_social_network_handlers(app, social_network_controller, prefix)
 
@@ -205,66 +206,6 @@ def include_publication_handlers(
         tags=["Category"]
     )
 
-    # РУБРИКИ ДЛЯ АВТОПОСТИНГА
-
-    # Создание рубрики для автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting-category",
-        publication_controller.create_autoposting_category,
-        methods=["POST"],
-        tags=["AutopostingCategory"]
-    )
-
-    # Получение рубрики для автопостинга по ID
-    app.add_api_route(
-        prefix + "/publication/autoposting-category/{autoposting_category_id}",
-        publication_controller.get_autoposting_category_by_id,
-        methods=["GET"],
-        tags=["AutopostingCategory"]
-    )
-
-    # Обновление рубрики для автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting-category/{autoposting_category_id}",
-        publication_controller.update_autoposting_category,
-        methods=["PUT"],
-        tags=["AutopostingCategory"]
-    )
-
-    # АВТОПОСТИНГ
-
-    # Создание автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting",
-        publication_controller.create_autoposting,
-        methods=["POST"],
-        tags=["Autoposting"]
-    )
-
-    # Получение автопостингов по организации
-    app.add_api_route(
-        prefix + "/publication/organization/{organization_id}/autopostings",
-        publication_controller.get_autoposting_by_organization,
-        methods=["GET"],
-        tags=["Autoposting"]
-    )
-
-    # Обновление автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting/{autoposting_id}",
-        publication_controller.update_autoposting,
-        methods=["PUT"],
-        tags=["Autoposting"]
-    )
-
-    # Удаление автопостинга
-    app.add_api_route(
-        prefix + "/publication/autoposting/{autoposting_id}",
-        publication_controller.delete_autoposting,
-        methods=["DELETE"],
-        tags=["Autoposting"]
-    )
-
     app.add_api_route(
         prefix + "/publication/audio/transcribe",
         publication_controller.transcribe_audio,
@@ -286,6 +227,61 @@ def include_publication_handlers(
         methods=["POST"],
         tags=["ImageEditing"]
     )
+
+def include_autoposting_handlers(
+        app: FastAPI,
+        autoposting_controller: interface.IAutopostingController,
+        prefix: str
+):
+    app.add_api_route(
+        prefix + "/publication/autoposting",
+        autoposting_controller.create_autoposting,
+        methods=["POST"],
+        tags=["Autoposting"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/autoposting/category",
+        autoposting_controller.create_autoposting_category,
+        methods=["POST"],
+        tags=["AutopostingCategory"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/autoposting/category/{autoposting_category_id}",
+        autoposting_controller.get_autoposting_category_by_id,
+        methods=["GET"],
+        tags=["AutopostingCategory"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/autoposting/{autoposting_id}",
+        autoposting_controller.update_autoposting,
+        methods=["PUT"],
+        tags=["Autoposting"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/autoposting/category/{autoposting_category_id}",
+        autoposting_controller.update_autoposting_category,
+        methods=["PUT"],
+        tags=["AutopostingCategory"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/organization/{organization_id}/autopostings",
+        autoposting_controller.get_autoposting_by_organization,
+        methods=["GET"],
+        tags=["Autoposting"]
+    )
+
+    app.add_api_route(
+        prefix + "/publication/autoposting/{autoposting_id}",
+        autoposting_controller.delete_autoposting,
+        methods=["DELETE"],
+        tags=["Autoposting"]
+    )
+
 
 
 def include_video_cut_handlers(

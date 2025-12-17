@@ -1,5 +1,6 @@
 
 from internal.interface.publication import *
+from internal.interface.autoposting import *
 from internal.interface.general import *
 from internal.interface.video_cut import *
 from internal.interface.social_network import *
