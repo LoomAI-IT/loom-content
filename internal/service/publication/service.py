@@ -325,7 +325,7 @@ ultrathink
                 images, generate_cost = await self.googleai_client.edit_image(
                     prompt=str(generate_image_prompt),
                     image_data=image_content,
-                    model_name="gemini-3-pro-image-preview",
+                    model_name="gemini-2.5-flash-image",
                 )
                 images = [images]
             else:
@@ -363,7 +363,7 @@ ultrathink
                 images, generate_cost = await self.googleai_client.generate_image(
                     prompt=str(generate_image_prompt),
                     aspect_ratio="16:9",
-                    model_name="gemini-3-pro-image-preview",
+                    model_name="gemini-2.5-flash-image",
                 )
                 images = [images]
 
@@ -400,7 +400,7 @@ ultrathink
             images, generate_cost = await self.googleai_client.generate_image(
                 prompt=str(generate_image_prompt),
                 aspect_ratio="16:9",
-                model_name="gemini-3-pro-image-preview",
+                model_name="gemini-2.5-flash-image",
             )
             images = [images]
 
@@ -978,7 +978,7 @@ ultrathink
         images, generate_cost = await self.googleai_client.generate_image(
             prompt=str(image_system_prompt),
             aspect_ratio="16:9",
-            model_name="gemini-3-pro-image-preview",
+            model_name="gemini-2.5-flash-image",
         )
         images = [images]
 
@@ -1140,7 +1140,7 @@ ultrathink
 
         result_image_data, generate_cost = await self.googleai_client.edit_image(
             image_data=image_content,
-            model_name="gemini-3-pro-image-preview",
+            model_name="gemini-2.5-flash-image",
             prompt=prompt,
         )
 
@@ -1177,7 +1177,7 @@ ultrathink
         result_image_data, generate_cost = await self.googleai_client.combine_images(
             images_data=images_data,
             prompt=prompt,
-            model_name="gemini-3-pro-image-preview",
+            model_name="gemini-2.5-flash-image",
         )
 
         result_image_base64 = base64.b64encode(result_image_data).decode('utf-8')
