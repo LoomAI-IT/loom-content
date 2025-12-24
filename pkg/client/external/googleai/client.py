@@ -189,6 +189,8 @@ class GoogleAIClient(interface.GoogleAIClient):
             self.logger.warning("Ответ Gemini без изображения", result)
             raise ErrNoImageData()
 
+        raise ErrExternalServiceError(response.status_code, response.text)
+
         return result_image_data, self._calculate_cost(result, model_name, input_images_count)
 
     @traced_method(SpanKind.CLIENT)
