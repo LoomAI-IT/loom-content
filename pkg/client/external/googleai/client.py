@@ -146,7 +146,7 @@ class GoogleAIClient(interface.GoogleAIClient):
             aspect_ratio: str,
             input_images_count: int = 0,
     ) -> tuple[bytes, dict]:
-
+        raise ErrExternalServiceError(500, 'response.text')
         payload: dict = {
             "contents": [{"parts": parts}]
         }
@@ -188,8 +188,6 @@ class GoogleAIClient(interface.GoogleAIClient):
         if result_image_data is None:
             self.logger.warning("Ответ Gemini без изображения", result)
             raise ErrNoImageData()
-
-        raise ErrExternalServiceError(response.status_code, response.text)
 
         return result_image_data, self._calculate_cost(result, model_name, input_images_count)
 

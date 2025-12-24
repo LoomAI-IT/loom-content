@@ -147,7 +147,7 @@ class PublicationController(interface.IPublicationController):
             )
         except common.ErrExternalServiceError as e:
             return JSONResponse(
-                status_code=503,
+                status_code=200,
                 content={
                     "external_service_error": True,
                     "status_code": e.status_code
@@ -677,7 +677,7 @@ class PublicationController(interface.IPublicationController):
             )
         except common.ErrExternalServiceError as e:
             return JSONResponse(
-                status_code=503,
+                status_code=200,
                 content={
                     "external_service_error": True,
                     "status_code": e.status_code
@@ -721,7 +721,7 @@ class PublicationController(interface.IPublicationController):
             )
         except common.ErrExternalServiceError as e:
             return JSONResponse(
-                status_code=503,
+                status_code=200,
                 content={
                     "external_service_error": True,
                     "status_code": e.status_code
