@@ -6,7 +6,7 @@ from PIL import Image
 from opentelemetry.trace import SpanKind
 
 from internal import interface
-from internal.common.error import ErrNoImageData
+from internal.common.error import ErrNoImageData, ErrExternalServiceError
 from pkg.trace_wrapper import traced_method
 
 MODEL_PRICING = {
@@ -170,8 +170,14 @@ class GoogleAIClient(interface.GoogleAIClient):
             json=payload,
             headers={"x-goog-api-key": self.api_key}
         )
-        if response.status_code >= 400:
-            self.logger.error("Google AI API error", {
+        if response.status_code >= 500:
+            self.logger.error("Google AI API server error", {
+                "status_code": response.status_code,
+                "response_body": response.text
+            })
+            raise ErrExternalServiceError(response.status_code, response.text)
+        elif response.status_code >= 400:
+            self.logger.error("Google AI API client error", {
                 "status_code": response.status_code,
                 "response_body": response.text
             })
