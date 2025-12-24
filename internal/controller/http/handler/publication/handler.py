@@ -138,6 +138,21 @@ class PublicationController(interface.IPublicationController):
                     "insufficient_balance": True,
                 }
             )
+        except common.ErrNoImageData:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "no_image_data": True
+                }
+            )
+        except common.ErrExternalServiceError as e:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "external_service_error": True,
+                    "status_code": e.status_code
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -660,6 +675,14 @@ class PublicationController(interface.IPublicationController):
                     "no_image_data": True
                 }
             )
+        except common.ErrExternalServiceError as e:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "external_service_error": True,
+                    "status_code": e.status_code
+                }
+            )
 
     @auto_log()
     @traced_method()
@@ -694,5 +717,13 @@ class PublicationController(interface.IPublicationController):
                 status_code=200,
                 content={
                     "no_image_data": True
+                }
+            )
+        except common.ErrExternalServiceError as e:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "external_service_error": True,
+                    "status_code": e.status_code
                 }
             )
