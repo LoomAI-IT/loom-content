@@ -146,7 +146,7 @@ class GoogleAIClient(interface.GoogleAIClient):
             aspect_ratio: str,
             input_images_count: int = 0,
     ) -> tuple[bytes, dict]:
-        raise ErrExternalServiceError(500, "))")
+        # raise ErrExternalServiceError(500, "))")
         payload: dict = {
             "contents": [{"parts": parts}]
         }
